@@ -37,7 +37,8 @@ def check_page(
         usable = False
         exclusion_reason = exclusion_reason or "wrong_registrable_domain"
 
-    if page.get("temporal_distance_days") and page["temporal_distance_days"] > config.max_temporal_distance_days:
+    dist = page.get("temporal_distance_days")
+    if dist is not None and float(dist) > config.max_temporal_distance_days:
         flags.append("distant_snapshot")
 
     if char_count < config.min_text_chars:

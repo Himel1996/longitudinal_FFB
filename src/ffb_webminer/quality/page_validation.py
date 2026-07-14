@@ -26,7 +26,7 @@ def validate_page_for_analysis(
         exclusion_reason = exclusion_reason or page.get("snapshot_status")
 
     dist = page.get("temporal_distance_days")
-    if dist is not None and dist > max_temporal_distance:
+    if dist is not None and float(dist) > max_temporal_distance:
         flags.append("beyond_temporal_tolerance")
         usable = False
         exclusion_reason = exclusion_reason or "beyond_temporal_tolerance"

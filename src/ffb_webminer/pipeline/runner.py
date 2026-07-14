@@ -506,7 +506,7 @@ class PipelineRunner:
                 all_pages.extend(self._empty_pages_for_snapshot(snap))
                 continue
             for cp in crawl_pages:
-                page_row = self._page_row_from_crawl(snap, firm, cp)
+                page_row = self._page_row_from_crawl(snap, firm, cp, fetcher=fetcher)
                 page_row = check_page(page_row, firm["primary_domain"], self.config.quality)
                 page_row = validate_page_for_analysis(
                     page_row,
@@ -581,18 +581,36 @@ class PipelineRunner:
         })
         return [row]
 
-    def _page_row_from_crawl(self, snap: pd.Series, firm: pd.Series, cp) -> dict[str, Any]:
+    def _page_row_from_crawl(
+        self,
+        snap: pd.Series,
+        firm: pd.Series,
+        cp,
+        fetcher: PageFetcher | None = None,
+    ) -> dict[str, Any]:
         fetch = cp.fetch
         row = {c: None for c in PAGE_COLUMNS}
         domain = parse_domain(cp.original_url)
-        meta = extract_metadata(fetch.content) if fetch and fetch.content else None
+        html_for_extract = fetch.content if fetch and fetch.content else None
+        replay_url = fetch.wayback_replay_url if fetch else snap.get("wayback_replay_url")
+        if fetch and fetch.content and cp.depth == 0:
+            from ffb_webminer.extract.html_preprocess import expand_archived_html
+
+            prepared = expand_archived_html(
+                fetch.content,
+                replay_url=str(replay_url) if replay_url else "",
+                fetcher=fetcher,
+            )
+            html_for_extract = prepared.html
+        meta = extract_metadata(html_for_extract) if html_for_extract else None
         text_ex = (
             extract_text(
-                fetch.content,
+                html_for_extract,
                 primary=self.config.extract.methods.get("primary", "trafilatura"),
                 fallback=self.config.extract.methods.get("fallback", "readability"),
+                replay_url=str(replay_url) if replay_url else None,
             )
-            if fetch and fetch.content
+            if html_for_extract
             else None
         )
         row.update({

@@ -64,7 +64,7 @@ class PageFetcher:
         return self.raw_html_dir / f"{key}.html"
 
     @retry(
-        retry=retry_if_exception_type((httpx.HTTPError, httpx.TimeoutException)),
+        retry=retry_if_exception_type((httpx.HTTPError, httpx.TimeoutException, OSError)),
         stop=stop_after_attempt(3),
         wait=wait_exponential(multiplier=2, min=1, max=30),
         reraise=True,
