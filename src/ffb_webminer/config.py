@@ -25,6 +25,10 @@ class SnapshotSelectionConfig(BaseModel):
         ]
     )
     event_year_precision_note: str = ""
+    event_dates_config: str = "config/event_dates.yaml"
+    event_pre_window_days: int = 90
+    adjacent_period_min_days: int = 180
+    override_very_low_usable: bool = False
 
 
 class CrawlConfig(BaseModel):

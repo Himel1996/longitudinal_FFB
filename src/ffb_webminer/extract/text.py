@@ -19,6 +19,8 @@ WAYBACK_TOOLBAR_RE = re.compile(
 
 @dataclass
 class TextExtraction:
+    main_text: str | None
+    visible_text: str | None
     extracted_text: str | None
     extraction_method: str | None
     text_language: str | None
@@ -31,52 +33,55 @@ class TextExtraction:
 
 
 def extract_text(html: bytes, primary: str = "trafilatura", fallback: str = "readability") -> TextExtraction:
-    text = None
+    from bs4 import BeautifulSoup
+
+    main_text = None
     method = None
     lang = None
 
     if primary == "trafilatura":
-        text = trafilatura.extract(html, include_comments=False, include_tables=True)
-        if text:
+        main_text = trafilatura.extract(html, include_comments=False, include_tables=True)
+        if main_text:
             method = "trafilatura"
             meta = trafilatura.extract_metadata(html)
             lang = meta.language if meta else None
 
-    if not text and fallback == "readability":
+    if not main_text and fallback == "readability":
         try:
             doc = Document(html.decode("utf-8", errors="replace"))
-            text = doc.summary()
-            if text:
-                from bs4 import BeautifulSoup
-
-                text = BeautifulSoup(text, "lxml").get_text(" ", strip=True)
+            summary = doc.summary()
+            if summary:
+                main_text = BeautifulSoup(summary, "lxml").get_text(" ", strip=True)
                 method = "readability"
         except Exception as exc:
             logger.debug("readability fallback failed: %s", exc)
 
+    soup = BeautifulSoup(html, "lxml")
+    visible_text = soup.get_text(" ", strip=True) if soup else None
+
     toolbar_removed = False
-    if text:
-        cleaned, removed = _strip_wayback_noise(text)
-        text = cleaned
-        toolbar_removed = removed
+    if main_text:
+        main_text, removed = _strip_wayback_noise(main_text)
+        toolbar_removed = toolbar_removed or removed
+    if visible_text:
+        visible_text, removed = _strip_wayback_noise(visible_text)
+        toolbar_removed = toolbar_removed or removed
 
-    char_count = len(text) if text else 0
-    words = text.split() if text else []
+    char_count = len(main_text) if main_text else 0
+    words = main_text.split() if main_text else []
     word_count = len(words)
-    token_count = word_count
-
-    quality = _quality_score(text, html) if text else 0.0
-    boilerplate = _boilerplate_ratio(text, html) if text else None
 
     return TextExtraction(
-        extracted_text=text,
+        main_text=main_text,
+        visible_text=visible_text,
+        extracted_text=main_text,
         extraction_method=method,
         text_language=lang,
         character_count=char_count,
         word_count=word_count,
-        token_count=token_count,
-        extraction_quality_score=quality,
-        boilerplate_ratio=boilerplate,
+        token_count=word_count,
+        extraction_quality_score=_quality_score(main_text, html) if main_text else 0.0,
+        boilerplate_ratio=_boilerplate_ratio(main_text, html) if main_text else None,
         archive_toolbar_removed_flag=toolbar_removed,
     )
 

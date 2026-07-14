@@ -37,6 +37,12 @@ python -m ffb_webminer visuals --config config/pilot.yaml
 | `report` | Quality summary, manual validation sample, manifest |
 | `run` | Execute full pipeline |
 
+## Temporal validity
+
+Snapshot selection applies structured event-date metadata, temporal fit scoring, and adjacent-period checks. See [`reports/temporal_validity_report.md`](reports/temporal_validity_report.md) after running `discover-snapshots` or `run`.
+
+Event-date overrides for the pilot live in [`config/event_dates.yaml`](config/event_dates.yaml) (e.g. MYRENNE April 2012).
+
 ## Outputs
 
 | File | Description |

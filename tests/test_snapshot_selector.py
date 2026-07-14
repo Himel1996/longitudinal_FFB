@@ -29,6 +29,7 @@ def test_closest_capture():
     assert sel.snapshot_status == "selected"
     assert sel.archive_timestamp == "20150615120000"
     assert sel.temporal_distance_days == 16
+    assert sel.cdx_original_url is not None
 
 
 def test_beyond_tolerance():

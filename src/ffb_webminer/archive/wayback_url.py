@@ -50,10 +50,30 @@ def normalize_original_url(url: str) -> str:
     parsed = urlparse(url)
     scheme = parsed.scheme or "https"
     netloc = parsed.netloc.lower()
+    # Remove default ports
+    if scheme == "http" and netloc.endswith(":80"):
+        netloc = netloc[:-3]
+    elif scheme == "https" and netloc.endswith(":443"):
+        netloc = netloc[:-4]
     path = parsed.path or "/"
     if path != "/" and path.endswith("/"):
         path = path.rstrip("/")
     return urlunparse((scheme, netloc, path, "", "", ""))
+
+
+def normalize_canonical_from_cdx(original: str) -> tuple[str, str]:
+    """Return (canonical_original_url, cdx_original_url)."""
+    cdx_original = original
+    canonical = normalize_original_url(original)
+    return canonical, cdx_original
+
+
+def is_homepage_path(url: str) -> bool:
+    from urllib.parse import urlparse
+
+    parsed = urlparse(unwrap_wayback_url(url))
+    path = parsed.path or "/"
+    return path in ("/", "")
 
 
 def strip_fragment(url: str) -> str:

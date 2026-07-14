@@ -1,7 +1,7 @@
 # Pilot Quality Report
 
-**Run ID:** `50fde797-156a-4d90-a3c7-51bfd468f0c5`  
-**Generated:** 2026-07-13T11:15:35.441232+00:00
+**Run ID:** `caf32350-86fe-4387-a0dd-1896ba002f99`  
+**Generated:** 2026-07-14T16:06:30.086683+00:00
 
 ## Snapshot coverage
 
@@ -24,12 +24,12 @@
 | ANLAGENTECHNIK LEICHTLE GMBH | post_post_event | 2027 | future_unavailable | nan |
 | MYRENNE GMBH | pre_pre_event | 2008 | selected | 50.0 |
 | MYRENNE GMBH | pre_event | 2010 | selected | 65.0 |
-| MYRENNE GMBH | event | 2012 | selected | 326.0 |
+| MYRENNE GMBH | event | 2012 | event_unavailable | 249.0 |
 | MYRENNE GMBH | post_event | 2014 | selected | 45.0 |
 | MYRENNE GMBH | post_post_event | 2016 | selected | 31.0 |
 | MSF-VATHAUER ANTRIEBSTECHNIK GMBH & CO. KG | pre_pre_event | 2002 | selected | 343.0 |
 | MSF-VATHAUER ANTRIEBSTECHNIK GMBH & CO. KG | pre_event | 2004 | selected | 435.0 |
-| MSF-VATHAUER ANTRIEBSTECHNIK GMBH & CO. KG | event | 2006 | selected | 278.0 |
+| MSF-VATHAUER ANTRIEBSTECHNIK GMBH & CO. KG | event | 2006 | selected | 114.0 |
 | MSF-VATHAUER ANTRIEBSTECHNIK GMBH & CO. KG | post_event | 2008 | selected | 96.0 |
 | MSF-VATHAUER ANTRIEBSTECHNIK GMBH & CO. KG | post_post_event | 2010 | selected | 13.0 |
 

@@ -150,3 +150,59 @@ class CDXClient:
                     seen.add(key)
                     merged.append(row)
         return merged, attempts
+
+    def search_domain_wildcard(
+        self,
+        domain: str,
+        status_codes: list[str] | None = None,
+        mimetypes: list[str] | None = None,
+        limit: int = 500,
+    ) -> list[dict[str, str]]:
+        """CDX wildcard search for pages under registrable domain."""
+        pattern = f"*.{domain}/*"
+        cache_key = self._cache_key(pattern, {"wildcard": True, "status": status_codes or [], "mime": mimetypes or []})
+        cache_path = self._cache_path(cache_key)
+
+        if cache_path.exists():
+            raw = json.loads(cache_path.read_text(encoding="utf-8"))
+            return [self._row_to_dict(r) for r in raw[:limit]]
+
+        params: list[tuple[str, str]] = [
+            ("url", pattern),
+            ("output", "json"),
+            ("fl", ",".join(CDX_FIELDS)),
+            ("collapse", "urlkey"),
+        ]
+        if status_codes:
+            for code in status_codes:
+                params.append(("filter", f"statuscode:{code}"))
+        if mimetypes:
+            for mime in mimetypes:
+                params.append(("filter", f"mimetype:{mime}"))
+
+        logger.info("CDX wildcard query: %s", pattern)
+        try:
+            rows = self._fetch_params(params)
+        except Exception as exc:
+            logger.warning("CDX wildcard failed for %s: %s", pattern, exc)
+            return []
+
+        cache_path.write_text(json.dumps(rows), encoding="utf-8")
+        return [self._row_to_dict(r) for r in rows[:limit]]
+
+    @staticmethod
+    def filter_branding_subpages(
+        captures: list[dict[str, str]],
+        patterns: list[str],
+    ) -> list[dict[str, str]]:
+        from ffb_webminer.archive.wayback_url import is_homepage_path
+
+        results = []
+        for row in captures:
+            orig = row.get("original", "")
+            if is_homepage_path(orig):
+                continue
+            path_lower = orig.lower()
+            if any(p.lower() in path_lower for p in patterns):
+                results.append(row)
+        return results

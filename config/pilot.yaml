@@ -39,8 +39,12 @@ snapshot_selection:
     - "https://{domain}/"
     - "http://{domain}/"
   event_year_precision_note: >
-    Year-level target dates use July 1 of the event year; the selected snapshot
-    may occur before or after the actual event date when no exact event date is provided.
+    Structured target_date_precision and event_date fields supersede this note.
+    Year-level targets default to July 1 unless event_date metadata supplies month/day precision.
+  event_dates_config: config/event_dates.yaml
+  event_pre_window_days: 90
+  adjacent_period_min_days: 180
+  override_very_low_usable: false
 
 crawl:
   mode: focused_site_crawl  # homepage_only | focused_site_crawl

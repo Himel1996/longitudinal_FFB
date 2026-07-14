@@ -38,6 +38,7 @@ def main(argv: list[str] | None = None) -> int:
         ("extract", "Alias for crawl (extraction included in crawl)"),
         ("visuals", "Optional homepage visual extraction"),
         ("report", "Generate quality reports and manifest"),
+        ("validate", "Regenerate pages from snapshots and export analysis tables"),
     ]:
         p = sub.add_parser(name, help=help_text)
         add_common(p)
@@ -66,6 +67,12 @@ def main(argv: list[str] | None = None) -> int:
         runner.extract_visuals(firm_ids=getattr(args, "firm_ids", None))
     elif args.command == "report":
         runner.report()
+    elif args.command == "validate":
+        runner.prepare()
+        runner.refresh_snapshot_metadata()
+        runner.crawl_and_extract(firm_ids=getattr(args, "firm_ids", None))
+        stats = runner.validate_and_export()
+        logging.getLogger(__name__).info("Validation complete: %s", stats)
     elif args.command == "run":
         runner.prepare()
         firm_ids = getattr(args, "firm_ids", None)
