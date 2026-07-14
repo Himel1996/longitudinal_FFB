@@ -1,0 +1,5 @@
+[
+  ["urlkey", "timestamp", "original", "mimetype", "statuscode", "digest", "length", "redirect"],
+  ["de,example)/", "20150615120000", "http://www.example.de/", "text/html", "200", "ABC123", "5000", "-"],
+  ["de,example)/about", "20150615120000", "http://www.example.de/about", "text/html", "200", "DEF456", "3000", "-"]
+]
