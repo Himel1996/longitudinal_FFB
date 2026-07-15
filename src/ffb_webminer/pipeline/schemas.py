@@ -220,6 +220,7 @@ MANUAL_VALIDATION_COLUMNS = [
     "content_extraction_usable",
     "duplicate_capture",
     "reviewer_notes",
+    "validation_screenshot_path",
 ]
 
 VISUAL_COLUMNS = [

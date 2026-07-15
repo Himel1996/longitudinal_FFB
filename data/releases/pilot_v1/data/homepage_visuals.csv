@@ -1,0 +1,69 @@
+run_id,firm_id,rank,company,relative_timepoint,target_year,archive_timestamp,wayback_replay_url,original_archived_url,rendered_success,viewport_width,viewport_height,screenshot_path,body_background_color,header_background_color,hero_background_color,h1_text,h1_font_family,h1_font_size_px,h1_font_weight,h1_color,computed_style_source,css_stylesheet_count,missing_asset_count,visual_extraction_confidence,visual_extraction_error,dominant_colors_json
+a48bc35c-844b-4358-afb4-290410db7f5d,1,1,BLUE MOON COMMUNICATION CONSULTANTS GMBH,pre_pre_event,2020,20201101073754.0,https://web.archive.org/web/20201101073754id_/https://www.bluemoon.de/,https://www.bluemoon.de/,True,1280,800,/Users/rick/DoksOhneidrive/FFB/data/interim/screenshots/5b7dcce0cc5e875c.png,"rgba(0, 0, 0, 0)","rgba(0, 0, 0, 0)",,BLUE MOON – die Full Service Werbeagentur für den Mittelstand,Times,32.0,700,"rgb(0, 0, 0)",playwright_getComputedStyle,4.0,0.0,0.7,,
+a48bc35c-844b-4358-afb4-290410db7f5d,1,1,BLUE MOON COMMUNICATION CONSULTANTS GMBH,pre_event,2022,20220707114701.0,https://web.archive.org/web/20220707114701id_/https://www.bluemoon.de/,https://www.bluemoon.de/,True,1280,800,/Users/rick/DoksOhneidrive/FFB/data/interim/screenshots/394579d9b5c7ef4c.png,"rgba(0, 0, 0, 0)","rgba(0, 0, 0, 0)",,BLUE MOON – die Werbeagentur für Ihren Markenerfolg,"""Droid Sans"", sans-serif",32.0,700,"rgb(0, 0, 0)",playwright_getComputedStyle,12.0,0.0,0.7,,
+a48bc35c-844b-4358-afb4-290410db7f5d,1,1,BLUE MOON COMMUNICATION CONSULTANTS GMBH,event,2024,20250314235344.0,https://web.archive.org/web/20250314235344id_/https://www.bluemoon.de/,https://www.bluemoon.de/,True,1280,800,/Users/rick/DoksOhneidrive/FFB/data/interim/screenshots/1bc317cb99b3b063.png,"rgba(0, 0, 0, 0)","rgba(0, 0, 0, 0)",,BLUE MOON – deine Werbeagentur. Weil der Mittelstand besonders ist.,"""Droid Sans"", sans-serif",32.0,700,"rgb(0, 0, 0)",playwright_getComputedStyle,24.0,0.0,0.7,,
+a48bc35c-844b-4358-afb4-290410db7f5d,1,1,BLUE MOON COMMUNICATION CONSULTANTS GMBH,post_event,2026,20260304002641.0,https://web.archive.org/web/20260304002641id_/https://www.bluemoon.de/,https://www.bluemoon.de/,False,1280,800,,,,,,,,,,,,,0.0,"Page.goto: net::ERR_CONNECTION_REFUSED at https://web.archive.org/web/20260304002641id_/https://www.bluemoon.de/
+Call log:
+  - navigating to ""https://web.archive.org/web/20260304002641id_/https://www.bluemoon.de/"", waiting until ""domcontentloaded""
+",
+a48bc35c-844b-4358-afb4-290410db7f5d,2,2,PETER-LACKE HOLDING GMBH,pre_pre_event,2011,20110709094353.0,https://web.archive.org/web/20110709094353id_/http://www.peter-lacke.de:80/,http://www.peter-lacke.de/,False,1280,800,,,,,,,,,,,,,0.0,"Page.goto: net::ERR_CONNECTION_REFUSED at https://web.archive.org/web/20110709094353id_/http://www.peter-lacke.de:80/
+Call log:
+  - navigating to ""https://web.archive.org/web/20110709094353id_/http://www.peter-lacke.de:80/"", waiting until ""domcontentloaded""
+",
+a48bc35c-844b-4358-afb4-290410db7f5d,2,2,PETER-LACKE HOLDING GMBH,pre_event,2013,20130703032151.0,https://web.archive.org/web/20130703032151id_/http://www.peter-lacke.de:80/,http://www.peter-lacke.de/,False,1280,800,,,,,,,,,,,,,0.0,"Page.goto: net::ERR_CONNECTION_REFUSED at https://web.archive.org/web/20130703032151id_/http://www.peter-lacke.de:80/
+Call log:
+  - navigating to ""https://web.archive.org/web/20130703032151id_/http://www.peter-lacke.de:80/"", waiting until ""domcontentloaded""
+",
+a48bc35c-844b-4358-afb4-290410db7f5d,2,2,PETER-LACKE HOLDING GMBH,event,2015,20150522040733.0,https://web.archive.org/web/20150522040733id_/http://www.peter-lacke.de:80/,http://www.peter-lacke.de/,False,1280,800,,,,,,,,,,,,,0.0,"Page.goto: net::ERR_CONNECTION_REFUSED at https://web.archive.org/web/20150522040733id_/http://www.peter-lacke.de:80/
+Call log:
+  - navigating to ""https://web.archive.org/web/20150522040733id_/http://www.peter-lacke.de:80/"", waiting until ""domcontentloaded""
+",
+a48bc35c-844b-4358-afb4-290410db7f5d,3,3,ANLAGENTECHNIK LEICHTLE GMBH,pre_pre_event,2019,20190723051243.0,https://web.archive.org/web/20190723051243id_/https://www.anlagentechnik-leichtle.de/,https://www.anlagentechnik-leichtle.de/,False,1280,800,,,,,,,,,,,,,0.0,"Page.goto: net::ERR_CONNECTION_REFUSED at https://web.archive.org/web/20190723051243id_/https://www.anlagentechnik-leichtle.de/
+Call log:
+  - navigating to ""https://web.archive.org/web/20190723051243id_/https://www.anlagentechnik-leichtle.de/"", waiting until ""domcontentloaded""
+",
+a48bc35c-844b-4358-afb4-290410db7f5d,3,3,ANLAGENTECHNIK LEICHTLE GMBH,pre_event,2021,20210623054251.0,https://web.archive.org/web/20210623054251id_/https://www.anlagentechnik-leichtle.de/,https://www.anlagentechnik-leichtle.de/,False,1280,800,,,,,,,,,,,,,0.0,"Page.goto: net::ERR_CONNECTION_REFUSED at https://web.archive.org/web/20210623054251id_/https://www.anlagentechnik-leichtle.de/
+Call log:
+  - navigating to ""https://web.archive.org/web/20210623054251id_/https://www.anlagentechnik-leichtle.de/"", waiting until ""domcontentloaded""
+",
+a48bc35c-844b-4358-afb4-290410db7f5d,3,3,ANLAGENTECHNIK LEICHTLE GMBH,event,2023,20230529054753.0,https://web.archive.org/web/20230529054753id_/https://www.anlagentechnik-leichtle.de/,https://www.anlagentechnik-leichtle.de/,False,1280,800,,,,,,,,,,,,,0.0,"Page.goto: net::ERR_CONNECTION_REFUSED at https://web.archive.org/web/20230529054753id_/https://www.anlagentechnik-leichtle.de/
+Call log:
+  - navigating to ""https://web.archive.org/web/20230529054753id_/https://www.anlagentechnik-leichtle.de/"", waiting until ""domcontentloaded""
+",
+a48bc35c-844b-4358-afb4-290410db7f5d,3,3,ANLAGENTECHNIK LEICHTLE GMBH,post_event,2025,20250615044832.0,https://web.archive.org/web/20250615044832id_/https://www.anlagentechnik-leichtle.de,https://www.anlagentechnik-leichtle.de/,False,1280,800,,,,,,,,,,,,,0.0,"Page.goto: net::ERR_CONNECTION_REFUSED at https://web.archive.org/web/20250615044832id_/https://www.anlagentechnik-leichtle.de
+Call log:
+  - navigating to ""https://web.archive.org/web/20250615044832id_/https://www.anlagentechnik-leichtle.de"", waiting until ""domcontentloaded""
+",
+a48bc35c-844b-4358-afb4-290410db7f5d,4,4,MYRENNE GMBH,pre_pre_event,2008,20080820062004.0,https://web.archive.org/web/20080820062004id_/http://www.myrenne.com/,http://www.myrenne.com/,False,1280,800,,,,,,,,,,,,,0.0,"Page.goto: net::ERR_CONNECTION_REFUSED at https://web.archive.org/web/20080820062004id_/http://www.myrenne.com/
+Call log:
+  - navigating to ""https://web.archive.org/web/20080820062004id_/http://www.myrenne.com/"", waiting until ""domcontentloaded""
+",
+a48bc35c-844b-4358-afb4-290410db7f5d,4,4,MYRENNE GMBH,pre_event,2010,20100427181748.0,https://web.archive.org/web/20100427181748id_/http://www.myrenne.com:80/,http://www.myrenne.com/,False,1280,800,,,,,,,,,,,,,0.0,"Page.goto: net::ERR_CONNECTION_REFUSED at https://web.archive.org/web/20100427181748id_/http://www.myrenne.com:80/
+Call log:
+  - navigating to ""https://web.archive.org/web/20100427181748id_/http://www.myrenne.com:80/"", waiting until ""domcontentloaded""
+",
+a48bc35c-844b-4358-afb4-290410db7f5d,4,4,MYRENNE GMBH,post_event,2014,20140517163035.0,https://web.archive.org/web/20140517163035id_/http://myrenne.com/,http://myrenne.com/,True,1280,800,/Users/rick/DoksOhneidrive/FFB/data/interim/screenshots/c44eb81c34985423.png,"rgba(0, 0, 0, 0)",,,myrenne gmbh,Times,32.0,700,"rgb(0, 0, 0)",playwright_getComputedStyle,9.0,0.0,0.7,,
+a48bc35c-844b-4358-afb4-290410db7f5d,4,4,MYRENNE GMBH,post_post_event,2016,20160801210455.0,https://web.archive.org/web/20160801210455id_/http://www.myrenne.com/,http://www.myrenne.com/,False,1280,800,,,,,,,,,,,,,0.0,"Page.goto: net::ERR_CONNECTION_REFUSED at https://web.archive.org/web/20160801210455id_/http://www.myrenne.com/
+Call log:
+  - navigating to ""https://web.archive.org/web/20160801210455id_/http://www.myrenne.com/"", waiting until ""domcontentloaded""
+",
+a48bc35c-844b-4358-afb4-290410db7f5d,5,5,MSF-VATHAUER ANTRIEBSTECHNIK GMBH & CO. KG,pre_pre_event,2002,20010723123022.0,https://web.archive.org/web/20010723123022id_/http://www.msf-technik.de:80/,http://www.msf-technik.de/,False,1280,800,,,,,,,,,,,,,0.0,"Page.goto: net::ERR_CONNECTION_REFUSED at https://web.archive.org/web/20010723123022id_/http://www.msf-technik.de:80/
+Call log:
+  - navigating to ""https://web.archive.org/web/20010723123022id_/http://www.msf-technik.de:80/"", waiting until ""domcontentloaded""
+",
+a48bc35c-844b-4358-afb4-290410db7f5d,5,5,MSF-VATHAUER ANTRIEBSTECHNIK GMBH & CO. KG,pre_event,2004,20050909231716.0,https://web.archive.org/web/20050909231716id_/http://www.msf-technik.de:80/,http://www.msf-technik.de/,False,1280,800,,,,,,,,,,,,,0.0,"Page.goto: net::ERR_CONNECTION_REFUSED at https://web.archive.org/web/20050909231716id_/http://www.msf-technik.de:80/
+Call log:
+  - navigating to ""https://web.archive.org/web/20050909231716id_/http://www.msf-technik.de:80/"", waiting until ""domcontentloaded""
+",
+a48bc35c-844b-4358-afb4-290410db7f5d,5,5,MSF-VATHAUER ANTRIEBSTECHNIK GMBH & CO. KG,event,2006,20050909231716.0,https://web.archive.org/web/20050909231716id_/http://www.msf-technik.de:80/,http://www.msf-technik.de/,False,1280,800,,,,,,,,,,,,,0.0,"Page.goto: net::ERR_CONNECTION_REFUSED at https://web.archive.org/web/20050909231716id_/http://www.msf-technik.de:80/
+Call log:
+  - navigating to ""https://web.archive.org/web/20050909231716id_/http://www.msf-technik.de:80/"", waiting until ""domcontentloaded""
+",
+a48bc35c-844b-4358-afb4-290410db7f5d,5,5,MSF-VATHAUER ANTRIEBSTECHNIK GMBH & CO. KG,post_event,2008,20080327012906.0,https://web.archive.org/web/20080327012906id_/http://msf-technik.de:80/,http://msf-technik.de/,False,1280,800,,,,,,,,,,,,,0.0,"Page.goto: net::ERR_CONNECTION_REFUSED at https://web.archive.org/web/20080327012906id_/http://msf-technik.de:80/
+Call log:
+  - navigating to ""https://web.archive.org/web/20080327012906id_/http://msf-technik.de:80/"", waiting until ""domcontentloaded""
+",
+a48bc35c-844b-4358-afb4-290410db7f5d,5,5,MSF-VATHAUER ANTRIEBSTECHNIK GMBH & CO. KG,post_post_event,2010,20100618062303.0,https://web.archive.org/web/20100618062303id_/http://www.msf-technik.de:80/,http://www.msf-technik.de/,False,1280,800,,,,,,,,,,,,,0.0,"Page.goto: net::ERR_CONNECTION_REFUSED at https://web.archive.org/web/20100618062303id_/http://www.msf-technik.de:80/
+Call log:
+  - navigating to ""https://web.archive.org/web/20100618062303id_/http://www.msf-technik.de:80/"", waiting until ""domcontentloaded""
+",

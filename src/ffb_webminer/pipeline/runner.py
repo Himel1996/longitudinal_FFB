@@ -471,6 +471,7 @@ class PipelineRunner:
             throttle_seconds=self.config.crawl.throttle_seconds,
             raw_html_dir=self.config.extract.raw_html_dir,
             store_raw_html=self.config.extract.store_raw_html,
+            retries=self.config.crawl.retries,
         )
 
         crawled_by_capture: dict[tuple[str, str], list] = {}

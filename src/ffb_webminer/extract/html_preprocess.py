@@ -85,12 +85,14 @@ def detect_redirect_targets(html: bytes) -> list[str]:
 
 def resolve_archived_child_url(replay_url: str, child_path: str) -> str:
     """Resolve a frame/redirect path against a Wayback replay URL."""
-    parsed = parse_wayback_url(replay_url)
-    if not parsed:
-        return child_path
-    ts, modifier, original = parsed
     if child_path.startswith("/web/"):
         return f"https://web.archive.org{child_path}"
+    parsed = parse_wayback_url(replay_url)
+    if not parsed:
+        if child_path.startswith(("http://", "https://")):
+            return child_path
+        return child_path
+    ts, modifier, original = parsed
     if child_path.startswith(("http://", "https://")):
         original_child = unwrap_wayback_url(child_path)
         return build_replay_url(original_child, ts, modifier or "id_")

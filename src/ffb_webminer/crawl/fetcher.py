@@ -9,7 +9,6 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import httpx
-from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential
 
 from ffb_webminer.archive.wayback_url import build_replay_url, unwrap_wayback_url
 
@@ -40,12 +39,14 @@ class PageFetcher:
         throttle_seconds: float = 1.5,
         raw_html_dir: str | Path | None = None,
         store_raw_html: bool = True,
+        retries: int = 3,
     ) -> None:
         self.user_agent = user_agent
         self.timeout_seconds = timeout_seconds
         self.max_bytes = max_bytes
         self.throttle_seconds = throttle_seconds
         self.raw_html_dir = Path(raw_html_dir) if raw_html_dir else None
+        self.retries = max(1, retries)
         if self.raw_html_dir:
             self.raw_html_dir.mkdir(parents=True, exist_ok=True)
         self.store_raw_html = store_raw_html
@@ -63,12 +64,6 @@ class PageFetcher:
         key = hashlib.sha256(f"{archive_timestamp or ''}|{url}".encode()).hexdigest()
         return self.raw_html_dir / f"{key}.html"
 
-    @retry(
-        retry=retry_if_exception_type((httpx.HTTPError, httpx.TimeoutException, OSError)),
-        stop=stop_after_attempt(3),
-        wait=wait_exponential(multiplier=2, min=1, max=30),
-        reraise=True,
-    )
     def fetch(
         self,
         original_url: str,
@@ -100,46 +95,62 @@ class PageFetcher:
                 raw_html_path=str(cache_path),
             )
 
-        self._throttle()
-        try:
-            with httpx.Client(
-                timeout=self.timeout_seconds,
-                follow_redirects=True,
-                headers={"User-Agent": self.user_agent},
-            ) as client:
-                resp = client.get(replay)
-                content = resp.content[: self.max_bytes]
-                mime = resp.headers.get("content-type", "").split(";")[0].strip()
-                content_hash = hashlib.sha256(content).hexdigest() if content else None
-                raw_path = None
-                if self.store_raw_html and cache_path and content:
-                    cache_path.write_bytes(content)
-                    raw_path = str(cache_path)
-                return FetchResult(
-                    requested_url=replay,
-                    final_url=str(resp.url),
-                    original_archived_url=original,
-                    wayback_replay_url=replay if archive_timestamp else None,
-                    http_status=resp.status_code,
-                    mime_type=mime,
-                    content=content,
-                    content_hash=content_hash,
-                    redirect_chain=None,
-                    fetch_error=None,
-                    raw_html_path=raw_path,
+        last_exc: Exception | None = None
+        for attempt in range(self.retries):
+            if attempt:
+                time.sleep(min(2 ** attempt, 30))
+            try:
+                return self._fetch_once(replay, original, archive_timestamp, cache_path)
+            except (httpx.HTTPError, httpx.TimeoutException, OSError) as exc:
+                last_exc = exc
+                logger.warning(
+                    "Fetch attempt %s/%s failed %s: %s", attempt + 1, self.retries, replay, exc
                 )
-        except Exception as exc:
-            logger.warning("Fetch failed %s: %s", replay, exc)
+        return FetchResult(
+            requested_url=replay,
+            final_url=replay,
+            original_archived_url=original,
+            wayback_replay_url=replay if archive_timestamp else None,
+            http_status=None,
+            mime_type=None,
+            content=None,
+            content_hash=None,
+            redirect_chain=None,
+            fetch_error=str(last_exc) if last_exc else "fetch_failed",
+            raw_html_path=None,
+        )
+
+    def _fetch_once(
+        self,
+        replay: str,
+        original: str,
+        archive_timestamp: str | None,
+        cache_path: Path | None,
+    ) -> FetchResult:
+        self._throttle()
+        with httpx.Client(
+            timeout=self.timeout_seconds,
+            follow_redirects=True,
+            headers={"User-Agent": self.user_agent},
+        ) as client:
+            resp = client.get(replay)
+            content = resp.content[: self.max_bytes]
+            mime = resp.headers.get("content-type", "").split(";")[0].strip()
+            content_hash = hashlib.sha256(content).hexdigest() if content else None
+            raw_path = None
+            if self.store_raw_html and cache_path and content:
+                cache_path.write_bytes(content)
+                raw_path = str(cache_path)
             return FetchResult(
                 requested_url=replay,
-                final_url=replay,
+                final_url=str(resp.url),
                 original_archived_url=original,
                 wayback_replay_url=replay if archive_timestamp else None,
-                http_status=None,
-                mime_type=None,
-                content=None,
-                content_hash=None,
+                http_status=resp.status_code,
+                mime_type=mime,
+                content=content,
+                content_hash=content_hash,
                 redirect_chain=None,
-                fetch_error=str(exc),
-                raw_html_path=None,
+                fetch_error=None,
+                raw_html_path=raw_path,
             )

@@ -106,6 +106,7 @@ def build_full_manual_validation(snapshots: pd.DataFrame) -> pd.DataFrame:
             "content_extraction_usable": None,
             "duplicate_capture": snap.get("duplicate_capture_flag"),
             "reviewer_notes": None,
+            "validation_screenshot_path": None,
         })
     result = pd.DataFrame(rows)
     for col in MANUAL_VALIDATION_COLUMNS:
