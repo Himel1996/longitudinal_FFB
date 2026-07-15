@@ -10,9 +10,9 @@
 
 ## Executive Summary
 
-The five-firm pilot dataset has been **regenerated from scratch** using the final multi-stage extraction pipeline. Manual validation confirms **18 of 19** observations have usable extraction for NLP analysis, exceeding the ≥15/19 success criterion.
+The five-firm pilot dataset has been **regenerated from scratch** using the final multi-stage extraction pipeline. Manual validation confirms **18 of 19** observations have usable extraction for NLP analysis.
 
-**Ready to share with Christian:** **YES** — with documented limitations below.
+With documented limitations below.
 
 ---
 
@@ -106,8 +106,7 @@ See `reports/reproducibility.md` for exact commands, package versions, and expec
 |----------|--------|
 | Pilot v1.0 complete? | **YES** |
 | Meets ≥15/19 extraction target? | **YES** (18/19) |
-| Ready for Christian? | **YES** |
-| Process remaining 25 firms? | **YES** — after Christian reviews v1.0; expect similar Wayback retry requirements |
+| Process remaining 25 firms? | **YES** — expect similar Wayback retry requirements |
 
 ---
 
