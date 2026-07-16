@@ -7,6 +7,49 @@ from typing import Any
 
 from ffb_webminer.archive.wayback_url import is_wayback_url, registrable_domain_from_url
 from ffb_webminer.config import QualityConfig
+from ffb_webminer.extract.text_utils import normalize_analysis_text
+
+
+def as_bool(value: object) -> bool:
+    if value is None:
+        return False
+    if isinstance(value, float) and value != value:
+        return False
+    if isinstance(value, str):
+        return value.strip().lower() in {"true", "1", "yes"}
+    return bool(value)
+
+
+def as_int(value: object, default: int = 0) -> int:
+    if value is None:
+        return default
+    if isinstance(value, float) and value != value:
+        return default
+    try:
+        return int(float(value))
+    except (TypeError, ValueError):
+        return default
+
+
+def has_fetch_error(page: dict[str, Any]) -> bool:
+    error = page.get("fetch_error")
+    if error is None:
+        return False
+    if isinstance(error, float) and error != error:
+        return False
+    return bool(str(error).strip())
+
+
+def page_fetch_success(page: dict[str, Any]) -> bool:
+    if has_fetch_error(page):
+        return False
+    status = page.get("http_status")
+    if status is None or (isinstance(status, float) and status != status):
+        return bool(page.get("content_hash") or page.get("raw_html_path"))
+    try:
+        return int(status) == 200
+    except (TypeError, ValueError):
+        return False
 
 
 def check_page(
@@ -18,18 +61,23 @@ def check_page(
     exclusion_reason = None
     usable = True
 
-    text = page.get("extracted_text") or ""
-    char_count = page.get("character_count") or 0
+    text = normalize_analysis_text(page.get("extracted_text"))
+    char_count = as_int(page.get("character_count"))
 
-    if page.get("fetch_error"):
+    if has_fetch_error(page):
         flags.append("fetch_error")
         usable = False
         exclusion_reason = page.get("fetch_error")
 
-    if page.get("http_status") and int(page["http_status"]) >= 400:
-        flags.append("http_error")
-        usable = False
-        exclusion_reason = exclusion_reason or f"http_{page['http_status']}"
+    status = page.get("http_status")
+    if status is not None and not (isinstance(status, float) and status != status):
+        try:
+            if int(status) >= 400:
+                flags.append("http_error")
+                usable = False
+                exclusion_reason = exclusion_reason or f"http_{status}"
+        except (TypeError, ValueError):
+            pass
 
     reg_domain = page.get("registrable_domain")
     if reg_domain and reg_domain != expected_domain:
@@ -102,8 +150,22 @@ def summarize_snapshot_pages(
     snapshot_status: str,
 ) -> dict[str, Any]:
     attempted = len(pages)
-    success = sum(1 for p in pages if p.get("http_status") == 200 and not p.get("fetch_error"))
-    usable = sum(1 for p in pages if p.get("usable_for_analysis"))
+    success = sum(1 for p in pages if page_fetch_success(p))
+    fetch_failed = attempted - success
+    usable = sum(1 for p in pages if as_bool(p.get("usable_for_analysis")))
+    branding = sum(
+        1
+        for p in pages
+        if as_bool(p.get("branding_corpus_eligible")) and as_bool(p.get("usable_for_analysis"))
+    )
+    governance = sum(1 for p in pages if p.get("governance_metadata_eligible"))
+    legal_technical = sum(
+        1
+        for p in pages
+        if p.get("page_category")
+        in {"privacy_policy", "terms_conditions", "cookie_notice", "legal_other", "technical_system", "search_archive"}
+    )
+    duplicate = sum(1 for p in pages if p.get("duplicate_content_flag"))
     excluded = attempted - usable
     chars = [p.get("character_count") or 0 for p in pages if p.get("character_count")]
     avg_chars = sum(chars) / len(chars) if chars else 0
@@ -121,8 +183,13 @@ def summarize_snapshot_pages(
         "target_year": target_year,
         "snapshot_status": snapshot_status,
         "pages_attempted": attempted,
-        "pages_success": success,
-        "pages_usable": usable,
+        "pages_fetch_success": success,
+        "pages_fetch_failed": fetch_failed,
+        "pages_extraction_usable": usable,
+        "pages_branding_eligible": branding,
+        "pages_governance_metadata": governance,
+        "pages_excluded_legal_technical": legal_technical,
+        "pages_duplicate": duplicate,
         "pages_excluded": excluded,
         "avg_text_chars": round(avg_chars, 1),
         "flags": json.dumps(sorted(all_flags)) if all_flags else None,

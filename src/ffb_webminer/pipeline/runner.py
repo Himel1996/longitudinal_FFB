@@ -31,6 +31,13 @@ from ffb_webminer.extract.domain import parse_domain
 from ffb_webminer.extract.html_metadata import extract_metadata
 from ffb_webminer.extract.text import extract_text
 from ffb_webminer.extract.visual import extract_homepage_visuals
+from ffb_webminer.pipeline.corpus_outputs import (
+    build_branding_corpus_observations,
+    build_branding_corpus_pages,
+    build_governance_metadata_observations,
+    build_governance_metadata_pages,
+    build_observation_text_summary,
+)
 from ffb_webminer.pipeline import io as pipeline_io
 from ffb_webminer.pipeline.analysis_export import (
     assign_observation_scopes,
@@ -41,15 +48,22 @@ from ffb_webminer.pipeline.analysis_export import (
 )
 from ffb_webminer.pipeline.schemas import (
     ANALYSIS_OBSERVATION_COLUMNS,
+    BRANDING_CORPUS_OBSERVATION_COLUMNS,
+    BRANDING_CORPUS_PAGE_COLUMNS,
     FIRM_COVERAGE_COLUMNS,
     FIRM_COLUMNS,
+    GOVERNANCE_METADATA_OBSERVATION_COLUMNS,
+    GOVERNANCE_METADATA_PAGE_COLUMNS,
     MANUAL_VALIDATION_COLUMNS,
+    MANUAL_CORPUS_VALIDATION_COLUMNS,
+    OBSERVATION_TEXT_SUMMARY_COLUMNS,
     PAGE_COLUMNS,
     QUALITY_SUMMARY_COLUMNS,
     SNAPSHOT_COLUMNS,
     VISUAL_COLUMNS,
 )
 from ffb_webminer.quality.checks import check_page, summarize_snapshot_pages
+from ffb_webminer.quality.page_classification import classify_page
 from ffb_webminer.quality.duplicate_captures import apply_duplicate_capture_rules
 from ffb_webminer.quality.page_validation import validate_page_for_analysis
 from ffb_webminer.quality.temporal_validity import (
@@ -515,6 +529,14 @@ class PipelineRunner:
                     self.config.quality,
                     max_temporal_distance=self.config.quality.max_temporal_distance_days,
                 )
+                classification = classify_page(page_row)
+                page_row.update({
+                    "page_category": classification.page_category,
+                    "page_category_reason": classification.page_category_reason,
+                    "branding_corpus_eligible": classification.branding_corpus_eligible,
+                    "branding_corpus_exclusion_reason": classification.branding_corpus_exclusion_reason,
+                    "governance_metadata_eligible": classification.governance_metadata_eligible,
+                })
                 ch = page_row.get("content_hash")
                 if page_row.get("analysis_eligible") and ch:
                     if ch in analysis_content_hashes:
@@ -579,6 +601,9 @@ class PipelineRunner:
             "wayback_replay_url": snap.get("wayback_replay_url"),
             "usable_for_analysis": False,
             "exclusion_reason": snap.get("observation_recommendation") or snap["snapshot_status"],
+            "branding_corpus_eligible": False,
+            "branding_corpus_exclusion_reason": snap.get("observation_recommendation") or snap["snapshot_status"],
+            "governance_metadata_eligible": False,
         })
         return [row]
 
@@ -610,6 +635,8 @@ class PipelineRunner:
                 primary=self.config.extract.methods.get("primary", "trafilatura"),
                 fallback=self.config.extract.methods.get("fallback", "readability"),
                 replay_url=str(replay_url) if replay_url else None,
+                language_min_chars=self.config.analysis.short_text_language_chars,
+                language_confidence_threshold=self.config.analysis.language_confidence_threshold,
             )
             if html_for_extract
             else None
@@ -680,13 +707,25 @@ class PipelineRunner:
                 "extracted_text": text_ex.extracted_text,
                 "extraction_method": text_ex.extraction_method,
                 "text_language": text_ex.text_language,
+                "text_language_confidence": text_ex.text_language_confidence,
+                "text_language_method": text_ex.text_language_method,
+                "text_language_reason": text_ex.text_language_reason,
                 "character_count": text_ex.character_count,
                 "word_count": text_ex.word_count,
                 "token_count": text_ex.token_count,
+                "token_count_reason": text_ex.token_count_reason,
                 "extraction_quality_score": text_ex.extraction_quality_score,
                 "boilerplate_ratio": text_ex.boilerplate_ratio,
                 "archive_toolbar_removed_flag": text_ex.archive_toolbar_removed_flag,
             })
+        classification = classify_page(row)
+        row.update({
+            "page_category": classification.page_category,
+            "page_category_reason": classification.page_category_reason,
+            "branding_corpus_eligible": classification.branding_corpus_eligible,
+            "branding_corpus_exclusion_reason": classification.branding_corpus_exclusion_reason,
+            "governance_metadata_eligible": classification.governance_metadata_eligible,
+        })
         return row
 
     def validate_and_export(self) -> dict[str, Any]:
@@ -704,6 +743,18 @@ class PipelineRunner:
         sensitivity = build_analysis_observations_sensitivity(snapshots)
         coverage = build_firm_coverage_matrix(snapshots)
         manual = build_full_manual_validation(snapshots)
+        governance_pages = build_governance_metadata_pages(pages)
+        governance_obs = build_governance_metadata_observations(snapshots, governance_pages)
+        observation_summary = build_observation_text_summary(
+            snapshots,
+            pages,
+            governance_obs,
+            self.config.analysis,
+        )
+        branding_pages = build_branding_corpus_pages(pages, observation_summary)
+        branding_obs_all = build_branding_corpus_observations(observation_summary, branding_pages, primary_only=None)
+        branding_obs_primary = build_branding_corpus_observations(observation_summary, branding_pages, primary_only=True)
+        branding_obs_sens = build_branding_corpus_observations(observation_summary, branding_pages, primary_only=False)
 
         pipeline_io.write_csv(analysis, self.output_dir / "analysis_observations.csv", ANALYSIS_OBSERVATION_COLUMNS)
         pipeline_io.write_csv(
@@ -714,6 +765,41 @@ class PipelineRunner:
         pipeline_io.write_csv(coverage, self.output_dir / "firm_coverage_matrix.csv", FIRM_COVERAGE_COLUMNS)
         pipeline_io.write_csv(
             manual, self.output_dir / "manual_validation_sample.csv", MANUAL_VALIDATION_COLUMNS
+        )
+        pipeline_io.write_csv(
+            governance_pages,
+            self.output_dir / "governance_metadata_pages.csv",
+            GOVERNANCE_METADATA_PAGE_COLUMNS,
+        )
+        pipeline_io.write_csv(
+            governance_obs,
+            self.output_dir / "governance_metadata_observations.csv",
+            GOVERNANCE_METADATA_OBSERVATION_COLUMNS,
+        )
+        pipeline_io.write_csv(
+            observation_summary,
+            self.output_dir / "observation_text_summary.csv",
+            OBSERVATION_TEXT_SUMMARY_COLUMNS,
+        )
+        pipeline_io.write_csv(
+            branding_pages,
+            self.output_dir / "branding_corpus_pages.csv",
+            BRANDING_CORPUS_PAGE_COLUMNS,
+        )
+        pipeline_io.write_csv(
+            branding_obs_all,
+            self.output_dir / "branding_corpus_observations.csv",
+            BRANDING_CORPUS_OBSERVATION_COLUMNS,
+        )
+        pipeline_io.write_csv(
+            branding_obs_primary,
+            self.output_dir / "branding_corpus_observations_primary.csv",
+            BRANDING_CORPUS_OBSERVATION_COLUMNS,
+        )
+        pipeline_io.write_csv(
+            branding_obs_sens,
+            self.output_dir / "branding_corpus_observations_sensitivity.csv",
+            BRANDING_CORPUS_OBSERVATION_COLUMNS,
         )
 
         stats = self._validation_stats(snapshots, pages, analysis, sensitivity)
@@ -903,6 +989,7 @@ class PipelineRunner:
 
         self._write_manifest(snapshots, pages, summary_df)
         self._write_quality_report(snapshots, pages, summary_df)
+        self._write_corpus_quality_report()
         if (self.output_dir / "analysis_observations.csv").exists():
             return
         self.validate_and_export()
@@ -928,6 +1015,8 @@ class PipelineRunner:
                 "snapshots_selected": int((snapshots["snapshot_status"] == "selected").sum()),
                 "pages": len(pages),
                 "pages_usable": int(pages["usable_for_analysis"].fillna(False).sum()) if not pages.empty else 0,
+                "branding_pages": int(pages["branding_corpus_eligible"].fillna(False).sum()) if not pages.empty else 0,
+                "governance_pages": int(pages["governance_metadata_eligible"].fillna(False).sum()) if not pages.empty else 0,
             },
         }
         path = self.output_dir / "run_manifest.json"
@@ -956,12 +1045,13 @@ class PipelineRunner:
         if summary.empty:
             lines.append("No pages extracted.")
         else:
-            lines.append("| Company | Timepoint | Attempted | Usable | Avg chars |")
-            lines.append("|---------|-----------|-----------|--------|-----------|")
+            lines.append("| Company | Timepoint | Attempted | Fetch success | Extraction usable | Branding eligible | Avg chars |")
+            lines.append("|---------|-----------|-----------|---------------|-------------------|------------------|-----------|")
             for _, r in summary.iterrows():
                 lines.append(
                     f"| {r['company']} | {r['relative_timepoint']} | {r['pages_attempted']} | "
-                    f"{r['pages_usable']} | {r['avg_text_chars']} |"
+                    f"{r['pages_fetch_success']} | {r['pages_extraction_usable']} | "
+                    f"{r['pages_branding_eligible']} | {r['avg_text_chars']} |"
                 )
         future = snapshots[snapshots["snapshot_status"] == "future_unavailable"]
         if not future.empty:
@@ -970,6 +1060,32 @@ class PipelineRunner:
                 lines.append(f"- {f['company']} / {f['relative_timepoint']} (target {f['target_year']})")
         report_path = Path(self.config.run.reports_dir) / "pilot_quality_report.md"
         report_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+    def _write_corpus_quality_report(self) -> None:
+        obs_path = self.output_dir / "observation_text_summary.csv"
+        if not obs_path.exists():
+            return
+        obs = pd.read_csv(obs_path)
+        lines = [
+            "# Corpus Quality Report",
+            "",
+            f"**Run ID:** `{self.run_id}`  ",
+            f"**Generated:** {datetime.now(timezone.utc).isoformat()}",
+            "",
+            "| Firm | Timepoint | Branding pages | Branding words | Branding tokens | Language | Eligible | Quality band | Exclusion reason |",
+            "|------|-----------|----------------|----------------|-----------------|----------|----------|--------------|------------------|",
+        ]
+        for _, row in obs.iterrows():
+            lines.append(
+                f"| {row['company']} | {row['relative_timepoint']} | {row['n_branding_pages_eligible']} | "
+                f"{row['branding_word_count']} | {row['branding_token_count']} | {row['detected_primary_language']} | "
+                f"{row['text_analysis_eligible']} | {row['text_analysis_quality_band']} | "
+                f"{row.get('text_analysis_exclusion_reason') or ''} |"
+            )
+        (Path(self.config.run.reports_dir) / "corpus_quality_report.md").write_text(
+            "\n".join(lines) + "\n",
+            encoding="utf-8",
+        )
 
     def _write_temporal_validity_report(self, snapshots: pd.DataFrame) -> None:
         report = build_temporal_validity_report(

@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import Any
 
 from ffb_webminer.config import QualityConfig
+from ffb_webminer.quality.checks import as_bool, as_int, has_fetch_error
 
 
 def validate_page_for_analysis(
@@ -15,9 +16,18 @@ def validate_page_for_analysis(
 ) -> dict[str, Any]:
     flags: list[str] = []
     exclusion_reason = page.get("exclusion_reason")
-    usable = True
+    usable = as_bool(page.get("usable_for_analysis"))
 
-    if not page.get("analysis_eligible"):
+    status = page.get("http_status")
+    if status is not None and not (isinstance(status, float) and status != status):
+        try:
+            if int(status) >= 400:
+                usable = False
+                exclusion_reason = exclusion_reason or f"http_{status}"
+        except (TypeError, ValueError):
+            pass
+
+    if not as_bool(page.get("analysis_eligible")):
         usable = False
         exclusion_reason = exclusion_reason or "observation_not_analysis_eligible"
 
@@ -31,22 +41,22 @@ def validate_page_for_analysis(
         usable = False
         exclusion_reason = exclusion_reason or "beyond_temporal_tolerance"
 
-    if page.get("fetch_error"):
+    if has_fetch_error(page):
         usable = False
-        exclusion_reason = exclusion_reason or page.get("fetch_error")
+        exclusion_reason = exclusion_reason or str(page.get("fetch_error"))
 
     if page.get("registrable_domain") and page["registrable_domain"] != expected_domain:
         flags.append("wrong_domain")
         usable = False
         exclusion_reason = exclusion_reason or "wrong_registrable_domain"
 
-    char_count = page.get("character_count") or 0
+    char_count = as_int(page.get("character_count"))
     if char_count < config.min_text_chars:
         flags.append("short_text")
         if char_count == 0:
             usable = False
             exclusion_reason = exclusion_reason or "empty_main_text"
 
-    page["usable_for_analysis"] = usable and bool(page.get("analysis_eligible"))
+    page["usable_for_analysis"] = usable and as_bool(page.get("analysis_eligible"))
     page["exclusion_reason"] = exclusion_reason
     return page

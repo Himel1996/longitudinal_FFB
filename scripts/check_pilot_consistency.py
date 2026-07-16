@@ -27,10 +27,22 @@ def main() -> int:
     snapshots = pd.read_csv(out / "snapshots.csv")
     pages = pd.read_csv(out / "pages.csv")
     manual = pd.read_csv(out / "manual_validation_sample.csv")
+    quality = pd.read_csv(out / "quality_summary.csv")
+    obs_summary = pd.read_csv(out / "observation_text_summary.csv")
+    branding_pages = pd.read_csv(out / "branding_corpus_pages.csv")
+    governance_pages = pd.read_csv(out / "governance_metadata_pages.csv")
     run_id = str(snapshots["run_id"].iloc[0])
 
     # Single run_id everywhere
-    for name, df in [("snapshots", snapshots), ("pages", pages), ("manual", manual)]:
+    for name, df in [
+        ("snapshots", snapshots),
+        ("pages", pages),
+        ("manual", manual),
+        ("quality", quality),
+        ("observation_text_summary", obs_summary),
+        ("branding_corpus_pages", branding_pages),
+        ("governance_metadata_pages", governance_pages),
+    ]:
         ids = df["run_id"].dropna().astype(str).unique()
         if len(ids) > 1 or (len(ids) == 1 and ids[0] != run_id):
             errors.append(f"{name}: inconsistent run_id values {ids.tolist()}")
@@ -71,6 +83,34 @@ def main() -> int:
         key = (str(int(float(p["firm_id"]))), p["relative_timepoint"])
         if key not in snap_keys:
             errors.append(f"Page references unknown snapshot: {key}")
+
+    # Branding corpus pages must be traceable and never legal/technical
+    banned = {"privacy_policy", "terms_conditions", "cookie_notice", "legal_other", "technical_system", "search_archive", "navigation_only", "impressum"}
+    for _, p in branding_pages.iterrows():
+        key = (str(int(float(p["firm_id"]))), p["relative_timepoint"])
+        if key not in snap_keys:
+            errors.append(f"Branding page references unknown snapshot: {key}")
+        if p.get("page_category") in banned:
+            errors.append(f"Illegal page in branding corpus: {p.get('original_archived_url')}")
+
+    for _, p in governance_pages.iterrows():
+        key = (str(int(float(p["firm_id"]))), p["relative_timepoint"])
+        if key not in snap_keys:
+            errors.append(f"Governance page references unknown snapshot: {key}")
+
+    # Quality summary consistency
+    for _, q in quality.iterrows():
+        attempted = int(q.get("pages_attempted", 0) or 0)
+        success = int(q.get("pages_fetch_success", 0) or 0)
+        failed = int(q.get("pages_fetch_failed", 0) or 0)
+        usable = int(q.get("pages_extraction_usable", 0) or 0)
+        branding = int(q.get("pages_branding_eligible", 0) or 0)
+        if attempted != success + failed:
+            errors.append(f"Attempted mismatch for {q['firm_id']}|{q['relative_timepoint']}")
+        if success < usable:
+            errors.append(f"Fetch success < extraction usable for {q['firm_id']}|{q['relative_timepoint']}")
+        if usable < branding:
+            errors.append(f"Extraction usable < branding eligible for {q['firm_id']}|{q['relative_timepoint']}")
 
     # Screenshot paths exist
     if "validation_screenshot_path" in manual.columns:

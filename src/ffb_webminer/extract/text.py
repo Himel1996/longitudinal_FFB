@@ -9,6 +9,9 @@ from dataclasses import dataclass
 import trafilatura
 from readability import Document
 
+from ffb_webminer.extract.language_detection import detect_page_language
+from ffb_webminer.extract.text_utils import compute_text_stats
+
 logger = logging.getLogger(__name__)
 
 WAYBACK_TOOLBAR_RE = re.compile(
@@ -52,9 +55,13 @@ class TextExtraction:
     extracted_text: str | None
     extraction_method: str | None
     text_language: str | None
+    text_language_confidence: float | None
+    text_language_method: str | None
+    text_language_reason: str | None
     character_count: int
     word_count: int
     token_count: int
+    token_count_reason: str | None
     extraction_quality_score: float | None
     boilerplate_ratio: float | None
     archive_toolbar_removed_flag: bool
@@ -74,6 +81,8 @@ def extract_text(
     primary: str = "trafilatura",
     fallback: str = "readability",
     replay_url: str | None = None,
+    language_min_chars: int = 80,
+    language_confidence_threshold: float = 0.80,
 ) -> TextExtraction:
     """Run staged extraction and return the highest-quality candidate."""
     from bs4 import BeautifulSoup
@@ -116,9 +125,13 @@ def extract_text(
             extracted_text=None,
             extraction_method=None,
             text_language=None,
+            text_language_confidence=None,
+            text_language_method=None,
+            text_language_reason="empty_text",
             character_count=0,
             word_count=0,
             token_count=0,
+            token_count_reason="empty_text",
             extraction_quality_score=0.0,
             boilerplate_ratio=None,
             archive_toolbar_removed_flag=toolbar_removed,
@@ -126,17 +139,25 @@ def extract_text(
 
     main_text, removed = _strip_wayback_noise(best.text)
     toolbar_removed = toolbar_removed or removed
-
-    words = main_text.split()
+    stats = compute_text_stats(main_text)
+    lang = detect_page_language(
+        main_text,
+        min_chars=language_min_chars,
+        confidence_threshold=language_confidence_threshold,
+    )
     return TextExtraction(
-        main_text=main_text,
+        main_text=stats.normalized_text,
         visible_text=visible_text or None,
-        extracted_text=main_text,
+        extracted_text=stats.normalized_text,
         extraction_method=best.method,
-        text_language=best.lang,
-        character_count=len(main_text),
-        word_count=len(words),
-        token_count=len(words),
+        text_language=lang.language,
+        text_language_confidence=lang.confidence,
+        text_language_method=lang.method,
+        text_language_reason=lang.reason,
+        character_count=stats.character_count,
+        word_count=stats.word_count,
+        token_count=stats.token_count,
+        token_count_reason=stats.token_count_reason,
         extraction_quality_score=best.score,
         boilerplate_ratio=best.boilerplate_ratio,
         archive_toolbar_removed_flag=toolbar_removed,

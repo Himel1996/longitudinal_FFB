@@ -54,6 +54,16 @@ class ExtractConfig(BaseModel):
     min_text_chars: int = 50
 
 
+class AnalysisConfig(BaseModel):
+    min_branding_pages: int = 1
+    min_branding_tokens: int = 100
+    preferred_branding_tokens: int = 300
+    short_text_language_chars: int = 80
+    language_confidence_threshold: float = 0.80
+    low_quality_token_threshold: int = 100
+    moderate_quality_token_threshold: int = 300
+
+
 class VisualConfig(BaseModel):
     enabled: bool = True
     viewport_width: int = 1280
@@ -108,6 +118,7 @@ class PipelineConfig(BaseModel):
     visual: VisualConfig = Field(default_factory=VisualConfig)
     archive: ArchiveConfig = Field(default_factory=ArchiveConfig)
     quality: QualityConfig = Field(default_factory=QualityConfig)
+    analysis: AnalysisConfig = Field(default_factory=AnalysisConfig)
 
     @classmethod
     def from_yaml(cls, path: str | Path) -> PipelineConfig:

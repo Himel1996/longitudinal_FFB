@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Manual validation: screenshots + extraction comparison for pilot release."""
+"""Manual validation: screenshots + extraction comparison for pilot v1.1."""
 
 from __future__ import annotations
 
@@ -200,7 +200,7 @@ def main() -> int:
 def _write_report(path: Path, rows: list, manifest: list, usable: int, run_id: str) -> None:
     total = len(rows)
     lines = [
-        "# Manual Validation Report — Pilot v1.0",
+        "# Manual Validation Report — Pilot v1.1",
         "",
         f"**Run ID:** `{run_id}`  ",
         f"**Validation date:** {datetime.now(timezone.utc).strftime('%Y-%m-%d')}",
