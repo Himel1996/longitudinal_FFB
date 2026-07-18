@@ -20,17 +20,19 @@ Pilot v1.1 adds a clean branding corpus, separate governance metadata layer, obs
 
 ## Dataset Statistics
 
-| Metric | Value |
-|--------|-------|
-| Firms | 5 |
-| Snapshot observations | 25 |
-| Page rows | 394 |
-| Extraction-usable pages | 374 |
-| Branding-corpus pages | 231 |
-| Governance metadata pages | 24 |
-| Primary text-analysis eligible observations | 13 |
-| Sensitivity text-analysis eligible observations | 15 |
-| Manual corpus validation rows | 43 |
+
+| Metric                                          | Value |
+| ----------------------------------------------- | ----- |
+| Firms                                           | 5     |
+| Snapshot observations                           | 25    |
+| Page rows                                       | 394   |
+| Extraction-usable pages                         | 374   |
+| Branding-corpus pages                           | 231   |
+| Governance metadata pages                       | 24    |
+| Primary text-analysis eligible observations     | 13    |
+| Sensitivity text-analysis eligible observations | 15    |
+| Manual corpus validation rows                   | 43    |
+
 
 ---
 
@@ -63,4 +65,4 @@ New corpus-validation sample in `manual_corpus_validation.csv` covers branding-i
 
 ## Recommendation
 
-Pilot v1.1 meets the release definition of done for the first five firms. Proceed with Christian's review of `branding_corpus_observations_primary.csv` and `governance_metadata_observations.csv` before scaling.
+Pilot v1.1 meets the release definition of done for the first five firms. Proceed with review of `branding_corpus_observations_primary.csv` and `governance_metadata_observations.csv` before scaling.

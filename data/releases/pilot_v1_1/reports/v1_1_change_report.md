@@ -6,7 +6,7 @@
 
 ---
 
-## Christian's requested changes
+## requested changes
 
 1. **Exclude legal/technical boilerplate from the main NLP corpus** — implemented transparent `page_category` classification with default exclusions for privacy, AGB, cookies, legal/technical, search, navigation-only, and low-substance contact pages.
 2. **Retain Impressum separately for governance validation** — added `governance_metadata_pages.csv` and `governance_metadata_observations.csv` with rule-based field extraction and raw-text fallback.
@@ -39,28 +39,32 @@
 
 ## Before / after corpus statistics
 
-| Metric | v1.0 | v1.1 |
-|--------|------|------|
-| Total page rows | 394 | 394 |
-| Pages usable for extraction | 358 | 374 |
-| Branding-corpus-eligible pages | n/a | 231 |
-| Impressum/governance pages retained | mixed in pages | 24 |
-| Observation text-analysis eligible | n/a | 15 |
-| Token_count = 0 with non-empty text | present | **0** |
-| Quality-summary count inconsistencies | present | **0** |
+
+| Metric                                | v1.0           | v1.1  |
+| ------------------------------------- | -------------- | ----- |
+| Total page rows                       | 394            | 394   |
+| Pages usable for extraction           | 358            | 374   |
+| Branding-corpus-eligible pages        | n/a            | 231   |
+| Impressum/governance pages retained   | mixed in pages | 24    |
+| Observation text-analysis eligible    | n/a            | 15    |
+| Token_count = 0 with non-empty text   | present        | **0** |
+| Quality-summary count inconsistencies | present        | **0** |
+
 
 ---
 
 ## Pages excluded by category
 
-| Category | Pages | In branding corpus |
-|----------|-------|--------------------|
-| privacy_policy | 71 | 0 |
-| search_archive | 35 | 0 |
-| navigation_only | 26 | 0 |
-| impressum | 24 | 0 |
+
+| Category                | Pages        | In branding corpus                      |
+| ----------------------- | ------------ | --------------------------------------- |
+| privacy_policy          | 71           | 0                                       |
+| search_archive          | 35           | 0                                       |
+| navigation_only         | 26           | 0                                       |
+| impressum               | 24           | 0                                       |
 | contact (low substance) | subset of 76 | excluded when below substance threshold |
-| technical_system | 4 | 0 |
+| technical_system        | 4            | 0                                       |
+
 
 Legal/technical categories are excluded by default; substantive branding pages remain in `branding_corpus_pages.csv`.
 
@@ -76,11 +80,13 @@ Legal/technical categories are excluded by default; substantive branding pages r
 
 ## Observations newly eligible / ineligible
 
-| Pool | Text-analysis eligible |
-|------|------------------------|
-| All observations | 15 / 25 |
-| Primary (`include`) | 13 / 16 |
-| Sensitivity (`include` + `sensitivity_analysis`) | 15 / 19 |
+
+| Pool                                             | Text-analysis eligible |
+| ------------------------------------------------ | ---------------------- |
+| All observations                                 | 15 / 25                |
+| Primary (`include`)                              | 13 / 16                |
+| Sensitivity (`include` + `sensitivity_analysis`) | 15 / 19                |
+
 
 Exclusion reasons:
 
@@ -117,12 +123,14 @@ Exclusion reasons:
 
 ## Language-detection coverage
 
-| Language | Pages |
-|----------|-------|
-| de | 335 |
-| en | 44 |
-| unknown | 7 |
-| missing/short | 8 |
+
+| Language      | Pages |
+| ------------- | ----- |
+| de            | 335   |
+| en            | 44    |
+| unknown       | 7     |
+| missing/short | 8     |
+
 
 Observation-level primary language is token-weighted from branding-eligible pages.
 
@@ -134,3 +142,4 @@ Observation-level primary language is token-weighted from branding-eligible page
 2. Governance field extraction is regex/rule-based v1.1 only; nulls are expected where Impressum text is ambiguous.
 3. Contact-page substance threshold may need manual review for edge cases.
 4. Playwright remains required for a subset of dynamic archived pages.
+
