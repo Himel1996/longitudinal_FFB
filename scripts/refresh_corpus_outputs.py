@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Re-apply page analysis and regenerate v1.1 corpus outputs without re-crawling."""
+"""Re-apply page classification and regenerate corpus outputs without re-crawling."""
 
 from __future__ import annotations
 
@@ -35,6 +35,33 @@ from ffb_webminer.quality.page_classification import classify_page
 from ffb_webminer.quality.page_validation import validate_page_for_analysis
 
 
+def _apply_classification(row: dict, domain: str, config: PipelineConfig) -> dict:
+    row = check_page(row, domain, config.quality)
+    row = validate_page_for_analysis(
+        row,
+        domain,
+        config.quality,
+        max_temporal_distance=config.quality.max_temporal_distance_days,
+    )
+    classification = classify_page(
+        row,
+        governance_allowlist=config.analysis.governance_url_allowlist,
+    )
+    row.update({
+        "page_category": classification.page_category,
+        "page_category_reason": classification.page_category_reason,
+        "classification_rule_priority": classification.classification_rule_priority,
+        "classification_rule_id": classification.classification_rule_id,
+        "branding_corpus_eligible": classification.branding_corpus_eligible,
+        "branding_corpus_exclusion_reason": classification.branding_corpus_exclusion_reason,
+        "governance_metadata_eligible": classification.governance_metadata_eligible,
+        "governance_inclusion_reason": classification.governance_inclusion_reason,
+        "governance_rule_id": classification.governance_rule_id,
+        "governance_evidence_type": classification.governance_evidence_type,
+    })
+    return row
+
+
 def main() -> int:
     config = PipelineConfig.from_yaml(ROOT / "config/pilot.yaml")
     runner = PipelineRunner(config, project_root=ROOT)
@@ -44,29 +71,14 @@ def main() -> int:
     pages = pd.read_csv(out / "pages.csv")
 
     firm_domains = {
-        str(row["firm_id"]): row["primary_domain"] for _, row in firms.iterrows()
+        str(int(float(row["firm_id"]))): row["primary_domain"] for _, row in firms.iterrows()
     }
 
     refreshed_rows = []
     for _, page in pages.iterrows():
         row = page.to_dict()
         firm_id = str(int(float(row["firm_id"])))
-        row = check_page(row, firm_domains[firm_id], config.quality)
-        row = validate_page_for_analysis(
-            row,
-            firm_domains[firm_id],
-            config.quality,
-            max_temporal_distance=config.quality.max_temporal_distance_days,
-        )
-        classification = classify_page(row)
-        row.update({
-            "page_category": classification.page_category,
-            "page_category_reason": classification.page_category_reason,
-            "branding_corpus_eligible": classification.branding_corpus_eligible,
-            "branding_corpus_exclusion_reason": classification.branding_corpus_exclusion_reason,
-            "governance_metadata_eligible": classification.governance_metadata_eligible,
-        })
-        refreshed_rows.append(row)
+        refreshed_rows.append(_apply_classification(row, firm_domains[firm_id], config))
 
     pages = pd.DataFrame(refreshed_rows)
     pipeline_io.write_csv(pages, out / "pages.csv", PAGE_COLUMNS)
@@ -77,17 +89,39 @@ def main() -> int:
         snapshots, pages, governance_obs, config.analysis
     )
     branding_pages = build_branding_corpus_pages(pages, observation_summary)
-    branding_obs_all = build_branding_corpus_observations(observation_summary, branding_pages, primary_only=None)
-    branding_obs_primary = build_branding_corpus_observations(observation_summary, branding_pages, primary_only=True)
-    branding_obs_sens = build_branding_corpus_observations(observation_summary, branding_pages, primary_only=False)
+    branding_obs_all = build_branding_corpus_observations(
+        observation_summary, branding_pages, primary_only=None
+    )
+    branding_obs_primary = build_branding_corpus_observations(
+        observation_summary, branding_pages, primary_only=True
+    )
+    branding_obs_sens = build_branding_corpus_observations(
+        observation_summary, branding_pages, primary_only=False
+    )
 
-    pipeline_io.write_csv(governance_pages, out / "governance_metadata_pages.csv", GOVERNANCE_METADATA_PAGE_COLUMNS)
-    pipeline_io.write_csv(governance_obs, out / "governance_metadata_observations.csv", GOVERNANCE_METADATA_OBSERVATION_COLUMNS)
-    pipeline_io.write_csv(observation_summary, out / "observation_text_summary.csv", OBSERVATION_TEXT_SUMMARY_COLUMNS)
+    pipeline_io.write_csv(
+        governance_pages, out / "governance_metadata_pages.csv", GOVERNANCE_METADATA_PAGE_COLUMNS
+    )
+    pipeline_io.write_csv(
+        governance_obs, out / "governance_metadata_observations.csv", GOVERNANCE_METADATA_OBSERVATION_COLUMNS
+    )
+    pipeline_io.write_csv(
+        observation_summary, out / "observation_text_summary.csv", OBSERVATION_TEXT_SUMMARY_COLUMNS
+    )
     pipeline_io.write_csv(branding_pages, out / "branding_corpus_pages.csv", BRANDING_CORPUS_PAGE_COLUMNS)
-    pipeline_io.write_csv(branding_obs_all, out / "branding_corpus_observations.csv", BRANDING_CORPUS_OBSERVATION_COLUMNS)
-    pipeline_io.write_csv(branding_obs_primary, out / "branding_corpus_observations_primary.csv", BRANDING_CORPUS_OBSERVATION_COLUMNS)
-    pipeline_io.write_csv(branding_obs_sens, out / "branding_corpus_observations_sensitivity.csv", BRANDING_CORPUS_OBSERVATION_COLUMNS)
+    pipeline_io.write_csv(
+        branding_obs_all, out / "branding_corpus_observations.csv", BRANDING_CORPUS_OBSERVATION_COLUMNS
+    )
+    pipeline_io.write_csv(
+        branding_obs_primary,
+        out / "branding_corpus_observations_primary.csv",
+        BRANDING_CORPUS_OBSERVATION_COLUMNS,
+    )
+    pipeline_io.write_csv(
+        branding_obs_sens,
+        out / "branding_corpus_observations_sensitivity.csv",
+        BRANDING_CORPUS_OBSERVATION_COLUMNS,
+    )
 
     summaries = []
     for _, snap in snapshots.iterrows():
@@ -111,6 +145,9 @@ def main() -> int:
     pipeline_io.write_csv(summary_df, out / "quality_summary.csv", QUALITY_SUMMARY_COLUMNS)
     runner._write_corpus_quality_report()
     print("Refreshed corpus outputs and quality summary")
+    print(f"branding_pages={len(branding_pages)}")
+    print(f"primary_obs={len(branding_obs_primary)} sensitivity_obs={len(branding_obs_sens)}")
+    print(f"governance_pages={len(governance_pages)}")
     return 0
 
 

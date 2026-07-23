@@ -1,0 +1,12 @@
+# Explicit event-date metadata overrides (pilot firms).
+# Keys are firm rank (integer). Used when label parsing is insufficient.
+
+4:
+  event_date: "2012-04-15"
+  event_date_precision: month
+  event_date_source: "event_label: Übergabe im April 2012 bestätigt"
+
+5:
+  event_date: "2006-01-01"
+  event_date_precision: year
+  event_date_source: "event_year; MSF-Vathauer management entry 2006 (exact day unknown)"

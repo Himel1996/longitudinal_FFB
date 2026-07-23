@@ -62,6 +62,7 @@ class AnalysisConfig(BaseModel):
     language_confidence_threshold: float = 0.80
     low_quality_token_threshold: int = 100
     moderate_quality_token_threshold: int = 300
+    governance_url_allowlist: list[str] = Field(default_factory=list)
 
 
 class VisualConfig(BaseModel):

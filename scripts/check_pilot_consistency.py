@@ -30,7 +30,10 @@ def main() -> int:
     quality = pd.read_csv(out / "quality_summary.csv")
     obs_summary = pd.read_csv(out / "observation_text_summary.csv")
     branding_pages = pd.read_csv(out / "branding_corpus_pages.csv")
+    branding_primary = pd.read_csv(out / "branding_corpus_observations_primary.csv")
+    branding_sens = pd.read_csv(out / "branding_corpus_observations_sensitivity.csv")
     governance_pages = pd.read_csv(out / "governance_metadata_pages.csv")
+    governance_obs = pd.read_csv(out / "governance_metadata_observations.csv")
     run_id = str(snapshots["run_id"].iloc[0])
 
     # Single run_id everywhere
@@ -41,7 +44,10 @@ def main() -> int:
         ("quality", quality),
         ("observation_text_summary", obs_summary),
         ("branding_corpus_pages", branding_pages),
+        ("branding_corpus_observations_primary", branding_primary),
+        ("branding_corpus_observations_sensitivity", branding_sens),
         ("governance_metadata_pages", governance_pages),
+        ("governance_metadata_observations", governance_obs),
     ]:
         ids = df["run_id"].dropna().astype(str).unique()
         if len(ids) > 1 or (len(ids) == 1 and ids[0] != run_id):
@@ -85,7 +91,17 @@ def main() -> int:
             errors.append(f"Page references unknown snapshot: {key}")
 
     # Branding corpus pages must be traceable and never legal/technical
-    banned = {"privacy_policy", "terms_conditions", "cookie_notice", "legal_other", "technical_system", "search_archive", "navigation_only", "impressum"}
+    banned = {
+        "privacy_policy",
+        "terms_conditions",
+        "cookie_notice",
+        "legal_other",
+        "technical_system",
+        "search_archive",
+        "navigation_only",
+        "impressum",
+        "legal_notice",
+    }
     for _, p in branding_pages.iterrows():
         key = (str(int(float(p["firm_id"]))), p["relative_timepoint"])
         if key not in snap_keys:
@@ -97,6 +113,66 @@ def main() -> int:
         key = (str(int(float(p["firm_id"]))), p["relative_timepoint"])
         if key not in snap_keys:
             errors.append(f"Governance page references unknown snapshot: {key}")
+        # governance file may only contain eligible pages
+        if "governance_metadata_eligible" in pages.columns:
+            match = pages[
+                (pages["firm_id"].astype(str) == key[0])
+                & (pages["relative_timepoint"] == key[1])
+                & (pages["original_archived_url"].astype(str) == str(p.get("original_archived_url")))
+            ]
+            if not match.empty and not bool(match.iloc[0].get("governance_metadata_eligible")):
+                errors.append(f"Governance page not marked eligible in pages.csv: {p.get('original_archived_url')}")
+
+    # Observation corpus eligibility (v1.2 hard rules)
+    if branding_primary["text_analysis_eligible"].fillna(False).astype(bool).ne(True).any():
+        errors.append("branding_corpus_observations_primary contains text_analysis_eligible != true")
+    if branding_sens["text_analysis_eligible"].fillna(False).astype(bool).ne(True).any():
+        errors.append("branding_corpus_observations_sensitivity contains text_analysis_eligible != true")
+
+    primary_expected = obs_summary[
+        (obs_summary["observation_recommendation"] == "include")
+        & (obs_summary["text_analysis_eligible"].fillna(False).astype(bool))
+    ]
+    sens_expected = obs_summary[
+        (obs_summary["observation_recommendation"].isin(["include", "sensitivity_analysis"]))
+        & (obs_summary["text_analysis_eligible"].fillna(False).astype(bool))
+    ]
+    if len(branding_primary) != len(primary_expected):
+        errors.append(
+            f"primary corpus count {len(branding_primary)} != eligible primary observations {len(primary_expected)}"
+        )
+    if len(branding_sens) != len(sens_expected):
+        errors.append(
+            f"sensitivity corpus count {len(branding_sens)} != eligible sensitivity observations {len(sens_expected)}"
+        )
+
+    def _obs_keys(df: pd.DataFrame) -> set[tuple[str, str]]:
+        return {
+            (str(int(float(r["firm_id"]))), r["relative_timepoint"])
+            for _, r in df.iterrows()
+        }
+
+    if _obs_keys(branding_primary) != _obs_keys(primary_expected):
+        errors.append("primary corpus keys do not match eligible observation_text_summary rows")
+    if _obs_keys(branding_sens) != _obs_keys(sens_expected):
+        errors.append("sensitivity corpus keys do not match eligible observation_text_summary rows")
+
+    # Governance observation URLs must be traceable
+    gov_page_urls = set(governance_pages["original_archived_url"].dropna().astype(str))
+    for _, g in governance_obs.iterrows():
+        raw = g.get("governance_metadata_source_urls")
+        if pd.isna(raw) or not raw:
+            continue
+        import json
+
+        try:
+            urls = json.loads(raw) if isinstance(raw, str) else list(raw)
+        except Exception:
+            errors.append(f"Unparseable governance_metadata_source_urls for {g.get('firm_id')}|{g.get('relative_timepoint')}")
+            continue
+        for url in urls:
+            if url not in gov_page_urls:
+                errors.append(f"Governance observation URL not in governance pages: {url}")
 
     # Quality summary consistency
     for _, q in quality.iterrows():

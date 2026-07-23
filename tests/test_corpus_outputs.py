@@ -118,6 +118,103 @@ def test_corpus_and_governance_outputs_traceable():
     assert len(branding_pages) == 1
     assert branding_pages.iloc[0]["page_category"] == "homepage"
 
-    branding_obs = build_branding_corpus_observations(obs, branding_pages)
+    branding_obs = build_branding_corpus_observations(obs, branding_pages, primary_only=True)
     assert len(branding_obs) == 1
     assert branding_obs.iloc[0]["branding_token_count"] == 120
+    assert bool(branding_obs.iloc[0]["text_analysis_eligible"]) is True
+
+
+def test_ineligible_observations_excluded_from_primary_corpus():
+    """Reproduce v1.1 bug: ineligible observations must not appear in primary corpus."""
+    snapshots = pd.DataFrame([
+        {
+            "run_id": "r1",
+            "firm_id": "1",
+            "company": "Firm A",
+            "relative_timepoint": "pre_event",
+            "target_date": "2022-07-01",
+            "selected_capture_date": "2022-07-07",
+            "snapshot_status": "selected",
+            "observation_recommendation": "include",
+            "analysis_eligible": True,
+        },
+        {
+            "run_id": "r1",
+            "firm_id": "1",
+            "company": "Firm A",
+            "relative_timepoint": "event",
+            "target_date": "2024-07-01",
+            "selected_capture_date": "2024-07-01",
+            "snapshot_status": "selected",
+            "observation_recommendation": "include",
+            "analysis_eligible": True,
+        },
+    ])
+    pages = pd.DataFrame([
+        {
+            "run_id": "r1",
+            "firm_id": "1",
+            "company": "Firm A",
+            "relative_timepoint": "pre_event",
+            "target_date": "2022-07-01",
+            "selected_capture_date": "2022-07-07",
+            "http_status": 200,
+            "fetch_error": None,
+            "usable_for_analysis": True,
+            "branding_corpus_eligible": True,
+            "governance_metadata_eligible": False,
+            "page_category": "homepage",
+            "duplicate_content_flag": False,
+            "word_count": 200,
+            "token_count": 200,
+            "text_language": "de",
+            "main_text": "familiengeführtes unternehmen mit werten und tradition und innovation",
+            "original_archived_url": "https://example.com/",
+            "path": "/",
+            "page_priority_reason": "homepage",
+        },
+        {
+            "run_id": "r1",
+            "firm_id": "1",
+            "company": "Firm A",
+            "relative_timepoint": "event",
+            "target_date": "2024-07-01",
+            "selected_capture_date": "2024-07-01",
+            "http_status": 200,
+            "fetch_error": None,
+            "usable_for_analysis": True,
+            "branding_corpus_eligible": True,
+            "governance_metadata_eligible": False,
+            "page_category": "homepage",
+            "duplicate_content_flag": False,
+            "word_count": 20,
+            "token_count": 20,
+            "text_language": "de",
+            "main_text": "kurze seite",
+            "original_archived_url": "https://example.com/event",
+            "path": "/",
+            "page_priority_reason": "homepage",
+        },
+    ])
+    gov_pages = build_governance_metadata_pages(pages)
+    gov_obs = build_governance_metadata_observations(snapshots, gov_pages)
+    obs = build_observation_text_summary(snapshots, pages, gov_obs, AnalysisConfig(min_branding_tokens=100))
+    assert bool(obs.loc[obs["relative_timepoint"] == "pre_event", "text_analysis_eligible"].iloc[0]) is True
+    assert bool(obs.loc[obs["relative_timepoint"] == "event", "text_analysis_eligible"].iloc[0]) is False
+
+    branding_pages = build_branding_corpus_pages(pages, obs)
+    primary = build_branding_corpus_observations(obs, branding_pages, primary_only=True)
+    assert list(primary["relative_timepoint"]) == ["pre_event"]
+    assert primary["text_analysis_eligible"].astype(bool).all()
+
+
+def test_legal_pages_never_in_branding_corpus_pages():
+    snapshots = _snapshots()
+    pages = _pages()
+    # Force a mis-tagged eligible impressum that should still be filtered out by export
+    pages.loc[pages["page_category"] == "impressum", "branding_corpus_eligible"] = True
+    gov_pages = build_governance_metadata_pages(pages)
+    gov_obs = build_governance_metadata_observations(snapshots, gov_pages)
+    obs = build_observation_text_summary(snapshots, pages, gov_obs, AnalysisConfig())
+    branding_pages = build_branding_corpus_pages(pages, obs)
+    assert (branding_pages["page_category"] == "impressum").sum() == 0

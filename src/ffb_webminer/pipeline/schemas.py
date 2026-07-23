@@ -132,9 +132,14 @@ PAGE_COLUMNS = [
     "page_priority_reason",
     "page_category",
     "page_category_reason",
+    "classification_rule_priority",
+    "classification_rule_id",
     "branding_corpus_eligible",
     "branding_corpus_exclusion_reason",
     "governance_metadata_eligible",
+    "governance_inclusion_reason",
+    "governance_rule_id",
+    "governance_evidence_type",
     "document_title",
     "meta_description",
     "meta_keywords",
@@ -179,6 +184,7 @@ GOVERNANCE_METADATA_PAGE_COLUMNS = [
     "original_archived_url",
     "wayback_replay_url",
     "document_title",
+    "page_category",
     "extracted_text",
     "managing_directors_raw",
     "legal_representatives_raw",
@@ -189,6 +195,9 @@ GOVERNANCE_METADATA_PAGE_COLUMNS = [
     "vat_id_raw",
     "extraction_confidence",
     "extraction_notes",
+    "governance_inclusion_reason",
+    "governance_rule_id",
+    "governance_evidence_type",
 ]
 
 GOVERNANCE_METADATA_OBSERVATION_COLUMNS = [
@@ -248,6 +257,7 @@ BRANDING_CORPUS_OBSERVATION_COLUMNS = [
     "firm_id",
     "company",
     "relative_timepoint",
+    "observation_recommendation",
     "branding_text",
     "branding_word_count",
     "branding_token_count",
@@ -256,6 +266,7 @@ BRANDING_CORPUS_OBSERVATION_COLUMNS = [
     "source_page_categories_json",
     "text_analysis_eligible",
     "text_analysis_quality_band",
+    "text_analysis_exclusion_reason",
 ]
 
 MANUAL_CORPUS_VALIDATION_COLUMNS = [
@@ -272,6 +283,10 @@ MANUAL_CORPUS_VALIDATION_COLUMNS = [
     "branding_corpus_eligibility_correct",
     "legal_technical_exclusion_correct",
     "impressum_layer_correct",
+    "strict_legal_classification_correct",
+    "branding_exclusion_correct",
+    "governance_inclusion_correct",
+    "observation_export_correct",
     "token_count_plausible",
     "language_detection_plausible",
     "observation_text_eligibility_correct",

@@ -529,13 +529,21 @@ class PipelineRunner:
                     self.config.quality,
                     max_temporal_distance=self.config.quality.max_temporal_distance_days,
                 )
-                classification = classify_page(page_row)
+                classification = classify_page(
+                    page_row,
+                    governance_allowlist=self.config.analysis.governance_url_allowlist,
+                )
                 page_row.update({
                     "page_category": classification.page_category,
                     "page_category_reason": classification.page_category_reason,
+                    "classification_rule_priority": classification.classification_rule_priority,
+                    "classification_rule_id": classification.classification_rule_id,
                     "branding_corpus_eligible": classification.branding_corpus_eligible,
                     "branding_corpus_exclusion_reason": classification.branding_corpus_exclusion_reason,
                     "governance_metadata_eligible": classification.governance_metadata_eligible,
+                    "governance_inclusion_reason": classification.governance_inclusion_reason,
+                    "governance_rule_id": classification.governance_rule_id,
+                    "governance_evidence_type": classification.governance_evidence_type,
                 })
                 ch = page_row.get("content_hash")
                 if page_row.get("analysis_eligible") and ch:
@@ -604,6 +612,11 @@ class PipelineRunner:
             "branding_corpus_eligible": False,
             "branding_corpus_exclusion_reason": snap.get("observation_recommendation") or snap["snapshot_status"],
             "governance_metadata_eligible": False,
+            "classification_rule_priority": None,
+            "classification_rule_id": None,
+            "governance_inclusion_reason": None,
+            "governance_rule_id": None,
+            "governance_evidence_type": None,
         })
         return [row]
 
@@ -718,13 +731,21 @@ class PipelineRunner:
                 "boilerplate_ratio": text_ex.boilerplate_ratio,
                 "archive_toolbar_removed_flag": text_ex.archive_toolbar_removed_flag,
             })
-        classification = classify_page(row)
+        classification = classify_page(
+            row,
+            governance_allowlist=self.config.analysis.governance_url_allowlist,
+        )
         row.update({
             "page_category": classification.page_category,
             "page_category_reason": classification.page_category_reason,
+            "classification_rule_priority": classification.classification_rule_priority,
+            "classification_rule_id": classification.classification_rule_id,
             "branding_corpus_eligible": classification.branding_corpus_eligible,
             "branding_corpus_exclusion_reason": classification.branding_corpus_exclusion_reason,
             "governance_metadata_eligible": classification.governance_metadata_eligible,
+            "governance_inclusion_reason": classification.governance_inclusion_reason,
+            "governance_rule_id": classification.governance_rule_id,
+            "governance_evidence_type": classification.governance_evidence_type,
         })
         return row
 

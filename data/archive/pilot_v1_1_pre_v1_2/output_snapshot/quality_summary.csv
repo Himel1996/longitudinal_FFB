@@ -1,0 +1,26 @@
+run_id,firm_id,rank,company,relative_timepoint,target_year,snapshot_status,pages_attempted,pages_fetch_success,pages_fetch_failed,pages_extraction_usable,pages_branding_eligible,pages_governance_metadata,pages_excluded_legal_technical,pages_duplicate,pages_excluded,avg_text_chars,flags
+c956bd4e-2b8a-4c48-8780-c187587f46b3,1,1,BLUE MOON COMMUNICATION CONSULTANTS GMBH,pre_pre_event,2020,selected,25,25,0,24,11,0,13,0,1,3654.2,"[""likely_navigation_only"", ""soft_404_flag""]"
+c956bd4e-2b8a-4c48-8780-c187587f46b3,1,1,BLUE MOON COMMUNICATION CONSULTANTS GMBH,pre_event,2022,selected,25,15,10,15,13,0,11,0,10,3619.0,"[""likely_navigation_only"", ""soft_404_flag""]"
+c956bd4e-2b8a-4c48-8780-c187587f46b3,1,1,BLUE MOON COMMUNICATION CONSULTANTS GMBH,event,2024,selected,25,25,0,25,23,0,2,0,0,3928.2,
+c956bd4e-2b8a-4c48-8780-c187587f46b3,1,1,BLUE MOON COMMUNICATION CONSULTANTS GMBH,post_event,2026,selected,25,25,0,25,23,0,2,0,0,4918.2,
+c956bd4e-2b8a-4c48-8780-c187587f46b3,1,1,BLUE MOON COMMUNICATION CONSULTANTS GMBH,post_post_event,2028,future_unavailable,1,1,0,0,0,0,0,0,1,,"[""likely_navigation_only""]"
+c956bd4e-2b8a-4c48-8780-c187587f46b3,2,2,PETER-LACKE HOLDING GMBH,pre_pre_event,2011,selected,25,25,0,25,12,11,2,0,0,1789.9,
+c956bd4e-2b8a-4c48-8780-c187587f46b3,2,2,PETER-LACKE HOLDING GMBH,pre_event,2013,selected,25,25,0,25,10,13,2,0,0,1675.4,
+c956bd4e-2b8a-4c48-8780-c187587f46b3,2,2,PETER-LACKE HOLDING GMBH,event,2015,selected,25,25,0,25,24,0,0,0,0,1661.7,"[""likely_navigation_only""]"
+c956bd4e-2b8a-4c48-8780-c187587f46b3,2,2,PETER-LACKE HOLDING GMBH,post_event,2017,beyond_tolerance,1,1,0,0,0,0,0,0,1,,"[""likely_navigation_only""]"
+c956bd4e-2b8a-4c48-8780-c187587f46b3,2,2,PETER-LACKE HOLDING GMBH,post_post_event,2019,beyond_tolerance,1,1,0,0,0,0,0,0,1,,"[""likely_navigation_only""]"
+c956bd4e-2b8a-4c48-8780-c187587f46b3,3,3,ANLAGENTECHNIK LEICHTLE GMBH,pre_pre_event,2019,selected,16,16,0,16,1,0,12,0,0,2092.8,"[""likely_navigation_only""]"
+c956bd4e-2b8a-4c48-8780-c187587f46b3,3,3,ANLAGENTECHNIK LEICHTLE GMBH,pre_event,2021,selected,25,25,0,25,2,0,18,0,0,1573.6,"[""likely_navigation_only""]"
+c956bd4e-2b8a-4c48-8780-c187587f46b3,3,3,ANLAGENTECHNIK LEICHTLE GMBH,event,2023,selected,21,21,0,21,2,0,15,0,0,1943.5,"[""likely_navigation_only""]"
+c956bd4e-2b8a-4c48-8780-c187587f46b3,3,3,ANLAGENTECHNIK LEICHTLE GMBH,post_event,2025,selected,23,23,0,23,2,0,18,0,0,1952.3,"[""likely_navigation_only""]"
+c956bd4e-2b8a-4c48-8780-c187587f46b3,3,3,ANLAGENTECHNIK LEICHTLE GMBH,post_post_event,2027,future_unavailable,1,1,0,0,0,0,0,0,1,,"[""likely_navigation_only""]"
+c956bd4e-2b8a-4c48-8780-c187587f46b3,4,4,MYRENNE GMBH,pre_pre_event,2008,selected,1,1,0,1,1,0,0,0,0,277.0,
+c956bd4e-2b8a-4c48-8780-c187587f46b3,4,4,MYRENNE GMBH,pre_event,2010,selected,25,25,0,25,22,0,3,0,0,2318.8,
+c956bd4e-2b8a-4c48-8780-c187587f46b3,4,4,MYRENNE GMBH,event,2012,event_unavailable,1,1,0,0,0,0,0,0,1,,"[""likely_navigation_only""]"
+c956bd4e-2b8a-4c48-8780-c187587f46b3,4,4,MYRENNE GMBH,post_event,2014,selected,25,25,0,25,17,0,7,0,0,1490.8,"[""likely_navigation_only""]"
+c956bd4e-2b8a-4c48-8780-c187587f46b3,4,4,MYRENNE GMBH,post_post_event,2016,selected,25,25,0,24,24,0,0,0,1,1556.0,"[""likely_navigation_only"", ""soft_404_flag""]"
+c956bd4e-2b8a-4c48-8780-c187587f46b3,5,5,MSF-VATHAUER ANTRIEBSTECHNIK GMBH & CO. KG,pre_pre_event,2002,selected,1,1,0,0,0,0,0,0,1,0.0,"[""likely_navigation_only""]"
+c956bd4e-2b8a-4c48-8780-c187587f46b3,5,5,MSF-VATHAUER ANTRIEBSTECHNIK GMBH & CO. KG,pre_event,2004,selected,1,1,0,0,0,0,0,0,1,0.0,"[""likely_navigation_only""]"
+c956bd4e-2b8a-4c48-8780-c187587f46b3,5,5,MSF-VATHAUER ANTRIEBSTECHNIK GMBH & CO. KG,event,2006,selected,1,1,0,0,0,0,0,0,1,0.0,"[""likely_navigation_only""]"
+c956bd4e-2b8a-4c48-8780-c187587f46b3,5,5,MSF-VATHAUER ANTRIEBSTECHNIK GMBH & CO. KG,post_event,2008,selected,25,25,0,25,20,0,4,0,0,1758.1,"[""likely_navigation_only""]"
+c956bd4e-2b8a-4c48-8780-c187587f46b3,5,5,MSF-VATHAUER ANTRIEBSTECHNIK GMBH & CO. KG,post_post_event,2010,selected,25,25,0,25,24,0,1,0,0,2022.6,"[""likely_navigation_only""]"

@@ -8,6 +8,7 @@ from collections import Counter
 import pandas as pd
 
 from ffb_webminer.config import AnalysisConfig
+from ffb_webminer.extract.text_utils import normalize_analysis_text
 from ffb_webminer.governance.extraction import extract_governance_metadata, json_list, merge_governance_texts
 from ffb_webminer.pipeline.schemas import (
     BRANDING_CORPUS_OBSERVATION_COLUMNS,
@@ -16,13 +17,13 @@ from ffb_webminer.pipeline.schemas import (
     GOVERNANCE_METADATA_PAGE_COLUMNS,
     OBSERVATION_TEXT_SUMMARY_COLUMNS,
 )
-from ffb_webminer.extract.text_utils import normalize_analysis_text
 from ffb_webminer.quality.checks import as_bool, page_fetch_success
 
 
 def build_governance_metadata_pages(pages: pd.DataFrame) -> pd.DataFrame:
+    eligible = pages[pages["governance_metadata_eligible"].fillna(False).astype(bool)]
     rows = []
-    for _, page in pages[pages["governance_metadata_eligible"].fillna(False)].iterrows():
+    for _, page in eligible.iterrows():
         g = extract_governance_metadata(page.get("extracted_text"))
         rows.append({
             "run_id": page["run_id"],
@@ -34,6 +35,7 @@ def build_governance_metadata_pages(pages: pd.DataFrame) -> pd.DataFrame:
             "original_archived_url": page["original_archived_url"],
             "wayback_replay_url": page["wayback_replay_url"],
             "document_title": page.get("document_title"),
+            "page_category": page.get("page_category"),
             "extracted_text": page.get("extracted_text"),
             "managing_directors_raw": g.managing_directors_raw,
             "legal_representatives_raw": g.legal_representatives_raw,
@@ -44,6 +46,9 @@ def build_governance_metadata_pages(pages: pd.DataFrame) -> pd.DataFrame:
             "vat_id_raw": g.vat_id_raw,
             "extraction_confidence": g.extraction_confidence,
             "extraction_notes": g.extraction_notes,
+            "governance_inclusion_reason": page.get("governance_inclusion_reason"),
+            "governance_rule_id": page.get("governance_rule_id"),
+            "governance_evidence_type": page.get("governance_evidence_type"),
         })
     df = pd.DataFrame(rows)
     for col in GOVERNANCE_METADATA_PAGE_COLUMNS:
@@ -59,6 +64,7 @@ def build_governance_metadata_observations(snapshots: pd.DataFrame, governance_p
             (governance_pages["firm_id"].astype(str) == str(snap["firm_id"]))
             & (governance_pages["relative_timepoint"] == snap["relative_timepoint"])
         ]
+        impressum_like = subset[subset["page_category"].isin(["impressum", "legal_notice"])]
         merged = merge_governance_texts(subset["extracted_text"].fillna("").tolist())
         reps = json_list(subset["legal_representatives_raw"].dropna().astype(str).tolist())
         entities = json_list(subset["legal_entity_raw"].dropna().astype(str).tolist())
@@ -71,13 +77,15 @@ def build_governance_metadata_observations(snapshots: pd.DataFrame, governance_p
             "relative_timepoint": snap["relative_timepoint"],
             "target_date": snap["target_date"],
             "selected_capture_date": snap["selected_capture_date"],
-            "impressum_available": bool(len(subset)),
+            "impressum_available": bool(len(impressum_like)),
             "governance_metadata_text": merged,
             "detected_legal_representatives": reps,
             "detected_legal_entity": entities,
             "detected_parent_company": parents,
             "governance_metadata_quality": quality,
-            "governance_metadata_source_urls": json_list(subset["original_archived_url"].dropna().astype(str).tolist()),
+            "governance_metadata_source_urls": json_list(
+                subset["original_archived_url"].dropna().astype(str).tolist()
+            ),
         })
     df = pd.DataFrame(rows)
     for col in GOVERNANCE_METADATA_OBSERVATION_COLUMNS:
@@ -110,7 +118,14 @@ def build_observation_text_summary(
             & subset["usable_for_analysis"].fillna(False).astype(bool)
         ]
         legal_technical = subset[subset["page_category"].isin([
-            "privacy_policy", "terms_conditions", "cookie_notice", "legal_other", "technical_system", "search_archive"
+            "privacy_policy",
+            "terms_conditions",
+            "cookie_notice",
+            "legal_other",
+            "technical_system",
+            "search_archive",
+            "impressum",
+            "legal_notice",
         ])]
         duplicates = int(subset["duplicate_content_flag"].fillna(False).sum())
         usable_pages = subset[subset["usable_for_analysis"].fillna(False)]
@@ -119,9 +134,13 @@ def build_observation_text_summary(
         branding_words = int(branding_pages["word_count"].fillna(0).sum())
         branding_tokens = int(branding_pages["token_count"].fillna(0).sum())
         gov = gov_lookup.get(key)
-        gov_words = len(normalize_analysis_text(gov.get("governance_metadata_text")).split()) if gov is not None else 0
+        gov_words = (
+            len(normalize_analysis_text(gov.get("governance_metadata_text")).split())
+            if gov is not None
+            else 0
+        )
 
-        lang_counter = Counter()
+        lang_counter: Counter[str] = Counter()
         unknown_lang = 0
         for _, page in branding_pages.iterrows():
             lang = page.get("text_language") or "unknown"
@@ -132,14 +151,14 @@ def build_observation_text_summary(
         primary_lang = max(lang_counter.items(), key=lambda kv: kv[1])[0] if lang_counter else "unknown"
 
         exclusion_reason = None
-        eligible = bool(snap.get("analysis_eligible"))
+        eligible = as_bool(snap.get("analysis_eligible"))
         if snap.get("snapshot_status") != "selected":
             exclusion_reason = "no_valid_snapshot"
             eligible = False
         elif snap.get("observation_recommendation") == "exclude_duplicate_capture":
             exclusion_reason = "duplicate_capture"
             eligible = False
-        elif not snap.get("analysis_eligible"):
+        elif not as_bool(snap.get("analysis_eligible")):
             exclusion_reason = "observation_excluded_temporally"
             eligible = False
         elif len(branding_pages) < analysis_cfg.min_branding_pages:
@@ -173,7 +192,7 @@ def build_observation_text_summary(
             "n_pages_extraction_usable": extraction_usable,
             "n_branding_pages_eligible": len(branding_pages),
             "n_branding_pages_excluded": max(extraction_usable - len(branding_pages), 0),
-            "n_impressum_pages": int(subset["page_category"].eq("impressum").sum()),
+            "n_impressum_pages": int(subset["page_category"].isin(["impressum", "legal_notice"]).sum()),
             "n_legal_technical_pages": len(legal_technical),
             "n_duplicate_pages": duplicates,
             "total_word_count_all_usable_pages": all_words,
@@ -182,7 +201,9 @@ def build_observation_text_summary(
             "branding_token_count": branding_tokens,
             "governance_metadata_word_count": gov_words,
             "detected_primary_language": primary_lang,
-            "language_distribution_json": json.dumps(dict(lang_counter), ensure_ascii=False) if lang_counter else None,
+            "language_distribution_json": (
+                json.dumps(dict(lang_counter), ensure_ascii=False) if lang_counter else None
+            ),
             "n_pages_language_unknown": unknown_lang,
             "text_analysis_eligible": eligible,
             "text_analysis_exclusion_reason": exclusion_reason,
@@ -196,25 +217,36 @@ def build_observation_text_summary(
 
 
 def build_branding_corpus_pages(pages: pd.DataFrame, observation_summary: pd.DataFrame) -> pd.DataFrame:
+    """Page-level branding corpus for eligible observations only."""
     elig = {
-        (str(r["firm_id"]), r["relative_timepoint"]): (
-            r["text_analysis_eligible"],
-            r["text_analysis_quality_band"],
-            r["observation_recommendation"],
-        )
+        (str(r["firm_id"]), r["relative_timepoint"]): r
         for _, r in observation_summary.iterrows()
+    }
+    banned = {
+        "impressum",
+        "legal_notice",
+        "privacy_policy",
+        "terms_conditions",
+        "cookie_notice",
+        "legal_other",
     }
     rows = []
     for _, page in pages.iterrows():
         key = (str(page["firm_id"]), page["relative_timepoint"])
-        text_eligible, quality_band, recommendation = elig.get(key, (False, "ineligible", None))
+        obs = elig.get(key)
+        if obs is None:
+            continue
+        if not as_bool(obs.get("text_analysis_eligible")):
+            continue
+        if obs.get("observation_recommendation") not in {"include", "sensitivity_analysis"}:
+            continue
         if not (as_bool(page.get("branding_corpus_eligible")) and as_bool(page.get("usable_for_analysis"))):
             continue
-        if recommendation not in {"include", "sensitivity_analysis"}:
+        if page.get("page_category") in banned:
             continue
         row = page.to_dict()
-        row["text_analysis_eligible"] = text_eligible
-        row["text_analysis_quality_band"] = quality_band
+        row["text_analysis_eligible"] = True
+        row["text_analysis_quality_band"] = obs.get("text_analysis_quality_band")
         rows.append(row)
     df = pd.DataFrame(rows)
     for col in BRANDING_CORPUS_PAGE_COLUMNS:
@@ -228,31 +260,54 @@ def build_branding_corpus_observations(
     branding_pages: pd.DataFrame,
     primary_only: bool | None = None,
 ) -> pd.DataFrame:
-    rows = []
+    """
+    Observation-level branding corpus.
+
+    observation_text_summary.csv is authoritative for eligibility:
+    - primary: recommendation == include AND text_analysis_eligible
+    - sensitivity: recommendation in {include, sensitivity_analysis} AND text_analysis_eligible
+    - all: same as sensitivity when primary_only is None (eligible text observations only)
+    """
     summary = observation_summary.copy()
+    summary = summary[summary["text_analysis_eligible"].fillna(False).astype(bool)]
     if primary_only is True:
         summary = summary[summary["observation_recommendation"] == "include"]
-    elif primary_only is False:
-        summary = summary[summary["observation_recommendation"].isin(["include", "sensitivity_analysis"])]
+    else:
+        # primary_only False or None → sensitivity-eligible pool
+        summary = summary[
+            summary["observation_recommendation"].isin(["include", "sensitivity_analysis"])
+        ]
+
+    rows = []
     for _, obs in summary.iterrows():
         subset = branding_pages[
             (branding_pages["firm_id"].astype(str) == str(obs["firm_id"]))
             & (branding_pages["relative_timepoint"] == obs["relative_timepoint"])
         ].sort_values(["page_category", "path"])
-        texts = [normalize_analysis_text(t) for t in subset["main_text"].fillna("").tolist() if normalize_analysis_text(t)]
+        texts = [
+            normalize_analysis_text(t)
+            for t in subset["main_text"].fillna("").tolist()
+            if normalize_analysis_text(t)
+        ]
         rows.append({
             "run_id": obs["run_id"],
             "firm_id": obs["firm_id"],
             "company": obs["company"],
             "relative_timepoint": obs["relative_timepoint"],
+            "observation_recommendation": obs["observation_recommendation"],
             "branding_text": "\n\n".join(texts) if texts else None,
             "branding_word_count": int(subset["word_count"].fillna(0).sum()),
             "branding_token_count": int(subset["token_count"].fillna(0).sum()),
             "source_page_count": len(subset),
-            "source_page_urls_json": json_list(subset["original_archived_url"].dropna().astype(str).tolist()),
-            "source_page_categories_json": json_list(subset["page_category"].dropna().astype(str).tolist()),
-            "text_analysis_eligible": obs["text_analysis_eligible"],
+            "source_page_urls_json": json_list(
+                subset["original_archived_url"].dropna().astype(str).tolist()
+            ),
+            "source_page_categories_json": json_list(
+                subset["page_category"].dropna().astype(str).tolist()
+            ),
+            "text_analysis_eligible": True,
             "text_analysis_quality_band": obs["text_analysis_quality_band"],
+            "text_analysis_exclusion_reason": obs.get("text_analysis_exclusion_reason"),
         })
     df = pd.DataFrame(rows)
     for col in BRANDING_CORPUS_OBSERVATION_COLUMNS:
