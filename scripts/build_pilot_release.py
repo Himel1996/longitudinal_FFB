@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build pilot_v1_3_1 release bundle with git-commit sync enforcement."""
+"""Build pilot_v1_4 release bundle with git-commit sync enforcement."""
 
 from __future__ import annotations
 
@@ -16,7 +16,7 @@ sys.path.insert(0, str(ROOT / "src"))
 
 from ffb_webminer.config import PipelineConfig
 
-RELEASE = "pilot_v1_3_1"
+RELEASE = "pilot_v1_4"
 CSV_FILES = [
     "firms.csv",
     "snapshots.csv",
@@ -58,6 +58,7 @@ REPORT_FILES = [
     "v1_2_change_report.md",
     "v1_3_change_report.md",
     "v1_3_1_change_report.md",
+    "v1_4_change_report.md",
     "temporal_validity_report.md",
     "extraction_validation_report.md",
     "reproducibility.md",
@@ -186,7 +187,7 @@ def main() -> int:
         if src.exists():
             shutil.copy2(src, cfg_dir / Path(rel).name)
 
-    readme = f"""# FFB Pilot Dataset v1.3.1
+    readme = f"""# FFB Pilot Dataset v1.4
 
 **Release date:** {datetime.now(timezone.utc).strftime('%Y-%m-%d')}  
 **Run ID:** `{manifest.get('run_id', 'unknown')}`  
@@ -194,16 +195,16 @@ def main() -> int:
 
 ## Contents
 
-Final clean rebuild of Pilot v1.3 with legal-path demotion applied during crawl:
+Fresh top-5 verification rebuild of the accepted scaling pipeline:
 
-- `/unternehmen/` legal pages (Impressum, AGB, Datenschutz, etc.) cannot consume reserved About/company slots
 - within firm × timepoint deduplication
 - hybrid language handling with German-only primary corpus
 - reserved-slot staged crawl prioritization
+- legal-path demotion (Impressum/AGB/Datenschutz cannot consume About slots)
 
-See `reports/v1_3_1_change_report.md` and `reports/reproducibility.md`.
+See `reports/v1_4_change_report.md` and `reports/reproducibility.md`.
 
-Family Firm Branding in Transition — Archived Web Pipeline (Pilot v1.3.1)
+Family Firm Branding in Transition — Archived Web Pipeline (Pilot v1.4)
 """
     (release_dir / "README.md").write_text(readme, encoding="utf-8")
     print(f"Release built: {release_dir}")
