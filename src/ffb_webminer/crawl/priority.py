@@ -123,6 +123,8 @@ BLOCK_RESERVED_SEGMENTS = (
 )
 
 STEM_EXT_RE = re.compile(r"\.(html?|php|aspx?|jsp|cfm)$", re.IGNORECASE)
+# Typo3-style pageid suffixes: Ueber-uns.9.0.html → ueber-uns
+TYPO3_ID_STEM_RE = re.compile(r"^(.+?)(?:\.\d+)+$")
 
 
 @dataclass
@@ -171,6 +173,16 @@ def normalize_path_segments(path: str) -> list[str]:
         stem = STEM_EXT_RE.sub("", part)
         if stem and stem != part:
             parts.append(stem)
+        # Delimited filename stems (Typo3 pageid / speaking-URL suffixes)
+        for candidate in (stem, part):
+            if not candidate or "." not in candidate:
+                continue
+            m = TYPO3_ID_STEM_RE.match(candidate)
+            if m and m.group(1):
+                parts.append(m.group(1))
+            head = candidate.split(".", 1)[0]
+            if head:
+                parts.append(head)
     seen: set[str] = set()
     out: list[str] = []
     for p in parts:

@@ -75,6 +75,8 @@ def test_exact_unternehmen_qualifies():
         "https://example.com/company",
         "https://example.com/about",
         "https://example.com/ueber-uns",
+        "http://msf-technik.de/UEber-uns.9.0.html",
+        "http://www.msf-technik.de/UEber-uns.antriebstechnikdezentrale.0.html",
     ):
         m = classify_path_match(url)
         assert m.crawl_priority_tier == 1, url
