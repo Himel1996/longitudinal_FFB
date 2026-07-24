@@ -31,12 +31,32 @@ RESERVE_CATS = {
     "management_leadership",
 }
 
-# Slugs that must not win company_about reserved slots via substring "unternehmen"
-FALSE_ABOUT_PATTERNS = re.compile(
-    r"(/(news|presse|press|aktuelles|pressemitteilungen)/|"
-    r"/(karriere|career|careers|jobs|stellen)/|"
-    r"/(produkte?|products?|download)/)",
-    re.IGNORECASE,
+LOW_VALUE_SEGMENTS = frozenset(
+    {
+        "news",
+        "newsletter",
+        "newsletters",
+        "newsroom",
+        "presse",
+        "press",
+        "aktuelles",
+        "pressemitteilungen",
+        "pressemitteilung",
+        "pr-bereich",
+        "medien",
+        "media",
+        "karriere",
+        "career",
+        "careers",
+        "jobs",
+        "stellen",
+        "produkte",
+        "produkt",
+        "products",
+        "product",
+        "download",
+        "downloads",
+    }
 )
 
 
@@ -371,14 +391,14 @@ def main() -> int:
             if reserved_sel:
                 foreign_reserved.append(url)
 
-        # Careers/news/product/press must not consume company_about reserved slots
-        if reserved_sel and cat == "company_about" and FALSE_ABOUT_PATTERNS.search(path):
+        segs = normalize_path_segments(path)
+        # Careers/news/product/press segments must not consume company_about reserved slots
+        if reserved_sel and cat == "company_about" and (set(segs) & LOW_VALUE_SEGMENTS):
             substring_false_about.append(url)
 
         # Re-score with segment-aware matcher: reserved slots require high-confidence structural match
         if reserved_sel and cat in RESERVE_CATS:
             match = classify_path_match(url, is_homepage=(cat == "homepage" and path in {"", "/"}))
-            segs = normalize_path_segments(path)
             # Fail if current code would not assign this reserved category with high confidence
             if cat != "homepage":
                 if (
@@ -403,12 +423,10 @@ def main() -> int:
                 substring_false_about.append(url)
 
     low_took_reserved = []
-    low_re = re.compile(
-        r"(news|presse|press|aktuelles|produkt|product|karriere|career|jobs|stellen)"
-    )
     for _, p in pages.iterrows():
         path = str(p.get("path") or "").lower()
-        if low_re.search(path) and as_bool(p.get("selected_under_reserved_slot")):
+        segs = set(normalize_path_segments(path))
+        if (segs & LOW_VALUE_SEGMENTS) and as_bool(p.get("selected_under_reserved_slot")):
             if str(p.get("reserved_slot_category") or "") in RESERVE_CATS:
                 low_took_reserved.append(str(p.get("original_archived_url")))
 

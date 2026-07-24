@@ -111,6 +111,16 @@ def test_presse_unternehmen_des_jahres_does_not_qualify():
     assert press.reserved_slot_category == "news_press"
 
 
+def test_newsletter_under_unternehmen_does_not_consume_about_slot():
+    scored = score_candidate(
+        "http://www.peter-lacke.de/deu/peter-lacke/unternehmen/pr-bereich/newsletter/newsletter.html",
+        depth=1,
+    )
+    assert scored.crawl_priority_tier == 2
+    assert scored.reserved_slot_category == "news_press"
+    assert scored.matched_priority_segment in {"newsletter", "pr-bereich"}
+
+
 def test_press_slug_containing_unternehmen_word_does_not_get_about_slot():
     url = (
         "https://www.bluemoon.de/pressemitteilungen/"
