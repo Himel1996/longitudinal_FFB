@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build pilot_v1_4 release bundle with git-commit sync enforcement."""
+"""Build pilot_v1_4_1 release bundle with git-commit sync enforcement."""
 
 from __future__ import annotations
 
@@ -16,7 +16,7 @@ sys.path.insert(0, str(ROOT / "src"))
 
 from ffb_webminer.config import PipelineConfig
 
-RELEASE = "pilot_v1_4"
+RELEASE = "pilot_v1_4_1"
 CSV_FILES = [
     "firms.csv",
     "snapshots.csv",
@@ -59,9 +59,11 @@ REPORT_FILES = [
     "v1_3_change_report.md",
     "v1_3_1_change_report.md",
     "v1_4_change_report.md",
+    "v1_4_1_change_report.md",
     "temporal_validity_report.md",
     "extraction_validation_report.md",
     "reproducibility.md",
+    "release_acceptance_audit.md",
 ]
 
 CONFIG_FILES = [
@@ -109,7 +111,6 @@ def _assert_git_sync(manifest_commit: str | None) -> None:
     if not manifest_commit:
         raise SystemExit("FAIL: run_manifest.json missing git_commit")
     head = _git_head()
-    # Allow later commits that only touch reports/data, but fail if pipeline code drifted
     code_diff = subprocess.check_output(
         [
             "git",
@@ -131,7 +132,6 @@ def _assert_git_sync(manifest_commit: str | None) -> None:
             f"FAIL: pipeline code changed since run_manifest git_commit {manifest_commit}.\n"
             f"Changed paths:\n{code_diff}"
         )
-    # Also require manifest commit exists
     try:
         subprocess.check_call(
             ["git", "cat-file", "-e", f"{manifest_commit}^{{commit}}"],
@@ -175,6 +175,12 @@ def main() -> int:
         if src.exists():
             shutil.copy2(src, reports_dir / fname)
 
+    # Also copy acceptance audit JSON into release reports if present
+    audit_json = ROOT / "data/interim/release_acceptance_audit.json"
+    if audit_json.exists():
+        shutil.copy2(audit_json, reports_dir / "release_acceptance_audit.json")
+        shutil.copy2(audit_json, data_dir / "release_acceptance_audit.json")
+
     for sub in ("validation_screenshots", "evidence"):
         src = out / sub
         if src.exists():
@@ -187,7 +193,7 @@ def main() -> int:
         if src.exists():
             shutil.copy2(src, cfg_dir / Path(rel).name)
 
-    readme = f"""# FFB Pilot Dataset v1.4
+    readme = f"""# FFB Pilot Dataset v1.4.1
 
 **Release date:** {datetime.now(timezone.utc).strftime('%Y-%m-%d')}  
 **Run ID:** `{manifest.get('run_id', 'unknown')}`  
@@ -195,16 +201,14 @@ def main() -> int:
 
 ## Contents
 
-Fresh top-5 verification rebuild of the accepted scaling pipeline:
+Targeted acceptance fix rebuild of the top-five pilot:
 
-- within firm × timepoint deduplication
-- hybrid language handling with German-only primary corpus
-- reserved-slot staged crawl prioritization
-- legal-path demotion (Impressum/AGB/Datenschutz cannot consume About slots)
+- segment-aware reserved-slot path matching (no broad-substring `unternehmen` false positives)
+- language-appropriate analysis token counts (`token_count` == `analysis_token_count`)
 
-See `reports/v1_4_change_report.md` and `reports/reproducibility.md`.
+See `reports/v1_4_1_change_report.md` and `reports/release_acceptance_audit.md`.
 
-Family Firm Branding in Transition — Archived Web Pipeline (Pilot v1.4)
+Family Firm Branding in Transition — Archived Web Pipeline (Pilot v1.4.1)
 """
     (release_dir / "README.md").write_text(readme, encoding="utf-8")
     print(f"Release built: {release_dir}")

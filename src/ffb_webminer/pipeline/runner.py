@@ -740,6 +740,10 @@ class PipelineRunner:
             "path_language_hint": getattr(cp, "path_language_hint", None),
             "path_language_priority": getattr(cp, "path_language_priority", None),
             "language_path_reason": getattr(cp, "language_path_reason", None),
+            "matched_priority_segment": getattr(cp, "matched_priority_segment", None),
+            "priority_match_type": getattr(cp, "priority_match_type", None),
+            "priority_rule_id": getattr(cp, "priority_rule_id", None),
+            "priority_match_confidence": getattr(cp, "priority_match_confidence", None),
         })
         if meta:
             row.update({
@@ -771,6 +775,10 @@ class PipelineRunner:
                 "word_count": text_ex.word_count,
                 "token_count": text_ex.token_count,
                 "token_count_reason": text_ex.token_count_reason,
+                "lexical_token_count": text_ex.lexical_token_count,
+                "analysis_token_count": text_ex.analysis_token_count,
+                "tokenization_status": text_ex.tokenization_status,
+                "tokenization_method": text_ex.tokenization_method,
                 "extraction_quality_score": text_ex.extraction_quality_score,
                 "boilerplate_ratio": text_ex.boilerplate_ratio,
                 "archive_toolbar_removed_flag": text_ex.archive_toolbar_removed_flag,

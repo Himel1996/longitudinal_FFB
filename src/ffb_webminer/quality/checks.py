@@ -95,6 +95,18 @@ def check_page(
             usable = False
             exclusion_reason = exclusion_reason or "empty_text"
 
+    analysis_tokens = page.get("analysis_token_count")
+    if analysis_tokens is None:
+        analysis_tokens = page.get("token_count")
+    try:
+        analysis_tokens_n = int(float(analysis_tokens)) if analysis_tokens is not None and str(analysis_tokens) != "nan" else 0
+    except (TypeError, ValueError):
+        analysis_tokens_n = 0
+    if char_count >= config.min_text_chars and analysis_tokens_n <= 0 and usable:
+        flags.append("zero_analysis_tokens")
+        usable = False
+        exclusion_reason = exclusion_reason or "zero_analysis_tokens"
+
     if _soft_404(text, page.get("document_title")):
         flags.append("soft_404")
         usable = False

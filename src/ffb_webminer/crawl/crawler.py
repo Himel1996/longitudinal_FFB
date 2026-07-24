@@ -34,6 +34,10 @@ class CrawlPage:
     path_language_hint: str | None = None
     path_language_priority: str | None = None
     language_path_reason: str | None = None
+    matched_priority_segment: str | None = None
+    priority_match_type: str | None = None
+    priority_rule_id: str | None = None
+    priority_match_confidence: str | None = None
 
 
 @dataclass
@@ -164,6 +168,10 @@ def crawl_snapshot(
             path_language_hint=pri.path_language_hint,
             path_language_priority=pri.path_language_priority,
             language_path_reason=pri.language_path_reason,
+            matched_priority_segment=pri.matched_priority_segment,
+            priority_match_type=pri.priority_match_type,
+            priority_rule_id=pri.priority_rule_id,
+            priority_match_confidence=pri.priority_match_confidence,
         )
         page.fetch = fetcher.fetch(item["url"], archive_timestamp=archive_timestamp)
         result.pages.append(page)
@@ -207,6 +215,8 @@ def crawl_snapshot(
             for cand in _sorted_candidates():
                 pri = cand["priority"]
                 if pri.reserved_slot_category != category:
+                    continue
+                if pri.crawl_priority_tier != 1:
                     continue
                 if pri.path_language_priority == "foreign_language_deprioritized":
                     continue

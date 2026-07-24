@@ -1,7 +1,12 @@
 """Tests for reserved-slot crawl prioritization."""
 
 from ffb_webminer.config import CrawlConfig
-from ffb_webminer.crawl.priority import classify_reserved_category, score_candidate
+from ffb_webminer.crawl.priority import (
+    classify_path_match,
+    classify_reserved_category,
+    normalize_path_segments,
+    score_candidate,
+)
 
 
 def test_about_outranks_news():
@@ -59,3 +64,89 @@ def test_legal_paths_do_not_consume_reserved_slots():
     assert impressum.reserved_slot_category is None
     assert about.crawl_priority_tier == 1
     assert about.reserved_slot_category == "company_about"
+
+
+def test_exact_unternehmen_qualifies():
+    for url in (
+        "https://example.com/unternehmen",
+        "https://example.com/unternehmen/",
+        "https://example.com/unternehmen/ueber-uns",
+        "https://example.com/de/unternehmen.html",
+        "https://example.com/company",
+        "https://example.com/about",
+        "https://example.com/ueber-uns",
+    ):
+        m = classify_path_match(url)
+        assert m.crawl_priority_tier == 1, url
+        assert m.reserved_slot_category == "company_about", url
+        assert m.eligible_for_reserved_slot is True, url
+        assert m.priority_match_type == "exact_path_segment", url
+
+
+def test_news_slug_unternehmen_does_not_qualify():
+    news = score_candidate("https://example.com/news/unser-unternehmen-expandiert", depth=1)
+    assert news.crawl_priority_tier == 2
+    assert news.reserved_slot_category == "news_press"
+    assert news.crawl_selection_reason.startswith("secondary:")
+
+
+def test_karriere_unternehmen_does_not_consume_about_slot():
+    careers = score_candidate(
+        "https://example.com/karriere/arbeiten-in-unserem-unternehmen", depth=1
+    )
+    assert careers.crawl_priority_tier == 2
+    assert careers.reserved_slot_category == "careers_employer"
+    nested = score_candidate(
+        "http://www.peter-lacke.de/deu/peter-lacke/unternehmen/karriere/karriere.html",
+        depth=1,
+    )
+    assert nested.crawl_priority_tier == 2
+    assert nested.reserved_slot_category == "careers_employer"
+    assert nested.matched_priority_segment == "karriere"
+
+
+def test_presse_unternehmen_des_jahres_does_not_qualify():
+    press = score_candidate("https://example.com/presse/unternehmen-des-jahres", depth=1)
+    assert press.crawl_priority_tier == 2
+    assert press.reserved_slot_category == "news_press"
+
+
+def test_press_slug_containing_unternehmen_word_does_not_get_about_slot():
+    url = (
+        "https://www.bluemoon.de/pressemitteilungen/"
+        "quo-vadis-social-media-in-der-shk-branche-blue-moon-befragte-40-unternehmen-"
+        "das-neue-whitepaper-zur-grossen-umfrage"
+    )
+    scored = score_candidate(url, depth=1)
+    assert scored.crawl_priority_tier == 2
+    assert scored.reserved_slot_category == "news_press"
+    assert scored.matched_priority_segment == "pressemitteilungen"
+
+
+def test_unternehmen_philosophie_may_qualify():
+    scored = score_candidate(
+        "http://www.peter-lacke.de/kontakt/unternehmen/philosophie.html", depth=1
+    )
+    assert scored.crawl_priority_tier == 1
+    assert scored.reserved_slot_category == "company_about"
+    assert scored.matched_priority_segment == "unternehmen"
+
+
+def test_path_segments_are_complete_tokens_only():
+    segs = normalize_path_segments("/news/unser-unternehmen-expandiert")
+    assert "news" in segs
+    assert "unternehmen" not in segs
+    assert "unser-unternehmen-expandiert" in segs
+
+
+def test_crawl_order_deterministic_with_segment_rules():
+    urls = [
+        "https://example.com/news/unser-unternehmen-expandiert",
+        "https://example.com/unternehmen",
+        "https://example.com/karriere/arbeiten-in-unserem-unternehmen",
+        "https://example.com/geschichte",
+    ]
+    a = sorted(urls, key=lambda u: (score_candidate(u, 1).crawl_priority_tier, -score_candidate(u, 1).crawl_priority_score, u))
+    b = sorted(urls, key=lambda u: (score_candidate(u, 1).crawl_priority_tier, -score_candidate(u, 1).crawl_priority_score, u))
+    assert a == b
+    assert a[0].endswith("/geschichte") or a[0].endswith("/unternehmen")

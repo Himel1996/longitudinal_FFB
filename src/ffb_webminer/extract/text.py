@@ -62,6 +62,10 @@ class TextExtraction:
     word_count: int
     token_count: int
     token_count_reason: str | None
+    lexical_token_count: int | None
+    analysis_token_count: int | None
+    tokenization_status: str | None
+    tokenization_method: str | None
     extraction_quality_score: float | None
     boilerplate_ratio: float | None
     archive_toolbar_removed_flag: bool
@@ -132,6 +136,10 @@ def extract_text(
             word_count=0,
             token_count=0,
             token_count_reason="empty_text",
+            lexical_token_count=0,
+            analysis_token_count=0,
+            tokenization_status="empty",
+            tokenization_method="none",
             extraction_quality_score=0.0,
             boilerplate_ratio=None,
             archive_toolbar_removed_flag=toolbar_removed,
@@ -139,12 +147,12 @@ def extract_text(
 
     main_text, removed = _strip_wayback_noise(best.text)
     toolbar_removed = toolbar_removed or removed
-    stats = compute_text_stats(main_text)
     lang = detect_page_language(
         main_text,
         min_chars=language_min_chars,
         confidence_threshold=language_confidence_threshold,
     )
+    stats = compute_text_stats(main_text, language_hint=lang.language)
     return TextExtraction(
         main_text=stats.normalized_text,
         visible_text=visible_text or None,
@@ -158,6 +166,10 @@ def extract_text(
         word_count=stats.word_count,
         token_count=stats.token_count,
         token_count_reason=stats.token_count_reason,
+        lexical_token_count=stats.lexical_token_count,
+        analysis_token_count=stats.analysis_token_count,
+        tokenization_status=stats.tokenization_status,
+        tokenization_method=stats.tokenization_method,
         extraction_quality_score=best.score,
         boilerplate_ratio=best.boilerplate_ratio,
         archive_toolbar_removed_flag=toolbar_removed,
