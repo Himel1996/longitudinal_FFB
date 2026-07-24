@@ -441,11 +441,9 @@ def main() -> int:
         if g.empty:
             continue
 
-        low_mask = g["path"].fillna("").astype(str).str.lower().str.contains(
-            r"news|presse|press|aktuelles|produkt|product|karriere|career|jobs|stellen|/en/",
-            regex=True,
-            na=False,
-        )
+        low_mask = g["path"].fillna("").astype(str).map(
+            lambda p: bool(set(normalize_path_segments(str(p).lower())) & LOW_VALUE_SEGMENTS)
+        ) | g["path"].fillna("").astype(str).str.lower().str.contains(r"/en/", regex=True, na=False)
         high_reserved = g.loc[
             g["selected_under_reserved_slot"].map(as_bool)
             & g["reserved_slot_category"].fillna("").isin(RESERVE_CATS)
