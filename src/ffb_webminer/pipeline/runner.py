@@ -34,6 +34,8 @@ from ffb_webminer.extract.visual import extract_homepage_visuals
 from ffb_webminer.pipeline.corpus_outputs import (
     build_branding_corpus_observations,
     build_branding_corpus_pages,
+    build_crawl_priority_summary,
+    build_duplicate_summary,
     build_governance_metadata_observations,
     build_governance_metadata_pages,
     build_observation_text_summary,
@@ -50,6 +52,8 @@ from ffb_webminer.pipeline.schemas import (
     ANALYSIS_OBSERVATION_COLUMNS,
     BRANDING_CORPUS_OBSERVATION_COLUMNS,
     BRANDING_CORPUS_PAGE_COLUMNS,
+    CRAWL_PRIORITY_SUMMARY_COLUMNS,
+    DUPLICATE_SUMMARY_COLUMNS,
     FIRM_COVERAGE_COLUMNS,
     FIRM_COLUMNS,
     GOVERNANCE_METADATA_OBSERVATION_COLUMNS,
@@ -63,6 +67,8 @@ from ffb_webminer.pipeline.schemas import (
     VISUAL_COLUMNS,
 )
 from ffb_webminer.quality.checks import check_page, summarize_snapshot_pages
+from ffb_webminer.quality.deduplication import deduplicate_within_observations
+from ffb_webminer.quality.language_inclusion import annotate_language_inclusion
 from ffb_webminer.quality.page_classification import classify_page
 from ffb_webminer.quality.duplicate_captures import apply_duplicate_capture_rules
 from ffb_webminer.quality.page_validation import validate_page_for_analysis
@@ -489,6 +495,7 @@ class PipelineRunner:
         )
 
         crawled_by_capture: dict[tuple[str, str], list] = {}
+        crawl_summaries: list[dict[str, Any]] = []
         selected = snapshots[snapshots["snapshot_status"] == "selected"]
         for (firm_id, archive_ts), group in selected.groupby(["firm_id", "archive_timestamp"], dropna=False):
             if pd.isna(archive_ts):
@@ -505,9 +512,22 @@ class PipelineRunner:
                 fetcher=fetcher,
             )
             crawled_by_capture[(snap_firm_id, str(archive_ts))] = crawl.pages
+            crawl_summaries.append({
+                "firm_id": snap_firm_id,
+                "company": snap["company"],
+                "archive_timestamp": str(archive_ts),
+                "n_high_priority_pages_discovered": crawl.summary.n_high_priority_pages_discovered,
+                "n_high_priority_pages_fetched": crawl.summary.n_high_priority_pages_fetched,
+                "n_high_priority_pages_missing": crawl.summary.n_high_priority_pages_missing,
+                "n_secondary_pages_fetched": crawl.summary.n_secondary_pages_fetched,
+                "n_broad_pages_fetched": crawl.summary.n_broad_pages_fetched,
+                "n_foreign_pages_deprioritized": crawl.summary.n_foreign_pages_deprioritized,
+                "crawl_limit_reached": crawl.summary.crawl_limit_reached,
+                "unused_reserved_slots": crawl.summary.unused_reserved_slots,
+                "pages_fetched": len(crawl.pages),
+            })
 
         all_pages: list[dict[str, Any]] = []
-        analysis_content_hashes: dict[str, str] = {}
 
         for _, snap in snapshots.iterrows():
             snap_firm_id = str(snap["firm_id"])
@@ -545,15 +565,23 @@ class PipelineRunner:
                     "governance_rule_id": classification.governance_rule_id,
                     "governance_evidence_type": classification.governance_evidence_type,
                 })
-                ch = page_row.get("content_hash")
-                if page_row.get("analysis_eligible") and ch:
-                    if ch in analysis_content_hashes:
-                        page_row["duplicate_content_flag"] = True
-                        page_row["usable_for_analysis"] = False
-                        page_row["exclusion_reason"] = "duplicate_content"
-                    else:
-                        analysis_content_hashes[ch] = page_row["original_archived_url"]
                 all_pages.append(page_row)
+
+        preferred_hosts = {}
+        for _, firm in firms.iterrows():
+            host = parse_domain(str(firm.get("website") or "")).hostname or ""
+            preferred_hosts[str(firm["firm_id"])] = host.lstrip("www.")
+
+        near_thresh = float(
+            getattr(self.config.deduplication, "near_duplicate_threshold", None)
+            or self.config.analysis.near_duplicate_threshold
+        )
+        all_pages = deduplicate_within_observations(
+            all_pages,
+            preferred_hosts=preferred_hosts,
+            near_duplicate_threshold=near_thresh,
+        )
+        all_pages = annotate_language_inclusion(all_pages, self.config.analysis)
 
         pages_df = pd.DataFrame(all_pages)
         out_path = self.output_dir / "pages.csv"
@@ -567,6 +595,13 @@ class PipelineRunner:
         if not pages_df.empty:
             pipeline_io.write_parquet(pages_df, self.output_dir / "pages.parquet")
         pages_df.to_csv(self.state_dir / "pages.csv", index=False)
+
+        crawl_summary_df = build_crawl_priority_summary(snapshots, crawl_summaries)
+        pipeline_io.write_csv(
+            crawl_summary_df,
+            self.output_dir / "crawl_priority_summary.csv",
+            CRAWL_PRIORITY_SUMMARY_COLUMNS,
+        )
         return pages_df
 
     def _assert_pages_match_snapshots(self, pages: pd.DataFrame, snapshots: pd.DataFrame) -> None:
@@ -696,6 +731,15 @@ class PipelineRunner:
             "crawl_depth": cp.depth,
             "discovered_from_url": cp.discovered_from_url,
             "page_priority_reason": cp.priority_reason,
+            "crawl_priority_tier": getattr(cp, "crawl_priority_tier", None),
+            "crawl_priority_score": getattr(cp, "crawl_priority_score", None),
+            "reserved_slot_category": getattr(cp, "reserved_slot_category", None),
+            "selected_under_reserved_slot": getattr(cp, "selected_under_reserved_slot", False),
+            "crawl_selection_reason": getattr(cp, "crawl_selection_reason", None) or cp.priority_reason,
+            "crawl_budget_position": getattr(cp, "crawl_budget_position", None),
+            "path_language_hint": getattr(cp, "path_language_hint", None),
+            "path_language_priority": getattr(cp, "path_language_priority", None),
+            "language_path_reason": getattr(cp, "language_path_reason", None),
         })
         if meta:
             row.update({
@@ -772,10 +816,45 @@ class PipelineRunner:
             governance_obs,
             self.config.analysis,
         )
-        branding_pages = build_branding_corpus_pages(pages, observation_summary)
-        branding_obs_all = build_branding_corpus_observations(observation_summary, branding_pages, primary_only=None)
-        branding_obs_primary = build_branding_corpus_observations(observation_summary, branding_pages, primary_only=True)
-        branding_obs_sens = build_branding_corpus_observations(observation_summary, branding_pages, primary_only=False)
+        branding_pages_all = build_branding_corpus_pages(pages, observation_summary, language_scope="all")
+        branding_pages_de = build_branding_corpus_pages(
+            pages, observation_summary, language_scope="de", require_german_observation=True
+        )
+        branding_pages_en = build_branding_corpus_pages(pages, observation_summary, language_scope="en")
+        branding_pages_other = build_branding_corpus_pages(pages, observation_summary, language_scope="other")
+        # Default branding_corpus_pages.csv tracks all-language eligible branding pages
+        branding_pages = branding_pages_all
+
+        branding_obs_all = build_branding_corpus_observations(
+            observation_summary, branding_pages_all, primary_only=None, corpus_language_scope="all"
+        )
+        # German-only primary NLP corpus unless config says otherwise
+        primary_lang = (self.config.analysis.primary_corpus_language or "de").lower()
+        use_german = primary_lang == "de"
+        branding_obs_primary = build_branding_corpus_observations(
+            observation_summary,
+            branding_pages_de if use_german else branding_pages_all,
+            primary_only=True,
+            corpus_language_scope="de" if use_german else "all",
+            use_german_eligibility=use_german,
+        )
+        branding_obs_sens = build_branding_corpus_observations(
+            observation_summary, branding_pages_all, primary_only=False, corpus_language_scope="all"
+        )
+        branding_obs_de = build_branding_corpus_observations(
+            observation_summary,
+            branding_pages_de,
+            primary_only=None,
+            corpus_language_scope="de",
+            use_german_eligibility=True,
+        )
+        branding_obs_en = build_branding_corpus_observations(
+            observation_summary, branding_pages_en, primary_only=None, corpus_language_scope="en"
+        )
+        branding_obs_other = build_branding_corpus_observations(
+            observation_summary, branding_pages_other, primary_only=None, corpus_language_scope="other"
+        )
+        duplicate_summary = build_duplicate_summary(pages)
 
         pipeline_io.write_csv(analysis, self.output_dir / "analysis_observations.csv", ANALYSIS_OBSERVATION_COLUMNS)
         pipeline_io.write_csv(
@@ -808,8 +887,48 @@ class PipelineRunner:
             BRANDING_CORPUS_PAGE_COLUMNS,
         )
         pipeline_io.write_csv(
+            branding_pages_all,
+            self.output_dir / "branding_corpus_pages_all_languages.csv",
+            BRANDING_CORPUS_PAGE_COLUMNS,
+        )
+        pipeline_io.write_csv(
+            branding_pages_de,
+            self.output_dir / "branding_corpus_pages_de.csv",
+            BRANDING_CORPUS_PAGE_COLUMNS,
+        )
+        pipeline_io.write_csv(
+            branding_pages_en,
+            self.output_dir / "branding_corpus_pages_en.csv",
+            BRANDING_CORPUS_PAGE_COLUMNS,
+        )
+        pipeline_io.write_csv(
+            branding_pages_other,
+            self.output_dir / "branding_corpus_pages_other.csv",
+            BRANDING_CORPUS_PAGE_COLUMNS,
+        )
+        pipeline_io.write_csv(
             branding_obs_all,
             self.output_dir / "branding_corpus_observations.csv",
+            BRANDING_CORPUS_OBSERVATION_COLUMNS,
+        )
+        pipeline_io.write_csv(
+            branding_obs_all,
+            self.output_dir / "branding_corpus_observations_all_languages.csv",
+            BRANDING_CORPUS_OBSERVATION_COLUMNS,
+        )
+        pipeline_io.write_csv(
+            branding_obs_de,
+            self.output_dir / "branding_corpus_observations_de.csv",
+            BRANDING_CORPUS_OBSERVATION_COLUMNS,
+        )
+        pipeline_io.write_csv(
+            branding_obs_en,
+            self.output_dir / "branding_corpus_observations_en.csv",
+            BRANDING_CORPUS_OBSERVATION_COLUMNS,
+        )
+        pipeline_io.write_csv(
+            branding_obs_other,
+            self.output_dir / "branding_corpus_observations_other.csv",
             BRANDING_CORPUS_OBSERVATION_COLUMNS,
         )
         pipeline_io.write_csv(
@@ -821,6 +940,11 @@ class PipelineRunner:
             branding_obs_sens,
             self.output_dir / "branding_corpus_observations_sensitivity.csv",
             BRANDING_CORPUS_OBSERVATION_COLUMNS,
+        )
+        pipeline_io.write_csv(
+            duplicate_summary,
+            self.output_dir / "duplicate_summary.csv",
+            DUPLICATE_SUMMARY_COLUMNS,
         )
 
         stats = self._validation_stats(snapshots, pages, analysis, sensitivity)

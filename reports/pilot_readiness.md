@@ -1,23 +1,24 @@
-# Pilot v1.2 Readiness Report
+# Pilot v1.3 Readiness Report
 
-**Release:** Pilot v1.2  
+**Release:** Pilot v1.3  
 **Run ID:** `c956bd4e-2b8a-4c48-8780-c187587f46b3`  
-**Run date:** 2026-07-23  
-**Git commit:** `40284949bcf3e42355fcdf7fd93bacd00610c6f7`  
-**Release bundle:** `data/releases/pilot_v1_2/`
+**Run date:** 2026-07-24  
+**Release bundle:** `data/releases/pilot_v1_3/`  
+**Predecessor archive:** `data/archive/pilot_v1_2_pre_v1_3/`
 
 ---
 
 ## Executive summary
 
-Pilot v1.2 fixes Christian Schröder’s three corpus-integrity issues without changing crawl/extraction architecture:
+Pilot v1.3 makes the five-firm pipeline scaling-ready:
 
-1. Strict legal URL/title precedence before branding categories  
-2. Observation corpora export only `text_analysis_eligible = true` rows  
-3. Governance layer restricted to Impressum / direct legal-governance evidence  
+1. Within-observation URL/content deduplication (www/non-www fixed)
+2. Hybrid language handling with German-only primary NLP corpus
+3. Reserved-slot crawl prioritization for branding pages
 
 **Ready to share with Christian:** **YES**  
-**Ready to scale to remaining 25 firms:** **YES, after Christian confirms the three integrity fixes**
+**Ready to scale to remaining 25 firms:** **YES, after Christian confirms v1.3**  
+(`config/full_sample.yaml` is prepared; do not run until confirmed)
 
 ---
 
@@ -25,20 +26,25 @@ Pilot v1.2 fixes Christian Schröder’s three corpus-integrity issues without c
 
 | Metric | Value |
 |--------|-------|
-| Branding corpus pages | 290 |
-| Legal/Impressum/AGB/Datenschutz URLs in branding | 0 |
-| Governance pages | 19 |
-| Primary NLP-eligible observations | 14 |
-| Sensitivity NLP-eligible observations | 16 |
+| Duplicate pages removed from branding | 83 |
+| Duplicate tokens removed | 8,640 |
+| MYRENNE pre_event branding tokens (v1.2 → v1.3) | 6,639 → 3,682 |
+| Branding pages (all languages) | 235 |
+| Branding pages (German) | 230 |
+| Branding pages (English) | 2 |
+| Branding pages (other/unknown) | 3 |
+| German primary eligible observations | 14 |
+| German text-analysis eligible observations | 16 |
 | Consistency checks | PASSED |
-| Tests | 47 passed |
+| Tests | 66 passed |
 
 ---
 
 ## Suggested review files
 
-1. `branding_corpus_observations_primary.csv`
-2. `branding_corpus_pages.csv`
-3. `observation_text_summary.csv`
-4. `governance_metadata_pages.csv`
-5. `reports/v1_2_change_report.md`
+1. `duplicate_summary.csv`
+2. `branding_corpus_observations_primary.csv`
+3. `branding_corpus_pages_de.csv` / `_en.csv` / `_all_languages.csv`
+4. `crawl_priority_summary.csv`
+5. `manual_scaling_validation.csv`
+6. `reports/v1_3_change_report.md`

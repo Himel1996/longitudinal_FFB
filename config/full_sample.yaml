@@ -1,8 +1,9 @@
-# Family Firm Branding in Transition — pilot configuration
+# Family Firm Branding in Transition — full 30-firm sample configuration
+# Do not run remaining firms until pilot v1.3 verification is accepted.
 
 run:
-  run_id: null  # auto-generated UUID if null
-  top_n: 5
+  run_id: null
+  top_n: 30
   input_csv: data/input/family_firm_event_longlist_30_trimmed.csv
   output_dir: data/output
   interim_dir: data/interim
@@ -47,18 +48,18 @@ snapshot_selection:
   override_very_low_usable: false
 
 crawl:
-  mode: focused_site_crawl  # homepage_only | focused_site_crawl
+  mode: focused_site_crawl
   max_pages_per_snapshot: 25
   max_depth: 2
   timeout_seconds: 45
   retries: 5
-  max_response_bytes: 10485760  # 10 MB
+  max_response_bytes: 10485760
   strip_query_strings: false
   exclude_query_patterns:
     - "utm_"
     - "fbclid"
     - "gclid"
-  user_agent: "FFB-WebMiner/0.1 (research; family-firm-branding-pilot; +https://github.com/)"
+  user_agent: "FFB-WebMiner/0.1 (research; family-firm-branding-full-sample; +https://github.com/)"
   throttle_seconds: 2.0
   extract_pdf: false
   prefer_german_paths: true
@@ -129,7 +130,7 @@ archive:
 quality:
   max_temporal_distance_days: 548
   min_text_chars: 50
-  manual_validation_sample_size: 15
+  manual_validation_sample_size: 30
 
 analysis:
   min_branding_pages: 1
@@ -143,7 +144,6 @@ analysis:
   german_token_share_min: 0.70
   allow_unknown_in_german_corpus: false
   near_duplicate_threshold: 0.98
-  # Optional path fragments that force governance inclusion (conservative allow-list)
   governance_url_allowlist: []
 
 deduplication:

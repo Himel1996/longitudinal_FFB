@@ -45,6 +45,22 @@ class CrawlConfig(BaseModel):
     extract_pdf: bool = False
     prefer_german_paths: bool = True
     branding_path_patterns: dict[str, list[str]] = Field(default_factory=dict)
+    reserved_slots: dict[str, int] = Field(
+        default_factory=lambda: {
+            "homepage": 1,
+            "company_about": 4,
+            "history_heritage": 3,
+            "family_owners": 3,
+            "values_responsibility": 3,
+            "management_leadership": 3,
+        }
+    )
+    flexible_slots: dict[str, int] = Field(
+        default_factory=lambda: {
+            "secondary_pages": 5,
+            "broad_context": 3,
+        }
+    )
 
 
 class ExtractConfig(BaseModel):
@@ -52,6 +68,12 @@ class ExtractConfig(BaseModel):
     store_raw_html: bool = True
     raw_html_dir: str = "data/interim/html"
     min_text_chars: int = 50
+
+
+class DeduplicationConfig(BaseModel):
+    within_observation: bool = True
+    near_duplicate_threshold: float = 0.98
+    near_duplicate_enabled: bool = True
 
 
 class AnalysisConfig(BaseModel):
@@ -63,6 +85,10 @@ class AnalysisConfig(BaseModel):
     low_quality_token_threshold: int = 100
     moderate_quality_token_threshold: int = 300
     governance_url_allowlist: list[str] = Field(default_factory=list)
+    primary_corpus_language: str = "de"
+    german_token_share_min: float = 0.70
+    allow_unknown_in_german_corpus: bool = False
+    near_duplicate_threshold: float = 0.98
 
 
 class VisualConfig(BaseModel):
@@ -120,6 +146,7 @@ class PipelineConfig(BaseModel):
     archive: ArchiveConfig = Field(default_factory=ArchiveConfig)
     quality: QualityConfig = Field(default_factory=QualityConfig)
     analysis: AnalysisConfig = Field(default_factory=AnalysisConfig)
+    deduplication: DeduplicationConfig = Field(default_factory=DeduplicationConfig)
 
     @classmethod
     def from_yaml(cls, path: str | Path) -> PipelineConfig:
