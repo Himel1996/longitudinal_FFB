@@ -1,0 +1,6 @@
+firm_id,rank,company,pre_pre_event,pre_event,event,post_event,post_post_event
+1,1,BLUE MOON COMMUNICATION CONSULTANTS GMBH,include,include,include,include,exclude
+2,2,PETER-LACKE HOLDING GMBH,include,include,sensitivity_analysis,exclude,exclude
+3,3,ANLAGENTECHNIK LEICHTLE GMBH,include,include,sensitivity_analysis,include,exclude
+4,4,MYRENNE GMBH,include,include,exclude,include,include
+5,5,MSF-VATHAUER ANTRIEBSTECHNIK GMBH & CO. KG,include,exclude_duplicate_capture,sensitivity_analysis,include,include

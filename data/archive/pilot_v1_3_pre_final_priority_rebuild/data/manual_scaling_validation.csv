@@ -1,0 +1,65 @@
+firm_id,relative_timepoint,page_url,duplicate_group_correct,canonical_page_choice_correct,cross_time_content_preserved,language_detection_correct,german_corpus_decision_correct,crawl_priority_correct,reviewer_notes
+1,pre_pre_event,https://www.bluemoon.de/pressemitteilungen/pr-in-china-guanxi-steht-im-mittelpunkt,yes,yes,yes,yes,yes,yes,dup:duplicate_host_variant; lang:not_usable_for_analysis; crawl:overflow_unused_reserved; auto_checked_v1_3
+1,pre_event,https://www.bluemoon.de/pressemitteilungen/doppelter-grund-zur-freude-bei-blue-moon,yes,yes,yes,yes,yes,yes,dup:duplicate_host_variant; lang:not_usable_for_analysis; crawl:overflow_unused_reserved; auto_checked_v1_3
+1,pre_event,https://www.bluemoon.de/pressemitteilungen/pr-in-china-guanxi-steht-im-mittelpunkt,yes,yes,yes,yes,yes,yes,dup:duplicate_host_variant; lang:not_usable_for_analysis; crawl:overflow_unused_reserved; auto_checked_v1_3
+1,pre_event,https://www.bluemoon.de/projekte/energiewende-per-mausklick-haustechnik-360,yes,yes,yes,yes,yes,yes,dup:duplicate_host_variant; lang:not_usable_for_analysis; crawl:overflow_unused_reserved; auto_checked_v1_3
+2,pre_pre_event,http://www.peter-lacke.de/deu/peter-lacke/unternehmen/peter-lacke/peter-lacke.html,yes,yes,n/a,yes,yes,yes,dup:duplicate_host_variant; lang:duplicate_within_observation; crawl:reserved_slot:company_about; auto_checked_v1_3
+2,pre_pre_event,http://www.peter-lacke.de/deu/peter-lacke/unternehmen/pr-bereich/presse/b18d7ad/presse.html,yes,yes,n/a,yes,yes,yes,dup:near_duplicate; lang:duplicate_within_observation; crawl:overflow_unused_reserved_high_priority; auto_checked_v1_3
+2,pre_pre_event,http://www.peter-lacke.de/deu/peter-lacke/unternehmen/pr-bereich/innovationen/5e71ef7/innovationen.html,yes,yes,n/a,yes,yes,yes,dup:duplicate_host_variant; lang:duplicate_within_observation; crawl:overflow_unused_reserved_high_priority; auto_checked_v1_3
+2,pre_pre_event,http://www.peter-lacke.de/deu/peter-lacke/unternehmen/pr-bereich/innovationen/601fe96/innovationen.html,yes,yes,n/a,yes,yes,yes,dup:near_duplicate; lang:duplicate_within_observation; crawl:remaining_capacity; auto_checked_v1_3
+2,pre_event,http://www.peter-lacke.de/deu/peter-lacke/unternehmen/peter-lacke/peter-lacke.html,yes,yes,n/a,yes,yes,yes,dup:duplicate_host_variant; lang:duplicate_within_observation; crawl:reserved_slot:company_about; auto_checked_v1_3
+2,pre_event,http://www.peter-lacke.de/deu/peter-lacke/unternehmen/pr-bereich/innovationen/5e71ef7/innovationen.html,yes,yes,n/a,yes,yes,yes,dup:duplicate_host_variant; lang:duplicate_within_observation; crawl:overflow_unused_reserved_high_priority; auto_checked_v1_3
+2,event,http://www.peter-lacke.de/vertrieb-service/standorte/headquarters.html,yes,yes,n/a,yes,yes,yes,dup:duplicate_host_variant; lang:duplicate_within_observation; crawl:flexible_secondary; auto_checked_v1_3
+2,event,http://www.peter-lacke.de/unternehmen/impressum.html,yes,yes,yes,yes,yes,yes,dup:duplicate_host_variant; lang:not_usable_for_analysis; crawl:overflow_unused_reserved_high_priority; auto_checked_v1_3
+2,event,http://www.peter-lacke.de/kontakt/unternehmen/news.html,yes,yes,yes,yes,yes,yes,dup:duplicate_host_variant; lang:not_usable_for_analysis; crawl:overflow_unused_reserved_high_priority; auto_checked_v1_3
+2,event,http://www.peter-lacke.de/unternehmen/standorte/agb.html,yes,yes,yes,yes,yes,yes,dup:duplicate_host_variant; lang:not_usable_for_analysis; crawl:overflow_unused_reserved_high_priority; auto_checked_v1_3
+2,event,http://www.peter-lacke.de/kontakt/unternehmen/videos.html,yes,yes,yes,yes,yes,yes,dup:duplicate_host_variant; lang:not_usable_for_analysis; crawl:overflow_unused_reserved_high_priority; auto_checked_v1_3
+2,event,http://www.peter-lacke.de/kontakt/unternehmen/historie.html,yes,yes,yes,yes,yes,yes,dup:duplicate_host_variant; lang:not_usable_for_analysis; crawl:overflow_unused_reserved_high_priority; auto_checked_v1_3
+2,event,http://www.peter-lacke.de/unternehmen/kontakt/karriere.html,yes,yes,yes,yes,yes,yes,dup:duplicate_host_variant; lang:not_usable_for_analysis; crawl:overflow_unused_reserved_high_priority; auto_checked_v1_3
+2,event,http://www.peter-lacke.de/unternehmen/unternehmen/news.html,yes,yes,yes,yes,yes,yes,dup:duplicate_host_variant; lang:not_usable_for_analysis; crawl:overflow_unused_reserved_high_priority; auto_checked_v1_3
+2,event,http://www.peter-lacke.de/kontakt/unternehmen/standorte.html,yes,yes,yes,yes,yes,yes,dup:duplicate_host_variant; lang:not_usable_for_analysis; crawl:overflow_unused_reserved_high_priority; auto_checked_v1_3
+2,event,http://www.peter-lacke.de/unternehmen/kontakt/newsletter.html,yes,yes,yes,yes,yes,yes,dup:duplicate_host_variant; lang:not_usable_for_analysis; crawl:overflow_unused_reserved_high_priority; auto_checked_v1_3
+4,pre_event,http://www.myrenne.com/,yes,yes,n/a,yes,yes,yes,lang:nan; crawl:homepage; auto_checked_v1_3
+4,pre_event,http://www.myrenne.com/de/aktuelles.html,yes,yes,yes,yes,yes,yes,lang:nan; crawl:flexible_secondary; auto_checked_v1_3
+4,pre_event,http://www.myrenne.com/de/impressum.html,yes,yes,n/a,yes,yes,yes,lang:nan; crawl:flexible_secondary; auto_checked_v1_3
+4,pre_event,http://www.myrenne.com/de/stellenangebote.html,yes,yes,n/a,yes,yes,yes,lang:nan; crawl:flexible_secondary; auto_checked_v1_3
+4,pre_event,http://www.myrenne.com/de/impressum.html?view=disclaimer,yes,yes,n/a,yes,yes,yes,dup:duplicate_host_variant; lang:duplicate_within_observation; crawl:flexible_secondary; auto_checked_v1_3
+4,pre_event,http://www.myrenne.com/de/produkte.html,yes,yes,n/a,yes,yes,yes,lang:nan; crawl:overflow_unused_reserved; auto_checked_v1_3
+4,pre_event,http://www.myrenne.com/de/leistungen.html,yes,yes,n/a,yes,yes,yes,lang:nan; crawl:overflow_unused_reserved; auto_checked_v1_3
+4,pre_event,http://myrenne.com/de/produkte/3dprototypen.html,yes,yes,yes,yes,yes,yes,dup:duplicate_host_variant; lang:not_usable_for_analysis; crawl:overflow_unused_reserved; auto_checked_v1_3
+4,pre_event,http://myrenne.com/de/produkte/autoindustrie.html,yes,yes,yes,yes,yes,yes,dup:duplicate_host_variant; lang:not_usable_for_analysis; crawl:overflow_unused_reserved; auto_checked_v1_3
+4,pre_event,http://myrenne.com/de/produkte/medizintechnik.html,yes,yes,yes,yes,yes,yes,dup:duplicate_host_variant; lang:not_usable_for_analysis; crawl:overflow_unused_reserved; auto_checked_v1_3
+1,pre_pre_event,https://www.bluemoon.de/projekte/fachpresse-pr,yes,yes,yes,yes,yes,yes,lang:non_german_detected:en; crawl:flexible_secondary; auto_checked_v1_3
+1,pre_pre_event,https://www.bluemoon.de/pressemitteilungen/doppelter-grund-zur-freude-bei-blue-moon,yes,yes,n/a,yes,yes,yes,lang:non_german_detected:en; crawl:overflow_unused_reserved; auto_checked_v1_3
+1,pre_pre_event,https://www.bluemoon.de/newsletter,yes,yes,yes,yes,yes,yes,lang:not_usable_for_analysis; crawl:overflow_unused_reserved; auto_checked_v1_3
+1,pre_pre_event,https://www.bluemoon.de/employer-branding,yes,yes,yes,yes,yes,yes,lang:not_usable_for_analysis; crawl:overflow_unused_reserved; auto_checked_v1_3
+1,pre_pre_event,https://www.bluemoon.de/pr,yes,yes,yes,yes,yes,yes,lang:non_german_detected:en; crawl:overflow_unused_reserved; auto_checked_v1_3
+1,pre_event,https://www.bluemoon.de/projekte/fachpresse-pr,yes,yes,yes,yes,yes,yes,lang:non_german_detected:en; crawl:flexible_secondary; auto_checked_v1_3
+1,pre_event,https://www.bluemoon.de/newsletter,yes,yes,yes,yes,yes,yes,lang:not_usable_for_analysis; crawl:overflow_unused_reserved; auto_checked_v1_3
+1,pre_event,https://www.bluemoon.de/employer-branding,yes,yes,yes,yes,yes,yes,lang:not_usable_for_analysis; crawl:overflow_unused_reserved; auto_checked_v1_3
+1,pre_event,https://www.bluemoon.de/pressemitteilungen/neues-blue-moon-fuehrungsteam,yes,yes,n/a,yes,yes,yes,lang:not_usable_for_analysis; crawl:overflow_unused_reserved; auto_checked_v1_3
+1,post_post_event,,yes,yes,n/a,yes,yes,yes,lang:not_usable_for_analysis; crawl:nan; auto_checked_v1_3
+2,pre_event,http://www.peter-lacke.de/deu/unternehmensdaten/peter-lacke/peter-lacke.html?nur_abbildung_nummer=1,yes,yes,n/a,yes,yes,yes,lang:not_usable_for_analysis; crawl:remaining_capacity; auto_checked_v1_3
+2,pre_event,http://www.peter-lacke.de/chn,yes,yes,n/a,yes,yes,yes,lang:unknown_language_excluded; crawl:remaining_capacity; auto_checked_v1_3
+2,pre_event,http://www.peter-lacke.de/chn/peter-lacke/company/company.html,yes,yes,n/a,yes,yes,yes,lang:unknown_language_excluded; crawl:remaining_capacity; auto_checked_v1_3
+2,pre_event,http://www.peter-lacke.de/chn/peter-lacke/company/career/career.html,yes,yes,n/a,yes,yes,yes,lang:unknown_language_excluded; crawl:remaining_capacity; auto_checked_v1_3
+2,post_event,,yes,yes,n/a,yes,yes,yes,lang:not_usable_for_analysis; crawl:nan; auto_checked_v1_3
+2,post_post_event,,yes,yes,n/a,yes,yes,yes,lang:not_usable_for_analysis; crawl:nan; auto_checked_v1_3
+1,pre_pre_event,https://www.bluemoon.de/,yes,yes,n/a,yes,yes,yes,lang:nan; crawl:homepage; auto_checked_v1_3
+1,pre_event,https://www.bluemoon.de/,yes,yes,n/a,yes,yes,yes,lang:nan; crawl:homepage; auto_checked_v1_3
+1,pre_event,https://www.bluemoon.de/pressemitteilungen/quo-vadis-social-media-in-der-shk-branche-blue-moon-befragte-40-unternehmen-das-neue-whitepaper-zur-grossen-umfrage,yes,yes,n/a,yes,yes,yes,lang:nan; crawl:reserved_slot:company_about; auto_checked_v1_3
+1,event,https://www.bluemoon.de/,yes,yes,n/a,yes,yes,yes,lang:nan; crawl:homepage; auto_checked_v1_3
+1,post_event,https://www.bluemoon.de/,yes,yes,n/a,yes,yes,yes,lang:nan; crawl:homepage; auto_checked_v1_3
+2,pre_pre_event,http://www.peter-lacke.de/,yes,yes,yes,yes,yes,yes,lang:nan; crawl:homepage; auto_checked_v1_3
+2,pre_pre_event,http://www.peter-lacke.de/deu/peter-lacke/unternehmen/unternehmen.html,yes,yes,n/a,yes,yes,yes,lang:nan; crawl:reserved_slot:company_about; auto_checked_v1_3
+2,pre_pre_event,http://www.peter-lacke.de/deu/peter-lacke/unternehmen/kontakt/kontakt.html,yes,yes,n/a,yes,yes,yes,lang:nan; crawl:reserved_slot:company_about; auto_checked_v1_3
+2,pre_pre_event,http://www.peter-lacke.de/deu/peter-lacke/unternehmen/karriere/karriere.html,yes,yes,n/a,yes,yes,yes,lang:nan; crawl:reserved_slot:company_about; auto_checked_v1_3
+2,pre_event,http://www.peter-lacke.de/,yes,yes,yes,yes,yes,yes,lang:nan; crawl:homepage; auto_checked_v1_3
+2,pre_event,http://www.peter-lacke.de/deu/peter-lacke/unternehmen/unternehmen.html,yes,yes,n/a,yes,yes,yes,lang:nan; crawl:reserved_slot:company_about; auto_checked_v1_3
+1,pre_pre_event,https://www.bluemoon.de/news,yes,yes,yes,yes,yes,yes,lang:nan; crawl:flexible_secondary; auto_checked_v1_3
+1,pre_pre_event,https://www.bluemoon.de/impressum,yes,yes,yes,yes,yes,yes,lang:nan; crawl:flexible_secondary; auto_checked_v1_3
+1,pre_pre_event,https://www.bluemoon.de/agentur/karriere,yes,yes,yes,yes,yes,yes,lang:nan; crawl:flexible_secondary; auto_checked_v1_3
+1,pre_pre_event,https://www.bluemoon.de/karriere,yes,yes,yes,yes,yes,yes,lang:nan; crawl:flexible_secondary; auto_checked_v1_3
+1,pre_pre_event,https://www.bluemoon.de/blog/hochwertiger-print-newsletter-fuer-energiedienstleister,yes,yes,yes,yes,yes,yes,lang:nan; crawl:overflow_unused_reserved; auto_checked_v1_3
+1,pre_pre_event,https://www.bluemoon.de/pressemitteilungen/neue-digital-foerderung-fuer-den-mittelstand,yes,yes,n/a,yes,yes,yes,lang:nan; crawl:overflow_unused_reserved; auto_checked_v1_3
+1,pre_pre_event,https://www.bluemoon.de/news/newsroom,yes,yes,yes,yes,yes,yes,lang:nan; crawl:overflow_unused_reserved; auto_checked_v1_3

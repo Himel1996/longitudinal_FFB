@@ -1,0 +1,337 @@
+{
+  "files_checked": [
+    "analysis_observations.csv",
+    "analysis_observations_sensitivity.csv",
+    "branding_corpus_observations.csv",
+    "branding_corpus_observations_all_languages.csv",
+    "branding_corpus_observations_de.csv",
+    "branding_corpus_observations_en.csv",
+    "branding_corpus_observations_other.csv",
+    "branding_corpus_observations_primary.csv",
+    "branding_corpus_observations_sensitivity.csv",
+    "branding_corpus_pages.csv",
+    "branding_corpus_pages_all_languages.csv",
+    "branding_corpus_pages_de.csv",
+    "branding_corpus_pages_en.csv",
+    "branding_corpus_pages_other.csv",
+    "crawl_priority_summary.csv",
+    "duplicate_summary.csv",
+    "firm_coverage_matrix.csv",
+    "firms.csv",
+    "governance_metadata_observations.csv",
+    "governance_metadata_pages.csv",
+    "manual_corpus_validation.csv",
+    "manual_scaling_validation.csv",
+    "manual_validation_sample.csv",
+    "observation_text_summary.csv",
+    "pages.csv",
+    "quality_summary.csv",
+    "snapshots.csv",
+    "run_manifest.json"
+  ],
+  "part1": {
+    "name": "Legal page exclusion from branding corpus",
+    "pass": true,
+    "n_branding_pages": 242,
+    "n_offenders": 0,
+    "offenders": []
+  },
+  "part2": {
+    "name": "Governance layer scope",
+    "pass": true,
+    "n_gov_pages": 6,
+    "category_distribution": {
+      "impressum": 4,
+      "corporate_affiliation": 2
+    },
+    "n_violations": 0,
+    "violations": []
+  },
+  "part3": {
+    "name": "Observation eligibility",
+    "pass": true,
+    "primary_n": 14,
+    "sensitivity_n": 16,
+    "primary_all_text_analysis_eligible_true": true,
+    "sensitivity_all_text_analysis_eligible_true": true,
+    "primary_key_mismatch": [],
+    "sensitivity_key_mismatch": [],
+    "primary_ineligible_examples": [],
+    "sensitivity_ineligible_examples": []
+  },
+  "part4": {
+    "name": "Duplicate handling",
+    "pass": true,
+    "within_timepoint_duplicate_hash_groups_in_branding": [],
+    "branding_pages_with_duplicate_content_flag": 0,
+    "flag_metadata_issues": [],
+    "n_duplicate_groups": 28,
+    "n_removed": 93,
+    "n_preserved_across_timepoints": 60,
+    "duplicate_summary_rows": 93
+  },
+  "part5": {
+    "name": "Language corpora",
+    "pass": true,
+    "n_all": 242,
+    "n_de": 234,
+    "n_en": 4,
+    "n_other": 4,
+    "de_language_value_counts": {
+      "de": 234
+    },
+    "non_german_in_de_corpus": [],
+    "english_in_de_corpus": [],
+    "unknown_in_de_corpus": [],
+    "partition_disjoint": true,
+    "all_equals_union_of_parts": true,
+    "all_minus_parts": [],
+    "parts_minus_all": []
+  },
+  "part6": {
+    "name": "Reserved-slot priority",
+    "pass": true,
+    "legal_pages_consuming_reserved_slots": [],
+    "foreign_pages_consuming_reserved_slots": [],
+    "news_product_career_consuming_reserved_slots": [],
+    "unternehmen_substring_false_company_about": [],
+    "reserved_slots_without_high_confidence_segment_match": [],
+    "observations_where_reserved_branding_before_low_pages": 20,
+    "observations_where_low_pages_before_reserved_branding": [],
+    "crawl_summary_totals": {
+      "high_priority_fetched": 94,
+      "secondary_fetched": 99,
+      "broad_fetched": 196,
+      "foreign_deprioritized_discovered": 4
+    }
+  },
+  "part7": {
+    "name": "Token consistency",
+    "pass": true,
+    "policy": "token_count is alias of analysis_token_count (choice A)",
+    "n_usable_pages_with_substantive_text_but_zero_analysis_tokens": 0,
+    "zero_token_examples": [],
+    "token_count_analysis_alias_mismatches": [],
+    "observation_vs_page_token_mismatches": [],
+    "chinese_peter_lacke_page": {
+      "url": "http://www.peter-lacke.de/chn/peter-lacke/company/company.html",
+      "character_count": 809.0,
+      "token_count": 716.0,
+      "analysis_token_count": 716.0,
+      "lexical_token_count": 0.0,
+      "tokenization_method": "unicode_cjk_chars",
+      "usable_for_analysis": true,
+      "detected_language": "unknown",
+      "german_corpus_eligible": false
+    }
+  },
+  "part8": {
+    "name": "Quality summary internal consistency",
+    "pass": true,
+    "n_rows": 25,
+    "issues": []
+  },
+  "part9": {
+    "name": "Comparison vs pilot_v1_4",
+    "prev_path": "/Users/rick/DoksOhneidrive/FFB/data/archive/pilot_v1_4_pre_v1_4_1/data",
+    "run_id_prev": "ab33b6f5-06a8-4981-a805-65bf3f6b3516",
+    "run_id_cur": "95bac495-6940-47be-b3ff-339fd97afa3e",
+    "git_commit_prev": "1a1d7ba1832e780aa19be2804c996964e61ec35a",
+    "git_commit_cur": "5a5fec78333d7baead292037b2be2a94f6733366",
+    "meaningful_content_differences": true,
+    "diffs": {
+      "branding_count_prev": 249,
+      "branding_count_cur": 242,
+      "branding_urls_added": 21,
+      "branding_urls_removed": 28,
+      "branding_urls_added_sample": [
+        [
+          "1",
+          "event",
+          "https://www.bluemoon.de/branding/case-protection-one"
+        ],
+        [
+          "1",
+          "event",
+          "https://www.bluemoon.de/online-marketing-agentur"
+        ],
+        [
+          "1",
+          "event",
+          "https://www.bluemoon.de/pr-agentur"
+        ],
+        [
+          "1",
+          "event",
+          "https://www.bluemoon.de/pr-agentur/pr-cases/hansa"
+        ],
+        [
+          "1",
+          "event",
+          "https://www.bluemoon.de/social-media"
+        ],
+        [
+          "1",
+          "post_event",
+          "https://www.bluemoon.de/branding/case-protection-one"
+        ],
+        [
+          "1",
+          "post_event",
+          "https://www.bluemoon.de/online-marketing-agentur"
+        ],
+        [
+          "1",
+          "post_event",
+          "https://www.bluemoon.de/pr-agentur"
+        ],
+        [
+          "1",
+          "post_event",
+          "https://www.bluemoon.de/pr-agentur/pr-cases/hansa"
+        ],
+        [
+          "1",
+          "post_event",
+          "https://www.bluemoon.de/social-media"
+        ],
+        [
+          "1",
+          "pre_event",
+          "https://www.bluemoon.de/social-media"
+        ],
+        [
+          "1",
+          "pre_pre_event",
+          "https://www.bluemoon.de/grafik-design"
+        ],
+        [
+          "2",
+          "pre_event",
+          "http://www.peter-lacke.de/chn/peter-lacke/company/group-of-companies/group-of-companies.html"
+        ],
+        [
+          "5",
+          "post_event",
+          "http://msf-technik.de/Service.7.0.html"
+        ],
+        [
+          "5",
+          "post_event",
+          "http://msf-technik.de/index.php?id=22&L=0"
+        ]
+      ],
+      "branding_urls_removed_sample": [
+        [
+          "1",
+          "event",
+          "https://www.bluemoon.de/branding/employer-branding"
+        ],
+        [
+          "1",
+          "event",
+          "https://www.bluemoon.de/lexikon/employer-branding"
+        ],
+        [
+          "1",
+          "event",
+          "https://www.bluemoon.de/lexikon/event-management"
+        ],
+        [
+          "1",
+          "event",
+          "https://www.bluemoon.de/lexikon/presseinformation"
+        ],
+        [
+          "1",
+          "event",
+          "https://www.bluemoon.de/lexikon/pressekonferenz"
+        ],
+        [
+          "1",
+          "event",
+          "https://www.bluemoon.de/lexikon/pressemappe"
+        ],
+        [
+          "1",
+          "post_event",
+          "https://www.bluemoon.de/branding/employer-branding"
+        ],
+        [
+          "1",
+          "post_event",
+          "https://www.bluemoon.de/lexikon/employer-branding"
+        ],
+        [
+          "1",
+          "post_event",
+          "https://www.bluemoon.de/lexikon/event-management"
+        ],
+        [
+          "1",
+          "post_event",
+          "https://www.bluemoon.de/lexikon/presseinformation"
+        ],
+        [
+          "1",
+          "post_event",
+          "https://www.bluemoon.de/lexikon/pressekonferenz"
+        ],
+        [
+          "1",
+          "post_event",
+          "https://www.bluemoon.de/lexikon/pressemappe"
+        ],
+        [
+          "1",
+          "pre_event",
+          "https://www.bluemoon.de/blog/hochwertiger-print-newsletter-fuer-energiedienstleister"
+        ],
+        [
+          "1",
+          "pre_event",
+          "https://www.bluemoon.de/lexikon/event-management"
+        ],
+        [
+          "1",
+          "pre_event",
+          "https://www.bluemoon.de/lexikon/pressemappe"
+        ]
+      ],
+      "pages_prev": 394,
+      "pages_cur": 394,
+      "page_urls_added": 49,
+      "page_urls_removed": 49,
+      "primary_prev": 14,
+      "primary_cur": 14,
+      "primary_keys_identical": true,
+      "sensitivity_prev": 16,
+      "sensitivity_cur": 16,
+      "sensitivity_keys_identical": true,
+      "branding_token_sum_prev": 67967,
+      "branding_token_sum_cur": 66770,
+      "tokens_de_prev": 67398,
+      "tokens_de_cur": 63986,
+      "dup_rows_prev": 86,
+      "dup_rows_cur": 93,
+      "branding_de_prev": 243,
+      "branding_de_cur": 234
+    },
+    "interpretation": "Content differs as expected for reserved-slot and tokenization fixes."
+  },
+  "part10": {
+    "name": "Release acceptance",
+    "pass": true,
+    "recommendation": "READY TO SCALE",
+    "part_results": {
+      "part1": "PASS",
+      "part2": "PASS",
+      "part3": "PASS",
+      "part4": "PASS",
+      "part5": "PASS",
+      "part6": "PASS",
+      "part7": "PASS",
+      "part8": "PASS"
+    }
+  }
+}

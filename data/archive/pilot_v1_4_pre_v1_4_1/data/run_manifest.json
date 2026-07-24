@@ -1,0 +1,177 @@
+{
+  "run_id": "ab33b6f5-06a8-4981-a805-65bf3f6b3516",
+  "run_timestamp": "2026-07-24T14:04:31.682953+00:00",
+  "pipeline_run_date": "2026-07-24",
+  "future_cutoff_date": "2026-07-24",
+  "git_commit": "1a1d7ba1832e780aa19be2804c996964e61ec35a",
+  "config": {
+    "run": {
+      "run_id": "ab33b6f5-06a8-4981-a805-65bf3f6b3516",
+      "top_n": 5,
+      "input_csv": "/Users/rick/DoksOhneidrive/FFB/data/input/family_firm_event_longlist_30_trimmed.csv",
+      "output_dir": "/Users/rick/DoksOhneidrive/FFB/data/output",
+      "interim_dir": "/Users/rick/DoksOhneidrive/FFB/data/interim",
+      "reports_dir": "/Users/rick/DoksOhneidrive/FFB/reports"
+    },
+    "timepoints": {
+      "relative": [
+        "pre_pre_event",
+        "pre_event",
+        "event",
+        "post_event",
+        "post_post_event"
+      ],
+      "year_offsets": {
+        "pre_pre_event": -4,
+        "pre_event": -2,
+        "event": 0,
+        "post_event": 2,
+        "post_post_event": 4
+      }
+    },
+    "snapshot_selection": {
+      "target_date_strategy": "mid_year",
+      "target_month_day": "07-01",
+      "tolerance_days": 548,
+      "prefer": [
+        "closest",
+        "earlier_on_tie"
+      ],
+      "allowed_status_codes": [
+        "200"
+      ],
+      "allowed_mimetypes": [
+        "text/html"
+      ],
+      "url_variants": [
+        "https://www.{domain}/",
+        "http://www.{domain}/",
+        "https://{domain}/",
+        "http://{domain}/"
+      ],
+      "event_year_precision_note": "Structured target_date_precision and event_date fields supersede this note. Year-level targets default to July 1 unless event_date metadata supplies month/day precision.\n",
+      "event_dates_config": "config/event_dates.yaml",
+      "event_pre_window_days": 90,
+      "adjacent_period_min_days": 180,
+      "override_very_low_usable": false
+    },
+    "crawl": {
+      "mode": "focused_site_crawl",
+      "max_pages_per_snapshot": 25,
+      "max_depth": 2,
+      "timeout_seconds": 45,
+      "retries": 5,
+      "max_response_bytes": 10485760,
+      "strip_query_strings": false,
+      "exclude_query_patterns": [
+        "utm_",
+        "fbclid",
+        "gclid"
+      ],
+      "user_agent": "FFB-WebMiner/0.1 (research; family-firm-branding-pilot; +https://github.com/)",
+      "throttle_seconds": 2.0,
+      "extract_pdf": false,
+      "prefer_german_paths": true,
+      "branding_path_patterns": {
+        "de": [
+          "ueber-uns",
+          "\u00fcber-uns",
+          "unternehmen",
+          "geschichte",
+          "historie",
+          "tradition",
+          "familie",
+          "werte",
+          "verantwortung",
+          "management",
+          "geschaeftsfuehrung",
+          "gesch\u00e4ftsf\u00fchrung",
+          "karriere",
+          "presse",
+          "news"
+        ],
+        "en": [
+          "about",
+          "company",
+          "history",
+          "heritage",
+          "family",
+          "values",
+          "responsibility",
+          "management",
+          "leadership",
+          "careers",
+          "press",
+          "news"
+        ]
+      },
+      "reserved_slots": {
+        "homepage": 1,
+        "company_about": 4,
+        "history_heritage": 3,
+        "family_owners": 3,
+        "values_responsibility": 3,
+        "management_leadership": 3
+      },
+      "flexible_slots": {
+        "secondary_pages": 5,
+        "broad_context": 3
+      }
+    },
+    "extract": {
+      "methods": {
+        "primary": "trafilatura",
+        "fallback": "readability"
+      },
+      "store_raw_html": true,
+      "raw_html_dir": "/Users/rick/DoksOhneidrive/FFB/data/interim/html",
+      "min_text_chars": 50
+    },
+    "visual": {
+      "enabled": true,
+      "viewport_width": 1280,
+      "viewport_height": 800,
+      "screenshot_dir": "/Users/rick/DoksOhneidrive/FFB/data/interim/screenshots",
+      "heading_rule": "Use first visible H1; if absent, use largest prominent hero heading (highest font-size among h1/h2 with visible text in main content area).\n"
+    },
+    "archive": {
+      "cdx_api_url": "https://web.archive.org/cdx/search/cdx",
+      "cache_dir": "/Users/rick/DoksOhneidrive/FFB/data/interim/cdx",
+      "retry_max": 5,
+      "retry_backoff_base": 2.0
+    },
+    "quality": {
+      "max_temporal_distance_days": 548,
+      "min_text_chars": 50,
+      "manual_validation_sample_size": 15
+    },
+    "analysis": {
+      "min_branding_pages": 1,
+      "min_branding_tokens": 100,
+      "preferred_branding_tokens": 300,
+      "short_text_language_chars": 80,
+      "language_confidence_threshold": 0.8,
+      "low_quality_token_threshold": 100,
+      "moderate_quality_token_threshold": 300,
+      "governance_url_allowlist": [],
+      "primary_corpus_language": "de",
+      "german_token_share_min": 0.7,
+      "allow_unknown_in_german_corpus": false,
+      "near_duplicate_threshold": 0.98
+    },
+    "deduplication": {
+      "within_observation": true,
+      "near_duplicate_threshold": 0.98,
+      "near_duplicate_enabled": true
+    }
+  },
+  "counts": {
+    "firms": 5,
+    "snapshots": 25,
+    "snapshots_selected": 20,
+    "pages": 394,
+    "pages_usable": 384,
+    "branding_pages": 250,
+    "governance_pages": 6
+  }
+}
