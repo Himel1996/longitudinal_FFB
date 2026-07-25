@@ -1,5 +1,5 @@
 # Family Firm Branding in Transition — full 30-firm sample configuration
-# Do not run remaining firms until pilot v1.3 verification is accepted.
+# Baseline: pilot_v1_4_1 (release acceptance READY TO SCALE).
 
 run:
   run_id: null

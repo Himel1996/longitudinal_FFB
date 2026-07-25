@@ -1,0 +1,66 @@
+{
+  "batch_label": "final_gate",
+  "firm_ids": null,
+  "timestamp": "2026-07-25T16:33:38.253143+00:00",
+  "summary": {
+    "n_snapshots": 150,
+    "snapshots_selected": 100,
+    "snapshots_missing_or_failed": 0,
+    "snapshots_future_like": 4,
+    "n_pages": 2073,
+    "pages_http_200": 1790,
+    "pages_non_200_or_missing_status": 283,
+    "pages_usable": 1756,
+    "page_category_counts": {
+      "company_about": 585,
+      "news_press": 251,
+      "search_archive": 197,
+      "navigation_only": 197,
+      "homepage": 133,
+      "unknown": 114,
+      "careers_employer": 114,
+      "products_services": 112,
+      "contact": 103,
+      "sustainability_responsibility": 78,
+      "history_heritage": 72,
+      "family_values": 40,
+      "privacy_policy": 20,
+      "corporate_affiliation": 14,
+      "management_leadership": 14,
+      "impressum": 7,
+      "terms_conditions": 5,
+      "legal_other": 5,
+      "management_legal_representatives": 4,
+      "cookie_notice": 4,
+      "legal_notice": 2,
+      "technical_system": 2
+    },
+    "duplicate_rows": 333,
+    "duplicate_tokens_removed": 97840,
+    "branding_pages_all": 1376,
+    "branding_pages_de": 862,
+    "language_distribution_branding_all": {
+      "de": 864,
+      "en": 507,
+      "unknown": 5
+    },
+    "primary_nlp_observations": 51,
+    "sensitivity_nlp_observations": 84,
+    "obs_german_eligible": 61,
+    "obs_text_eligible": 84,
+    "reserved_slot_coverage": {
+      "company_about": 144,
+      "homepage": 100,
+      "values_responsibility": 20,
+      "history_heritage": 16,
+      "management_leadership": 12
+    },
+    "crawl_high_priority_fetched": 804,
+    "quality_rows": 150
+  },
+  "invariants": {
+    "pass": true,
+    "n_failures": 0,
+    "failures": []
+  }
+}

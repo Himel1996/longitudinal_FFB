@@ -1,0 +1,62 @@
+firm_id,relative_timepoint,page_url,duplicate_group_correct,canonical_page_choice_correct,cross_time_content_preserved,language_detection_correct,german_corpus_decision_correct,crawl_priority_correct,reviewer_notes
+1,pre_pre_event,https://www.bluemoon.de/werbung,,,,,,,dup:duplicate_host_variant; lang:duplicate_within_observation; crawl:overflow_unused_reserved
+1,pre_pre_event,https://www.bluemoon.de/projekte,,,,,,,dup:duplicate_host_variant; lang:duplicate_within_observation; crawl:overflow_unused_reserved
+1,pre_pre_event,https://www.bluemoon.de/marketing,,,,,,,dup:duplicate_host_variant; lang:duplicate_within_observation; crawl:overflow_unused_reserved
+1,pre_pre_event,https://www.bluemoon.de/trendabende,,,,,,,dup:duplicate_host_variant; lang:duplicate_within_observation; crawl:flexible_broad
+1,pre_pre_event,https://www.bluemoon.de/werbeagentur,,,,,,,dup:duplicate_host_variant; lang:duplicate_within_observation; crawl:flexible_broad
+1,pre_event,https://www.bluemoon.de/werbung,,,,,,,dup:duplicate_host_variant; lang:duplicate_within_observation; crawl:overflow_unused_reserved
+1,pre_event,https://www.bluemoon.de/projekte,,,,,,,dup:duplicate_host_variant; lang:duplicate_within_observation; crawl:overflow_unused_reserved
+1,pre_event,https://www.bluemoon.de/marketing,,,,,,,dup:duplicate_host_variant; lang:duplicate_within_observation; crawl:flexible_broad
+1,pre_event,https://www.bluemoon.de/werbeagentur,,,,,,,dup:duplicate_host_variant; lang:duplicate_within_observation; crawl:flexible_broad
+2,pre_pre_event,http://www.peter-lacke.de/deu/peter-lacke/unternehmen/peter-lacke/peter-lacke.html,,,,,,,dup:duplicate_host_variant; lang:duplicate_within_observation; crawl:reserved_slot:company_about
+2,pre_pre_event,http://www.peter-lacke.de/deu/peter-lacke/unternehmen/pr-bereich/presse/b18d7ad/presse.html,,,,,,,dup:near_duplicate; lang:duplicate_within_observation; crawl:overflow_unused_reserved
+2,pre_pre_event,http://www.peter-lacke.de/deu/peter-lacke/unternehmen/pr-bereich/innovationen/5e71ef7/innovationen.html,,,,,,,dup:duplicate_host_variant; lang:duplicate_within_observation; crawl:overflow_unused_reserved
+2,pre_pre_event,http://www.peter-lacke.de/deu/peter-lacke/unternehmen/pr-bereich/innovationen/601fe96/innovationen.html,,,,,,,dup:near_duplicate; lang:duplicate_within_observation; crawl:flexible_broad
+2,pre_event,http://www.peter-lacke.de/deu/peter-lacke/unternehmen/peter-lacke/peter-lacke.html,,,,,,,dup:duplicate_host_variant; lang:duplicate_within_observation; crawl:reserved_slot:company_about
+2,pre_event,http://www.peter-lacke.de/deu/peter-lacke/unternehmen/pr-bereich/innovationen/5e71ef7/innovationen.html,,,,,,,dup:duplicate_host_variant; lang:duplicate_within_observation; crawl:overflow_unused_reserved
+2,pre_event,http://www.peter-lacke.de/chn/peter-lacke/company/peter-lacke/peter-lacke.html,,,,,,,dup:duplicate_host_variant; lang:duplicate_within_observation; crawl:overflow_unused_reserved_high_priority
+2,event,http://www.peter-lacke.de/vertrieb-service/standorte/headquarters.html,,,,,,,dup:duplicate_host_variant; lang:duplicate_within_observation; crawl:flexible_secondary
+2,event,http://www.peter-lacke.de/kontakt/unternehmen/historie.html,,,,,,,dup:duplicate_host_variant; lang:duplicate_within_observation; crawl:overflow_unused_reserved_high_priority
+2,event,http://www.peter-lacke.de/kontakt/unternehmen/standorte.html,,,,,,,dup:duplicate_host_variant; lang:duplicate_within_observation; crawl:overflow_unused_reserved_high_priority
+2,event,http://www.peter-lacke.de/unternehmen/unternehmen/videos.html,,,,,,,dup:duplicate_host_variant; lang:duplicate_within_observation; crawl:overflow_unused_reserved_high_priority
+4,pre_event,http://www.myrenne.com/,n/a,,,,,,lang:nan; crawl:homepage
+4,pre_event,http://www.myrenne.com/de/aktuelles.html,n/a,,,,,,lang:nan; crawl:flexible_secondary
+4,pre_event,http://www.myrenne.com/de/produkte.html,n/a,,,,,,lang:nan; crawl:overflow_unused_reserved
+4,pre_event,http://www.myrenne.com/de/leistungen.html,n/a,,,,,,lang:nan; crawl:overflow_unused_reserved
+4,pre_event,http://myrenne.com/de/produkte/3dprototypen.html,,,,,,,dup:duplicate_host_variant; lang:duplicate_within_observation; crawl:overflow_unused_reserved
+4,pre_event,http://myrenne.com/de/produkte/autoindustrie.html,,,,,,,dup:duplicate_host_variant; lang:duplicate_within_observation; crawl:overflow_unused_reserved
+4,pre_event,http://myrenne.com/de/produkte/medizintechnik.html,,,,,,,dup:duplicate_host_variant; lang:duplicate_within_observation; crawl:overflow_unused_reserved
+4,pre_event,http://myrenne.com/de/produkte/pruefgeraete.html,,,,,,,dup:duplicate_host_variant; lang:duplicate_within_observation; crawl:overflow_unused_reserved
+4,pre_event,http://myrenne.com/de/produkte/verschiedenes.html,,,,,,,dup:duplicate_host_variant; lang:duplicate_within_observation; crawl:overflow_unused_reserved
+4,pre_event,http://www.myrenne.com/de/leistungen/3d-modelle.html,,,,,,,dup:duplicate_host_variant; lang:duplicate_within_observation; crawl:overflow_unused_reserved
+1,pre_pre_event,https://www.bluemoon.de/pressemitteilungen/doppelter-grund-zur-freude-bei-blue-moon,n/a,,,,,,lang:non_german_detected:en; crawl:flexible_secondary
+1,pre_pre_event,https://www.bluemoon.de/pr,n/a,,,,,,lang:non_german_detected:en; crawl:overflow_unused_reserved
+1,pre_pre_event,https://www.bluemoon.de/sitemap,n/a,,,,,,lang:not_usable_for_analysis; crawl:overflow_unused_reserved
+1,pre_event,https://www.bluemoon.de/pressemitteilungen/doppelter-grund-zur-freude-bei-blue-moon,n/a,,,,,,lang:non_german_detected:en; crawl:overflow_unused_reserved
+1,pre_event,https://www.bluemoon.de/pr,n/a,,,,,,lang:non_german_detected:en; crawl:overflow_unused_reserved
+1,pre_event,https://www.bluemoon.de/sitemap,n/a,,,,,,lang:not_usable_for_analysis; crawl:overflow_unused_reserved
+1,post_post_event,,n/a,,,,,,lang:not_usable_for_analysis; crawl:nan
+2,pre_event,http://www.peter-lacke.de/chn,n/a,,,,,,lang:unknown_language_excluded; crawl:overflow_unused_reserved
+2,pre_event,http://www.peter-lacke.de/chn/peter-lacke/company/company.html,n/a,,,,,,lang:unknown_language_excluded; crawl:overflow_unused_reserved_high_priority
+2,pre_event,http://www.peter-lacke.de/chn/peter-lacke/company/contact/contact.html,n/a,,,,,,lang:unknown_language_excluded; crawl:overflow_unused_reserved_high_priority
+2,pre_event,http://www.peter-lacke.de/chn/peter-lacke/company/group-of-companies/group-of-companies.html,n/a,,,,,,lang:unknown_language_excluded; crawl:overflow_unused_reserved_high_priority
+1,pre_pre_event,https://www.bluemoon.de/,n/a,,,,,,lang:nan; crawl:homepage
+1,pre_event,https://www.bluemoon.de/,n/a,,,,,,lang:nan; crawl:homepage
+1,event,https://www.bluemoon.de/,n/a,,,,,,lang:nan; crawl:homepage
+1,post_event,https://www.bluemoon.de/,n/a,,,,,,lang:nan; crawl:homepage
+2,pre_pre_event,http://www.peter-lacke.de/,n/a,,,,,,lang:nan; crawl:homepage
+2,pre_pre_event,http://www.peter-lacke.de/deu/peter-lacke/unternehmen/unternehmen.html,n/a,,,,,,lang:nan; crawl:reserved_slot:company_about
+2,pre_pre_event,http://www.peter-lacke.de/deu/peter-lacke/unternehmen/kontakt/kontakt.html,n/a,,,,,,lang:nan; crawl:reserved_slot:company_about
+2,pre_pre_event,http://www.peter-lacke.de/deu/peter-lacke/unternehmen/unternehmensgruppe/unternehmensgruppe.html,n/a,,,,,,lang:nan; crawl:reserved_slot:company_about
+2,pre_event,http://www.peter-lacke.de/,n/a,,,,,,lang:nan; crawl:homepage
+2,pre_event,http://www.peter-lacke.de/deu/peter-lacke/unternehmen/unternehmen.html,n/a,,,,,,lang:nan; crawl:reserved_slot:company_about
+2,pre_event,http://www.peter-lacke.de/deu/peter-lacke/unternehmen/kontakt/kontakt.html,n/a,,,,,,lang:nan; crawl:reserved_slot:company_about
+1,pre_pre_event,https://www.bluemoon.de/news,n/a,,,,,,lang:nan; crawl:flexible_secondary
+1,pre_pre_event,https://www.bluemoon.de/agentur/karriere,n/a,,,,,,lang:nan; crawl:flexible_secondary
+1,pre_pre_event,https://www.bluemoon.de/karriere,n/a,,,,,,lang:nan; crawl:flexible_secondary
+1,pre_pre_event,https://www.bluemoon.de/pressemitteilungen/neue-digital-foerderung-fuer-den-mittelstand,n/a,,,,,,lang:nan; crawl:flexible_secondary
+1,pre_pre_event,https://www.bluemoon.de/newsletter,n/a,,,,,,lang:nan; crawl:overflow_unused_reserved
+1,pre_pre_event,https://www.bluemoon.de/news/newsroom,n/a,,,,,,lang:nan; crawl:overflow_unused_reserved
+1,pre_pre_event,https://www.bluemoon.de/pressemitteilungen/dreifach-gold-fuer-blue-moon-neusser-brand-agentur-glaenzt-bei-den-german-stevie-awards,n/a,,,,,,lang:nan; crawl:overflow_unused_reserved
+1,pre_pre_event,https://www.bluemoon.de/pressemitteilungen/employer-branding-und-recruiting,n/a,,,,,,lang:nan; crawl:overflow_unused_reserved
+1,pre_pre_event,https://www.bluemoon.de/pressemitteilungen/glow-up-fuers-blue-moon-space,n/a,,,,,,lang:nan; crawl:overflow_unused_reserved
