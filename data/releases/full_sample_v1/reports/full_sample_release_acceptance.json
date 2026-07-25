@@ -1,0 +1,951 @@
+{
+  "audit": "full_sample_v1_final_release_acceptance",
+  "timestamp": "2026-07-25T17:31:33.790502+00:00",
+  "release_path": "/Users/rick/DoksOhneidrive/FFB/data/releases/full_sample_v1",
+  "section1": {
+    "name": "Reproducibility",
+    "pass": true,
+    "missing_data": [],
+    "missing_reports": [],
+    "manifest_commit": "cbdd849197cb139b7e3c228c0ec962d8ed16d254",
+    "git_head": "9e68fc1dc530185bf29d0eca32fdbccf710ef6cc",
+    "exact_commit_match": false,
+    "packaging_only_drift": true,
+    "src_config_diff_since_manifest": [],
+    "tooling_diff_since_manifest": [
+      "config/full_sample.yaml"
+    ],
+    "config_hash_now": "2e3c987c0cb13b2c248d75275d4cacf16370741d791085b43f65079a9622c58b",
+    "config_hash_documented": "2e3c987c0cb13b2c248d75275d4cacf16370741d791085b43f65079a9622c58b",
+    "config_hash_match": true,
+    "run_id": "508f1903-71e7-4aab-aba6-000fed4d8b7d",
+    "run_id_issues": [],
+    "note": "Manifest commit records extraction code; HEAD differs by packaging/tooling only (no src/event_dates/pyproject drift). Config hash still matches freeze docs."
+  },
+  "section2": {
+    "name": "Snapshot quality",
+    "pass": true,
+    "total_observations": 150,
+    "selected": 100,
+    "beyond_tolerance": 45,
+    "future_unavailable": 4,
+    "event_unavailable": 1,
+    "unavailable_total": 50,
+    "sensitivity_recommendations": 21,
+    "include_recommendations": 77,
+    "exclude_recommendations": 50,
+    "silent_substitution_selected_missing_timestamp": 0,
+    "future_incorrectly_selected": 0,
+    "status_counts": {
+      "selected": 100,
+      "beyond_tolerance": 45,
+      "future_unavailable": 4,
+      "event_unavailable": 1
+    },
+    "recommendation_counts": {
+      "include": 77,
+      "exclude": 50,
+      "sensitivity_analysis": 21,
+      "exclude_duplicate_capture": 2
+    }
+  },
+  "section3": {
+    "name": "Legal page exclusion",
+    "pass": true,
+    "n_branding_pages": 1376,
+    "n_category_violations": 0,
+    "n_path_title_violations": 0,
+    "violations": []
+  },
+  "section4": {
+    "name": "Governance layer",
+    "pass": true,
+    "n_gov_pages": 27,
+    "category_distribution": {
+      "corporate_affiliation": 14,
+      "impressum": 7,
+      "management_legal_representatives": 4,
+      "legal_notice": 2
+    },
+    "n_violations": 0,
+    "violations": []
+  },
+  "section5": {
+    "name": "Observation eligibility",
+    "pass": true,
+    "primary_n": 51,
+    "sensitivity_n": 84,
+    "primary_ineligible": 0,
+    "sensitivity_ineligible": 0
+  },
+  "section6": {
+    "name": "Duplicate handling",
+    "pass": true,
+    "within_timepoint_duplicate_groups_in_branding": [],
+    "branding_pages_with_duplicate_flag": 0,
+    "duplicate_summary_rows": 333,
+    "duplicate_tokens_removed": 97840,
+    "preserved_longitudinal_duplicate_groups": 112,
+    "duplicate_reason_top": {
+      "duplicate_host_variant": 277,
+      "near_duplicate": 56
+    }
+  },
+  "section7": {
+    "name": "Language handling",
+    "pass": true,
+    "n_de": 862,
+    "n_all": 1376,
+    "n_de_pages_in_all_languages": 864,
+    "n_expected_de_under_german_observation_gate": 862,
+    "non_german_in_de_corpus": [],
+    "english_in_de_corpus": [],
+    "unknown_in_de_corpus": [],
+    "de_partition_matches_all_language_filter": true,
+    "partition_missing_from_de_file": [],
+    "partition_extra_in_de_file": [],
+    "tokens_de_observation_sum": 398064,
+    "tokens_de_from_german_eligible_pages": 398064,
+    "de_branding_file_token_sum": 397829,
+    "language_dist_all": {
+      "de": 864,
+      "en": 507,
+      "unknown": 5
+    },
+    "note": "German page file is gated by german_text_analysis_eligible observations; German pages in EN-primary observations remain in all-languages only."
+  },
+  "section8": {
+    "name": "Reserved-slot prioritization",
+    "pass": true,
+    "legal_pages_consuming_reserved_slots": [],
+    "foreign_pages_consuming_reserved_slots": [],
+    "news_careers_products_consuming_reserved": [],
+    "unternehmen_substring_false_company_about": [],
+    "observations_order_ok": 100,
+    "observations_order_issues": [],
+    "reserved_coverage": {
+      "company_about": 144,
+      "homepage": 100,
+      "values_responsibility": 20,
+      "history_heritage": 16,
+      "management_leadership": 12
+    },
+    "crawl_high_priority_fetched": 804
+  },
+  "section9": {
+    "name": "Tokenization",
+    "pass": true,
+    "policy": "token_count == analysis_token_count (choice A)",
+    "zero_analysis_token_usable_pages": [],
+    "observation_vs_page_mismatches": [],
+    "method_or_alias_issues": [],
+    "tokenization_method_counts": {
+      "latin_lexical_regex": 1864,
+      "NA": 180,
+      "none": 22,
+      "unicode_cjk_chars": 7
+    }
+  },
+  "section10": {
+    "name": "Quality summary",
+    "pass": true,
+    "n_rows": 150,
+    "issues": []
+  },
+  "section11": {
+    "name": "Branding corpus quality (review flags)",
+    "pass": true,
+    "n_flagged_observations": 66,
+    "flagged_observations": [
+      {
+        "firm_id": "1",
+        "relative_timepoint": "post_post_event",
+        "branding_pages": 0,
+        "branding_tokens": 0,
+        "german_pages": 0,
+        "flags": [
+          "branding_pages_zero",
+          "branding_tokens_below_threshold"
+        ]
+      },
+      {
+        "firm_id": "2",
+        "relative_timepoint": "post_event",
+        "branding_pages": 0,
+        "branding_tokens": 0,
+        "german_pages": 0,
+        "flags": [
+          "branding_pages_zero",
+          "branding_tokens_below_threshold"
+        ]
+      },
+      {
+        "firm_id": "2",
+        "relative_timepoint": "post_post_event",
+        "branding_pages": 0,
+        "branding_tokens": 0,
+        "german_pages": 0,
+        "flags": [
+          "branding_pages_zero",
+          "branding_tokens_below_threshold"
+        ]
+      },
+      {
+        "firm_id": "3",
+        "relative_timepoint": "post_post_event",
+        "branding_pages": 0,
+        "branding_tokens": 0,
+        "german_pages": 0,
+        "flags": [
+          "branding_pages_zero",
+          "branding_tokens_below_threshold"
+        ]
+      },
+      {
+        "firm_id": "4",
+        "relative_timepoint": "pre_pre_event",
+        "branding_pages": 1,
+        "branding_tokens": 36,
+        "german_pages": 1,
+        "flags": [
+          "branding_tokens_below_threshold"
+        ]
+      },
+      {
+        "firm_id": "4",
+        "relative_timepoint": "event",
+        "branding_pages": 0,
+        "branding_tokens": 0,
+        "german_pages": 0,
+        "flags": [
+          "branding_pages_zero",
+          "branding_tokens_below_threshold"
+        ]
+      },
+      {
+        "firm_id": "5",
+        "relative_timepoint": "pre_pre_event",
+        "branding_pages": 0,
+        "branding_tokens": 0,
+        "german_pages": 0,
+        "flags": [
+          "branding_pages_zero",
+          "branding_tokens_below_threshold"
+        ]
+      },
+      {
+        "firm_id": "5",
+        "relative_timepoint": "pre_event",
+        "branding_pages": 0,
+        "branding_tokens": 0,
+        "german_pages": 0,
+        "flags": [
+          "branding_pages_zero",
+          "branding_tokens_below_threshold"
+        ]
+      },
+      {
+        "firm_id": "5",
+        "relative_timepoint": "event",
+        "branding_pages": 0,
+        "branding_tokens": 0,
+        "german_pages": 0,
+        "flags": [
+          "branding_pages_zero",
+          "branding_tokens_below_threshold"
+        ]
+      },
+      {
+        "firm_id": "8",
+        "relative_timepoint": "post_event",
+        "branding_pages": 0,
+        "branding_tokens": 0,
+        "german_pages": 0,
+        "flags": [
+          "branding_pages_zero",
+          "branding_tokens_below_threshold"
+        ]
+      },
+      {
+        "firm_id": "8",
+        "relative_timepoint": "post_post_event",
+        "branding_pages": 0,
+        "branding_tokens": 0,
+        "german_pages": 0,
+        "flags": [
+          "branding_pages_zero",
+          "branding_tokens_below_threshold"
+        ]
+      },
+      {
+        "firm_id": "9",
+        "relative_timepoint": "post_post_event",
+        "branding_pages": 0,
+        "branding_tokens": 0,
+        "german_pages": 0,
+        "flags": [
+          "branding_pages_zero",
+          "branding_tokens_below_threshold"
+        ]
+      },
+      {
+        "firm_id": "10",
+        "relative_timepoint": "event",
+        "branding_pages": 0,
+        "branding_tokens": 0,
+        "german_pages": 0,
+        "flags": [
+          "branding_pages_zero",
+          "branding_tokens_below_threshold"
+        ]
+      },
+      {
+        "firm_id": "10",
+        "relative_timepoint": "post_event",
+        "branding_pages": 0,
+        "branding_tokens": 0,
+        "german_pages": 0,
+        "flags": [
+          "branding_pages_zero",
+          "branding_tokens_below_threshold"
+        ]
+      },
+      {
+        "firm_id": "10",
+        "relative_timepoint": "post_post_event",
+        "branding_pages": 0,
+        "branding_tokens": 0,
+        "german_pages": 0,
+        "flags": [
+          "branding_pages_zero",
+          "branding_tokens_below_threshold"
+        ]
+      },
+      {
+        "firm_id": "11",
+        "relative_timepoint": "pre_pre_event",
+        "branding_pages": 0,
+        "branding_tokens": 0,
+        "german_pages": 0,
+        "flags": [
+          "branding_pages_zero",
+          "branding_tokens_below_threshold"
+        ]
+      },
+      {
+        "firm_id": "11",
+        "relative_timepoint": "pre_event",
+        "branding_pages": 0,
+        "branding_tokens": 0,
+        "german_pages": 0,
+        "flags": [
+          "branding_pages_zero",
+          "branding_tokens_below_threshold"
+        ]
+      },
+      {
+        "firm_id": "11",
+        "relative_timepoint": "event",
+        "branding_pages": 0,
+        "branding_tokens": 0,
+        "german_pages": 0,
+        "flags": [
+          "branding_pages_zero",
+          "branding_tokens_below_threshold"
+        ]
+      },
+      {
+        "firm_id": "11",
+        "relative_timepoint": "post_event",
+        "branding_pages": 0,
+        "branding_tokens": 0,
+        "german_pages": 0,
+        "flags": [
+          "branding_pages_zero",
+          "branding_tokens_below_threshold"
+        ]
+      },
+      {
+        "firm_id": "11",
+        "relative_timepoint": "post_post_event",
+        "branding_pages": 0,
+        "branding_tokens": 0,
+        "german_pages": 0,
+        "flags": [
+          "branding_pages_zero",
+          "branding_tokens_below_threshold"
+        ]
+      },
+      {
+        "firm_id": "12",
+        "relative_timepoint": "pre_pre_event",
+        "branding_pages": 0,
+        "branding_tokens": 0,
+        "german_pages": 0,
+        "flags": [
+          "branding_pages_zero",
+          "branding_tokens_below_threshold"
+        ]
+      },
+      {
+        "firm_id": "12",
+        "relative_timepoint": "event",
+        "branding_pages": 0,
+        "branding_tokens": 0,
+        "german_pages": 0,
+        "flags": [
+          "branding_pages_zero",
+          "branding_tokens_below_threshold"
+        ]
+      },
+      {
+        "firm_id": "12",
+        "relative_timepoint": "post_event",
+        "branding_pages": 0,
+        "branding_tokens": 0,
+        "german_pages": 0,
+        "flags": [
+          "branding_pages_zero",
+          "branding_tokens_below_threshold"
+        ]
+      },
+      {
+        "firm_id": "12",
+        "relative_timepoint": "post_post_event",
+        "branding_pages": 0,
+        "branding_tokens": 0,
+        "german_pages": 0,
+        "flags": [
+          "branding_pages_zero",
+          "branding_tokens_below_threshold"
+        ]
+      },
+      {
+        "firm_id": "14",
+        "relative_timepoint": "pre_pre_event",
+        "branding_pages": 0,
+        "branding_tokens": 0,
+        "german_pages": 0,
+        "flags": [
+          "branding_pages_zero",
+          "branding_tokens_below_threshold"
+        ]
+      },
+      {
+        "firm_id": "14",
+        "relative_timepoint": "pre_event",
+        "branding_pages": 0,
+        "branding_tokens": 0,
+        "german_pages": 0,
+        "flags": [
+          "branding_pages_zero",
+          "branding_tokens_below_threshold"
+        ]
+      },
+      {
+        "firm_id": "14",
+        "relative_timepoint": "event",
+        "branding_pages": 0,
+        "branding_tokens": 0,
+        "german_pages": 0,
+        "flags": [
+          "branding_pages_zero",
+          "branding_tokens_below_threshold"
+        ]
+      },
+      {
+        "firm_id": "14",
+        "relative_timepoint": "post_event",
+        "branding_pages": 0,
+        "branding_tokens": 0,
+        "german_pages": 0,
+        "flags": [
+          "branding_pages_zero",
+          "branding_tokens_below_threshold"
+        ]
+      },
+      {
+        "firm_id": "14",
+        "relative_timepoint": "post_post_event",
+        "branding_pages": 0,
+        "branding_tokens": 0,
+        "german_pages": 0,
+        "flags": [
+          "branding_pages_zero",
+          "branding_tokens_below_threshold"
+        ]
+      },
+      {
+        "firm_id": "16",
+        "relative_timepoint": "post_post_event",
+        "branding_pages": 0,
+        "branding_tokens": 0,
+        "german_pages": 0,
+        "flags": [
+          "branding_pages_zero",
+          "branding_tokens_below_threshold"
+        ]
+      },
+      {
+        "firm_id": "17",
+        "relative_timepoint": "pre_pre_event",
+        "branding_pages": 0,
+        "branding_tokens": 0,
+        "german_pages": 0,
+        "flags": [
+          "branding_pages_zero",
+          "branding_tokens_below_threshold"
+        ]
+      },
+      {
+        "firm_id": "17",
+        "relative_timepoint": "pre_event",
+        "branding_pages": 0,
+        "branding_tokens": 0,
+        "german_pages": 0,
+        "flags": [
+          "branding_pages_zero",
+          "branding_tokens_below_threshold"
+        ]
+      },
+      {
+        "firm_id": "17",
+        "relative_timepoint": "event",
+        "branding_pages": 0,
+        "branding_tokens": 0,
+        "german_pages": 0,
+        "flags": [
+          "branding_pages_zero",
+          "branding_tokens_below_threshold"
+        ]
+      },
+      {
+        "firm_id": "17",
+        "relative_timepoint": "post_event",
+        "branding_pages": 0,
+        "branding_tokens": 0,
+        "german_pages": 0,
+        "flags": [
+          "branding_pages_zero",
+          "branding_tokens_below_threshold"
+        ]
+      },
+      {
+        "firm_id": "17",
+        "relative_timepoint": "post_post_event",
+        "branding_pages": 0,
+        "branding_tokens": 0,
+        "german_pages": 0,
+        "flags": [
+          "branding_pages_zero",
+          "branding_tokens_below_threshold"
+        ]
+      },
+      {
+        "firm_id": "18",
+        "relative_timepoint": "pre_pre_event",
+        "branding_pages": 0,
+        "branding_tokens": 0,
+        "german_pages": 0,
+        "flags": [
+          "branding_pages_zero",
+          "branding_tokens_below_threshold"
+        ]
+      },
+      {
+        "firm_id": "18",
+        "relative_timepoint": "pre_event",
+        "branding_pages": 0,
+        "branding_tokens": 0,
+        "german_pages": 0,
+        "flags": [
+          "branding_pages_zero",
+          "branding_tokens_below_threshold"
+        ]
+      },
+      {
+        "firm_id": "18",
+        "relative_timepoint": "event",
+        "branding_pages": 0,
+        "branding_tokens": 0,
+        "german_pages": 0,
+        "flags": [
+          "branding_pages_zero",
+          "branding_tokens_below_threshold"
+        ]
+      },
+      {
+        "firm_id": "18",
+        "relative_timepoint": "post_event",
+        "branding_pages": 0,
+        "branding_tokens": 0,
+        "german_pages": 0,
+        "flags": [
+          "branding_pages_zero",
+          "branding_tokens_below_threshold"
+        ]
+      },
+      {
+        "firm_id": "18",
+        "relative_timepoint": "post_post_event",
+        "branding_pages": 0,
+        "branding_tokens": 0,
+        "german_pages": 0,
+        "flags": [
+          "branding_pages_zero",
+          "branding_tokens_below_threshold"
+        ]
+      },
+      {
+        "firm_id": "19",
+        "relative_timepoint": "pre_event",
+        "branding_pages": 0,
+        "branding_tokens": 0,
+        "german_pages": 0,
+        "flags": [
+          "branding_pages_zero",
+          "branding_tokens_below_threshold"
+        ]
+      },
+      {
+        "firm_id": "19",
+        "relative_timepoint": "event",
+        "branding_pages": 0,
+        "branding_tokens": 0,
+        "german_pages": 0,
+        "flags": [
+          "branding_pages_zero",
+          "branding_tokens_below_threshold"
+        ]
+      },
+      {
+        "firm_id": "19",
+        "relative_timepoint": "post_event",
+        "branding_pages": 0,
+        "branding_tokens": 0,
+        "german_pages": 0,
+        "flags": [
+          "branding_pages_zero",
+          "branding_tokens_below_threshold"
+        ]
+      },
+      {
+        "firm_id": "19",
+        "relative_timepoint": "post_post_event",
+        "branding_pages": 0,
+        "branding_tokens": 0,
+        "german_pages": 0,
+        "flags": [
+          "branding_pages_zero",
+          "branding_tokens_below_threshold"
+        ]
+      },
+      {
+        "firm_id": "20",
+        "relative_timepoint": "event",
+        "branding_pages": 0,
+        "branding_tokens": 0,
+        "german_pages": 0,
+        "flags": [
+          "branding_pages_zero",
+          "branding_tokens_below_threshold"
+        ]
+      },
+      {
+        "firm_id": "20",
+        "relative_timepoint": "post_event",
+        "branding_pages": 0,
+        "branding_tokens": 0,
+        "german_pages": 0,
+        "flags": [
+          "branding_pages_zero",
+          "branding_tokens_below_threshold"
+        ]
+      },
+      {
+        "firm_id": "20",
+        "relative_timepoint": "post_post_event",
+        "branding_pages": 0,
+        "branding_tokens": 0,
+        "german_pages": 0,
+        "flags": [
+          "branding_pages_zero",
+          "branding_tokens_below_threshold"
+        ]
+      },
+      {
+        "firm_id": "21",
+        "relative_timepoint": "post_event",
+        "branding_pages": 0,
+        "branding_tokens": 0,
+        "german_pages": 0,
+        "flags": [
+          "branding_pages_zero",
+          "branding_tokens_below_threshold"
+        ]
+      },
+      {
+        "firm_id": "22",
+        "relative_timepoint": "event",
+        "branding_pages": 0,
+        "branding_tokens": 0,
+        "german_pages": 0,
+        "flags": [
+          "branding_pages_zero",
+          "branding_tokens_below_threshold"
+        ]
+      },
+      {
+        "firm_id": "22",
+        "relative_timepoint": "post_event",
+        "branding_pages": 0,
+        "branding_tokens": 0,
+        "german_pages": 0,
+        "flags": [
+          "branding_pages_zero",
+          "branding_tokens_below_threshold"
+        ]
+      },
+      {
+        "firm_id": "22",
+        "relative_timepoint": "post_post_event",
+        "branding_pages": 0,
+        "branding_tokens": 0,
+        "german_pages": 0,
+        "flags": [
+          "branding_pages_zero",
+          "branding_tokens_below_threshold"
+        ]
+      },
+      {
+        "firm_id": "24",
+        "relative_timepoint": "pre_pre_event",
+        "branding_pages": 0,
+        "branding_tokens": 0,
+        "german_pages": 0,
+        "flags": [
+          "branding_pages_zero",
+          "branding_tokens_below_threshold"
+        ]
+      },
+      {
+        "firm_id": "24",
+        "relative_timepoint": "pre_event",
+        "branding_pages": 0,
+        "branding_tokens": 0,
+        "german_pages": 0,
+        "flags": [
+          "branding_pages_zero",
+          "branding_tokens_below_threshold"
+        ]
+      },
+      {
+        "firm_id": "24",
+        "relative_timepoint": "event",
+        "branding_pages": 0,
+        "branding_tokens": 0,
+        "german_pages": 0,
+        "flags": [
+          "branding_pages_zero",
+          "branding_tokens_below_threshold"
+        ]
+      },
+      {
+        "firm_id": "24",
+        "relative_timepoint": "post_post_event",
+        "branding_pages": 0,
+        "branding_tokens": 0,
+        "german_pages": 0,
+        "flags": [
+          "branding_pages_zero",
+          "branding_tokens_below_threshold"
+        ]
+      },
+      {
+        "firm_id": "25",
+        "relative_timepoint": "event",
+        "branding_pages": 0,
+        "branding_tokens": 0,
+        "german_pages": 0,
+        "flags": [
+          "branding_pages_zero",
+          "branding_tokens_below_threshold"
+        ]
+      },
+      {
+        "firm_id": "25",
+        "relative_timepoint": "post_event",
+        "branding_pages": 0,
+        "branding_tokens": 0,
+        "german_pages": 0,
+        "flags": [
+          "branding_pages_zero",
+          "branding_tokens_below_threshold"
+        ]
+      },
+      {
+        "firm_id": "25",
+        "relative_timepoint": "post_post_event",
+        "branding_pages": 0,
+        "branding_tokens": 0,
+        "german_pages": 0,
+        "flags": [
+          "branding_pages_zero",
+          "branding_tokens_below_threshold"
+        ]
+      },
+      {
+        "firm_id": "27",
+        "relative_timepoint": "pre_pre_event",
+        "branding_pages": 0,
+        "branding_tokens": 0,
+        "german_pages": 0,
+        "flags": [
+          "branding_pages_zero",
+          "branding_tokens_below_threshold"
+        ]
+      },
+      {
+        "firm_id": "27",
+        "relative_timepoint": "pre_event",
+        "branding_pages": 1,
+        "branding_tokens": 64,
+        "german_pages": 1,
+        "flags": [
+          "branding_tokens_below_threshold"
+        ]
+      },
+      {
+        "firm_id": "27",
+        "relative_timepoint": "event",
+        "branding_pages": 0,
+        "branding_tokens": 0,
+        "german_pages": 0,
+        "flags": [
+          "branding_pages_zero",
+          "branding_tokens_below_threshold"
+        ]
+      },
+      {
+        "firm_id": "27",
+        "relative_timepoint": "post_event",
+        "branding_pages": 0,
+        "branding_tokens": 0,
+        "german_pages": 0,
+        "flags": [
+          "branding_pages_zero",
+          "branding_tokens_below_threshold"
+        ]
+      },
+      {
+        "firm_id": "30",
+        "relative_timepoint": "pre_pre_event",
+        "branding_pages": 0,
+        "branding_tokens": 0,
+        "german_pages": 0,
+        "flags": [
+          "branding_pages_zero",
+          "branding_tokens_below_threshold"
+        ]
+      },
+      {
+        "firm_id": "30",
+        "relative_timepoint": "pre_event",
+        "branding_pages": 0,
+        "branding_tokens": 0,
+        "german_pages": 0,
+        "flags": [
+          "branding_pages_zero",
+          "branding_tokens_below_threshold"
+        ]
+      },
+      {
+        "firm_id": "30",
+        "relative_timepoint": "event",
+        "branding_pages": 0,
+        "branding_tokens": 0,
+        "german_pages": 0,
+        "flags": [
+          "branding_pages_zero",
+          "branding_tokens_below_threshold"
+        ]
+      },
+      {
+        "firm_id": "28",
+        "relative_timepoint": "pre_pre_event",
+        "branding_pages": 1,
+        "branding_tokens": 65,
+        "german_pages": 0,
+        "flags": [
+          "branding_tokens_below_threshold"
+        ]
+      }
+    ],
+    "note": "Flags are for review and do not by themselves fail the release."
+  },
+  "section12": {
+    "name": "Governance quality",
+    "pass": true,
+    "n_gov_observations": 150,
+    "n_gov_pages": 27,
+    "n_observations_with_governance_pages": 22,
+    "n_explicitly_unavailable": 128,
+    "impressum_true_observations": 9,
+    "issues": [],
+    "note": "Zero governance pages with impressum_available=False counts as explicitly unavailable."
+  },
+  "section13": {
+    "name": "Random manual sample",
+    "pass": true,
+    "n_sample": 40,
+    "n_with_issues": 0,
+    "sample_issue_examples": [],
+    "accuracy": {
+      "correct_company_true": 39,
+      "valid_archived_true": 39,
+      "content_usable_true": 32,
+      "temporally_appropriate_true": 30
+    },
+    "note": "Evidence-based stratified sample checks; full Playwright re-open is optional and not required to fail unless sample issues found."
+  },
+  "section14": {
+    "name": "Regression against pilot_v1_4_1",
+    "pass": true,
+    "pilot_legal_in_branding": 0,
+    "full_legal_category_in_branding": 0,
+    "pilot_primary_n": 14,
+    "checks": {
+      "legal_exclusion_still_holds": true,
+      "governance_restricted": true,
+      "eligibility_filtering": true,
+      "duplicate_handling": true,
+      "german_only_corpus": true,
+      "reserved_slots": true,
+      "token_policy": true,
+      "quality_summary": true
+    }
+  },
+  "section15": {
+    "name": "Final release decision",
+    "pass": true,
+    "recommendation": "READY TO FREEZE",
+    "hard_fail_reasons": [],
+    "blocking": [],
+    "part_results": {
+      "section1": "PASS",
+      "section2": "PASS",
+      "section3": "PASS",
+      "section4": "PASS",
+      "section5": "PASS",
+      "section6": "PASS",
+      "section7": "PASS",
+      "section8": "PASS",
+      "section9": "PASS",
+      "section10": "PASS",
+      "section11": "PASS",
+      "section12": "PASS",
+      "section13": "PASS",
+      "section14": "PASS"
+    }
+  }
+}
