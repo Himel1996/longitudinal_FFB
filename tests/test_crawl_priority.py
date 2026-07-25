@@ -64,6 +64,12 @@ def test_legal_paths_do_not_consume_reserved_slots():
     assert impressum.reserved_slot_category is None
     assert about.crawl_priority_tier == 1
     assert about.reserved_slot_category == "company_about"
+    terms = score_candidate(
+        "https://www.canyon.com/de-de/about/terms-conditions.html", depth=1
+    )
+    assert terms.crawl_priority_tier == 3
+    assert terms.reserved_slot_category is None
+    assert terms.matched_priority_segment == "terms-conditions"
 
 
 def test_exact_unternehmen_qualifies():
