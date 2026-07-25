@@ -597,9 +597,14 @@ class PipelineRunner:
         pages_df.to_csv(self.state_dir / "pages.csv", index=False)
 
         crawl_summary_df = build_crawl_priority_summary(snapshots, crawl_summaries)
+        crawl_out = self.output_dir / "crawl_priority_summary.csv"
+        if firm_ids and crawl_out.exists():
+            existing = pd.read_csv(crawl_out)
+            keep = existing[~existing["firm_id"].astype(str).isin([str(f) for f in firm_ids])]
+            crawl_summary_df = pd.concat([keep, crawl_summary_df], ignore_index=True)
         pipeline_io.write_csv(
             crawl_summary_df,
-            self.output_dir / "crawl_priority_summary.csv",
+            crawl_out,
             CRAWL_PRIORITY_SUMMARY_COLUMNS,
         )
         return pages_df
