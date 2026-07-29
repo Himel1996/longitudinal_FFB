@@ -1,0 +1,31 @@
+firm_id,company,event_year,n_pre_event_observations,n_post_event_observations,n_pre_event_german_eligible,n_post_event_german_eligible,n_primary_observations,n_sensitivity_observations,german_longitudinal_ready,coverage_notes
+1,BLUE MOON COMMUNICATION CONSULTANTS GMBH,2024,2,2,2,1,4,4,TRUE,ready
+2,PETER-LACKE HOLDING GMBH,2015,2,2,2,0,2,3,FALSE,missing_post
+3,ANLAGENTECHNIK LEICHTLE GMBH,2023,2,2,2,1,3,4,TRUE,ready
+4,MYRENNE GMBH,2012,2,2,1,2,3,3,TRUE,ready
+5,MSF-VATHAUER ANTRIEBSTECHNIK GMBH & CO. KG,2006,2,2,0,2,2,2,FALSE,missing_pre
+6,FIELMANN GROUP AG,2019,2,2,2,2,4,5,TRUE,ready
+7,SIXT SE,2021,2,2,2,2,5,5,TRUE,ready
+8,DM-DROGERIE MARKT GMBH + CO. KG,2019,2,2,2,0,3,3,FALSE,missing_post
+9,TRIGEMA W. GRUPP KG,2024,2,2,2,1,4,4,TRUE,ready
+10,B. BRAUN SE,2019,2,2,0,0,0,2,FALSE,no_german;missing_pre;missing_post
+11,HARTING TECHNOLOGY GROUP,2015,2,2,0,0,0,0,FALSE,no_german;missing_pre;missing_post
+12,DIRK ROSSMANN GMBH,2021,2,2,1,0,1,1,FALSE,missing_post
+13,HIPP HOLDING / HIPP GMBH & CO. VERTRIEB KG,2021,2,2,2,2,5,5,TRUE,ready
+14,CLAAS KGAA MBH,2019,2,2,0,0,0,0,FALSE,no_german;missing_pre;missing_post;unavailable
+15,FABER-CASTELL AG,2017,2,2,2,0,2,5,FALSE,missing_post
+16,HENKEL AG & CO. KGAA,2020,2,2,0,0,0,4,FALSE,no_german;missing_pre;missing_post
+17,MERCK KGAA,2021,2,2,0,0,0,0,FALSE,no_german;missing_pre;missing_post;unavailable
+18,SCHAEFFLER AG,2014,2,2,0,0,0,0,FALSE,no_german;missing_pre;missing_post;unavailable
+19,HERAEUS GROUP,2013,2,2,1,0,1,1,FALSE,missing_post
+20,BAHLSEN GMBH & CO. KG,2022,2,2,0,0,0,2,FALSE,no_german;missing_pre;missing_post
+21,FREUDENBERG GROUP,2012,2,2,0,1,0,4,FALSE,missing_pre;sensitivity_only
+22,ANDREAS STIHL AG & CO. KG,2022,2,2,0,0,0,2,FALSE,no_german;missing_pre;missing_post
+23,VAILLANT GROUP,2018,2,2,1,0,1,5,FALSE,missing_post
+24,VIESSMANN CLIMATE SOLUTIONS / VIESSMANN GROUP,2023,2,2,0,0,0,1,FALSE,no_german;missing_pre;missing_post
+25,BIRKENSTOCK GROUP,2021,2,2,2,0,2,2,FALSE,missing_post
+26,RIMOWA GMBH,2016,2,2,1,2,3,5,TRUE,ready
+27,DOUGLAS HOLDING / DOUGLAS GROUP,2012,2,2,0,1,0,1,FALSE,missing_pre;sensitivity_only
+28,CANYON BICYCLES GMBH,2020,2,2,1,2,3,4,TRUE,ready
+29,CONDITOREI COPPENRATH & WIESE KG,2015,2,2,2,1,3,5,TRUE,ready
+30,DR. AUGUST OETKER KG / OETKER-GRUPPE,2021,2,2,0,2,0,2,FALSE,missing_pre;sensitivity_only

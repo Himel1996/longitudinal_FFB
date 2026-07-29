@@ -25,7 +25,7 @@
 
 - **30** firms · **150** observations · **100** selected snapshots  
 - **1,376** branding pages (862 DE) · **692,429** branding tokens  
-- **51** primary / **84** sensitivity NLP observations  
+- **51** primary (German) / **84** sensitivity (all languages) / **61** sensitivity (German) NLP observations  
 - **27** governance pages · **333** duplicate rows / **97,840** tokens removed  
 
 ## Remaining limitations
@@ -40,3 +40,14 @@
 ## Next step
 
 Dictionary development may begin on the German primary / sensitivity corpora. Do not change extraction eligibility rules mid-dictionary without a new release.
+
+## Branding observation corpora (language scope)
+
+| Corpus | File | Language scope |
+|--------|------|----------------|
+| Primary | `full_sample_branding_corpus_observations_primary.csv` | **German only** |
+| Sensitivity | `full_sample_branding_corpus_observations_sensitivity.csv` | **All languages** |
+| Sensitivity (German) | `full_sample_branding_corpus_observations_sensitivity_de.csv` | **German only** |
+
+Phase A added the German sensitivity export and firm longitudinal coverage tables without
+modifying extraction outputs.

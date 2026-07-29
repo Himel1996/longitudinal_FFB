@@ -42,8 +42,9 @@
 | Branding pages (DE) | 862 |
 | Branding token sum | 692,429 |
 | Tokens DE sum | 398,064 |
-| Primary NLP observations | 51 |
-| Sensitivity NLP observations | 84 |
+| Primary NLP observations (German only) | 51 |
+| Sensitivity NLP observations (all languages) | 84 |
+| Sensitivity NLP observations (German only) | 61 |
 | German-text-eligible observations | 61 |
 | Text-analysis-eligible observations | 84 |
 
@@ -54,6 +55,17 @@
 | de | 864 |
 | en | 507 |
 | unknown | 5 |
+
+## Branding observation corpora (language scope)
+
+| Corpus | File | Language scope |
+|--------|------|----------------|
+| Primary | `full_sample_branding_corpus_observations_primary.csv` | **German only** |
+| Sensitivity | `full_sample_branding_corpus_observations_sensitivity.csv` | **All languages** |
+| Sensitivity (German) | `full_sample_branding_corpus_observations_sensitivity_de.csv` | **German only** |
+
+Phase A added the German sensitivity export and firm longitudinal coverage tables without
+modifying extraction outputs.
 
 ## Governance
 

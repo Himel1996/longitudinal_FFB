@@ -52,6 +52,26 @@ Batch logs/QC JSON: `data/interim/full_sample_batches/`.
 Working copies: `data/output/full_sample_*.csv`  
 Release bundle: `data/releases/full_sample_v1/`
 
+
+### Phase A analytical outputs (no re-crawl)
+
+```bash
+python scripts/build_full_sample_phase_a_outputs.py
+```
+
+## Branding observation corpora (language scope)
+
+| Corpus | File | Language scope |
+|--------|------|----------------|
+| Primary | `full_sample_branding_corpus_observations_primary.csv` | **German only** |
+| Sensitivity | `full_sample_branding_corpus_observations_sensitivity.csv` | **All languages** |
+| Sensitivity (German) | `full_sample_branding_corpus_observations_sensitivity_de.csv` | **German only** |
+
+Phase A added the German sensitivity export and firm longitudinal coverage tables without
+modifying extraction outputs.
+
+Also writes `firm_longitudinal_coverage.csv` and `firm_longitudinal_coverage_summary.md`.
+
 ## Tests
 
 ```bash
