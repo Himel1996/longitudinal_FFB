@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from datetime import date
+from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
 
@@ -270,7 +271,6 @@ class RescuePipelineRunner(PipelineRunner):
             snapshots = snapshots[snapshots["firm_id"].astype(str).isin([str(f) for f in firm_ids])]
         firms = pd.read_csv(self.output_dir / "firms.csv", dtype=str)
 
-        from ffb_webminer.crawl.fetcher import PageFetcher
         from ffb_webminer.pipeline import io as pipeline_io
         from ffb_webminer.pipeline.corpus_outputs import build_crawl_priority_summary
         from ffb_webminer.pipeline.schemas import CRAWL_PRIORITY_SUMMARY_COLUMNS, PAGE_COLUMNS
@@ -279,66 +279,91 @@ class RescuePipelineRunner(PipelineRunner):
         from ffb_webminer.quality.language_inclusion import annotate_language_inclusion
         from ffb_webminer.quality.page_classification import classify_page
         from ffb_webminer.quality.page_validation import validate_page_for_analysis
+        from ffb_webminer.rescue.resumable_fetcher import ResumableRescueFetcher
+        from ffb_webminer.rescue.transport import TransportPausedError, TransportPolicy
 
-        fetcher = PageFetcher(
-            user_agent=self.config.crawl.user_agent,
-            timeout_seconds=self.config.crawl.timeout_seconds,
-            max_bytes=self.config.crawl.max_response_bytes,
-            throttle_seconds=self.config.crawl.throttle_seconds,
-            raw_html_dir=self.config.extract.raw_html_dir,
-            store_raw_html=self.config.extract.store_raw_html,
-            retries=self.config.crawl.retries,
+        policy = getattr(self, "transport_policy", None) or TransportPolicy(
+            max_attempts_per_request=int(self.config.crawl.retries),
+            inter_request_delay_seconds=float(self.config.crawl.throttle_seconds),
+            timeout_seconds=float(self.config.crawl.timeout_seconds),
         )
+        state_dir = Path(self.config.run.interim_dir) / "state"
+        state_dir.mkdir(parents=True, exist_ok=True)
+        fetcher = ResumableRescueFetcher(
+            user_agent=self.config.crawl.user_agent,
+            cache_dir=Path(self.config.extract.raw_html_dir),
+            state_db=state_dir / "page_fetch_state.sqlite",
+            policy=policy,
+            resume_command=getattr(self, "resume_command", ""),
+        )
+        fetcher.print_resume_summary()
 
         crawled_by_capture: dict[tuple[str, str], list] = {}
         crawl_summaries: list[dict[str, Any]] = []
         selected = snapshots[snapshots["snapshot_status"] == "selected"]
-        for (firm_id, archive_ts), group in selected.groupby(["firm_id", "archive_timestamp"], dropna=False):
-            ts_s = str(archive_ts).strip()
-            if not ts_s or ts_s.lower() in {"nan", "none", "nat", "<na>"}:
-                continue
+        paused: TransportPausedError | None = None
+        try:
+            for (firm_id, archive_ts), group in selected.groupby(["firm_id", "archive_timestamp"], dropna=False):
+                ts_s = str(archive_ts).strip()
+                if not ts_s or ts_s.lower() in {"nan", "none", "nat", "<na>"}:
+                    continue
+                try:
+                    archive_ts_norm = normalize_archive_timestamp(ts_s)
+                except ValueError:
+                    continue
+                snap = group.iloc[0]
+                snap_firm_id = str(firm_id)
+                firm = firms[firms["firm_id"].astype(str) == snap_firm_id].iloc[0]
+                seed = snap.get("canonical_original_url") or firm["website"]
+                try:
+                    reg_domain = parse_domain(str(seed)).registrable_domain
+                except Exception:
+                    reg_domain = firm["primary_domain"]
+                if (
+                    snap.get("rescue_domain")
+                    and pd.notna(snap.get("rescue_domain"))
+                    and str(snap.get("rescue_domain")).strip()
+                ):
+                    reg_domain = str(snap["rescue_domain"])
+                fetcher.firm_id = snap_firm_id
+                fetcher.relative_timepoint = str(snap.get("relative_timepoint") or "")
+                crawl = crawl_snapshot(
+                    seed_original_url=str(seed),
+                    archive_timestamp=archive_ts_norm,
+                    registrable_domain=reg_domain,
+                    config=self.config.crawl,
+                    fetcher=fetcher,
+                )
+                crawled_by_capture[(snap_firm_id, archive_ts_norm)] = crawl.pages
+                crawl_summaries.append(
+                    {
+                        "firm_id": snap_firm_id,
+                        "company": snap["company"],
+                        "archive_timestamp": archive_ts_norm,
+                        "n_high_priority_pages_discovered": crawl.summary.n_high_priority_pages_discovered,
+                        "n_high_priority_pages_fetched": crawl.summary.n_high_priority_pages_fetched,
+                        "n_high_priority_pages_missing": crawl.summary.n_high_priority_pages_missing,
+                        "n_secondary_pages_fetched": crawl.summary.n_secondary_pages_fetched,
+                        "n_broad_pages_fetched": crawl.summary.n_broad_pages_fetched,
+                        "n_foreign_pages_deprioritized": crawl.summary.n_foreign_pages_deprioritized,
+                        "crawl_limit_reached": crawl.summary.crawl_limit_reached,
+                        "unused_reserved_slots": crawl.summary.unused_reserved_slots,
+                        "pages_fetched": len(crawl.pages),
+                    }
+                )
+        except TransportPausedError as exc:
+            paused = exc
+        finally:
+            self._last_fetcher_stats = dict(getattr(fetcher, "stats", {}))
+            self._last_circuit = getattr(fetcher, "circuit", None)
             try:
-                archive_ts_norm = normalize_archive_timestamp(ts_s)
-            except ValueError:
-                continue
-            snap = group.iloc[0]
-            snap_firm_id = str(firm_id)
-            firm = firms[firms["firm_id"].astype(str) == snap_firm_id].iloc[0]
-            seed = snap.get("canonical_original_url") or firm["website"]
-            try:
-                reg_domain = parse_domain(str(seed)).registrable_domain
+                fetcher.close()
             except Exception:
-                reg_domain = firm["primary_domain"]
-            if (
-                snap.get("rescue_domain")
-                and pd.notna(snap.get("rescue_domain"))
-                and str(snap.get("rescue_domain")).strip()
-            ):
-                reg_domain = str(snap["rescue_domain"])
-            crawl = crawl_snapshot(
-                seed_original_url=str(seed),
-                archive_timestamp=archive_ts_norm,
-                registrable_domain=reg_domain,
-                config=self.config.crawl,
-                fetcher=fetcher,
-            )
-            crawled_by_capture[(snap_firm_id, archive_ts_norm)] = crawl.pages
-            crawl_summaries.append(
-                {
-                    "firm_id": snap_firm_id,
-                    "company": snap["company"],
-                    "archive_timestamp": archive_ts_norm,
-                    "n_high_priority_pages_discovered": crawl.summary.n_high_priority_pages_discovered,
-                    "n_high_priority_pages_fetched": crawl.summary.n_high_priority_pages_fetched,
-                    "n_high_priority_pages_missing": crawl.summary.n_high_priority_pages_missing,
-                    "n_secondary_pages_fetched": crawl.summary.n_secondary_pages_fetched,
-                    "n_broad_pages_fetched": crawl.summary.n_broad_pages_fetched,
-                    "n_foreign_pages_deprioritized": crawl.summary.n_foreign_pages_deprioritized,
-                    "crawl_limit_reached": crawl.summary.crawl_limit_reached,
-                    "unused_reserved_slots": crawl.summary.unused_reserved_slots,
-                    "pages_fetched": len(crawl.pages),
-                }
-            )
+                pass
+
+        if paused is not None:
+            # Page cache/state already persisted; re-raise so orchestrator exits resumable.
+            raise paused
 
         all_pages: list[dict[str, Any]] = []
         for _, snap in snapshots.iterrows():

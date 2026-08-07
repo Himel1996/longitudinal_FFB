@@ -11,6 +11,7 @@ import argparse
 import json
 import shutil
 import sys
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -65,7 +66,19 @@ from ffb_webminer.rescue.special_cases import (
     force_sensitivity_firm_ids,
     special_case_notes,
 )
-from ffb_webminer.rescue.transport import DEFAULT_TRANSPORT_POLICY, TRANSPORT_FAILURE_RESUMABLE
+from ffb_webminer.rescue.transport import (
+    PREFLIGHT_FAILED_TRANSPORT,
+    RESCUE_PAUSED_TRANSPORT_UNSTABLE,
+    TRANSPORT_FAILURE_RESUMABLE,
+    TransportPausedError,
+    TransportPolicy,
+    classify_transport_error,
+)
+from ffb_webminer.rescue.smoke_report import write_bbraun_smoke_report
+from ffb_webminer.rescue.page_cache import PageFetchStateStore, summarize_resume_state
+
+EXIT_PREFLIGHT_FAILED = 3
+EXIT_TRANSPORT_PAUSED = 4
 
 RESCUE_EXTRA_COLS = [
     "rescue_seed_url",
@@ -123,8 +136,10 @@ def _write_pipeline_yaml(rescue_doc: dict[str, Any], interim: Path, transport: d
     pipeline["visual"]["enabled"] = False
     pipeline["visual"]["screenshot_dir"] = "data/interim/full_sample_rescue/screenshots"
     crawl = dict(pipeline.get("crawl") or {})
-    crawl["retries"] = int(transport.get("retries", crawl.get("retries", 5)))
-    crawl["throttle_seconds"] = float(transport.get("throttle_seconds", crawl.get("throttle_seconds", 2.5)))
+    crawl["retries"] = int(transport.get("max_attempts_per_request", transport.get("retries", crawl.get("retries", 3))))
+    crawl["throttle_seconds"] = float(
+        transport.get("inter_request_delay_seconds", transport.get("throttle_seconds", crawl.get("throttle_seconds", 3.0)))
+    )
     crawl["timeout_seconds"] = int(transport.get("timeout_seconds", crawl.get("timeout_seconds", 45)))
     pipeline["crawl"] = crawl
     path = interim / "pipeline_config.yaml"
@@ -316,15 +331,26 @@ class RescueOrchestrator:
         no_network: bool = False,
         firms: list[str] | None = None,
         timepoints: list[str] | None = None,
+        resume: bool = False,
     ) -> None:
         self.config_path = config_path
         self.dry_run = dry_run
         self.no_network = no_network
         self.firm_filter = [str(f) for f in firms] if firms else None
         self.timepoint_filter = [str(t) for t in timepoints] if timepoints else None
+        self.resume = resume
         self.layout = rescue_layout(ROOT)
         self.rescue_doc = yaml.safe_load(config_path.read_text(encoding="utf-8"))
-        self.transport = {**DEFAULT_TRANSPORT_POLICY, **(self.rescue_doc.get("transport") or {})}
+        self.transport_policy = TransportPolicy.from_mapping(self.rescue_doc.get("transport") or {})
+        self.transport = {
+            **{
+                "concurrency": self.transport_policy.concurrency,
+                "max_attempts_per_request": self.transport_policy.max_attempts_per_request,
+                "inter_request_delay_seconds": self.transport_policy.inter_request_delay_seconds,
+                "jitter_seconds": self.transport_policy.jitter_seconds,
+                "timeout_seconds": self.transport_policy.timeout_seconds,
+            }
+        }
         self.parent_sha = None
         self.candidates = []
         self.alias_map = {}
@@ -332,6 +358,8 @@ class RescueOrchestrator:
         self.vreport: dict[str, Any] = {}
         self.cand_hash = ""
         self.execution_plan: dict[str, Any] = {}
+        self.preflight_metrics: dict[str, Any] = {}
+        self.last_pause: dict[str, Any] = {}
 
     def _network_guard(self, stage: str) -> None:
         if self.no_network or self.dry_run:
@@ -437,7 +465,6 @@ class RescueOrchestrator:
         return 0
 
     def preflight(self) -> int:
-        # Local checks only when --no-network; live Wayback probe is VM-side without --no-network.
         rc = self.validate()
         if rc:
             return rc
@@ -448,42 +475,276 @@ class RescueOrchestrator:
                         "stage": "preflight",
                         "mode": "no_network",
                         "ok": True,
-                        "note": "Skipped live Wayback probe; run without --no-network on the VM",
+                        "note": "Skipped live CDX/replay probes; run without --no-network on the Mac/VM",
                     },
                     indent=2,
                 )
             )
             return 0
-        # Live probe (VM execution only)
+
         import httpx
 
-        url = "https://web.archive.org/"
-        try:
-            with httpx.Client(timeout=30.0, follow_redirects=True) as client:
-                resp = client.get(url)
-            ok = 200 <= resp.status_code < 400
-            print(json.dumps({"stage": "preflight", "url": url, "http_status": resp.status_code, "ok": ok}, indent=2))
-            return 0 if ok else 3
-        except Exception as exc:
-            print(
-                json.dumps(
-                    {
-                        "stage": "preflight",
-                        "ok": False,
-                        "classification": TRANSPORT_FAILURE_RESUMABLE,
-                        "error": str(exc),
-                    },
-                    indent=2,
-                )
+        cfg = self.rescue_doc.get("preflight") or {}
+        cdx_urls = list(cfg.get("cdx_urls") or ["https://www.bbraun.de/", "https://www.bbraun.com/"])
+        replay_urls = list(
+            cfg.get("replay_urls")
+            or [
+                "https://web.archive.org/web/20190704175027id_/https://www.bbraun.com/",
+                "https://web.archive.org/web/20210706194317id_/https://www.bbraun.de/de.html",
+            ]
+        )
+        n_cdx = int(cfg.get("cdx_requests", 2))
+        n_replay = int(cfg.get("replay_requests", 5))
+        min_rate = float(cfg.get("min_replay_success_rate", 0.8))
+        metrics: dict[str, Any] = {
+            "total_requests": 0,
+            "successes": 0,
+            "failures": 0,
+            "http_status": {},
+            "tls_failures": 0,
+            "connection_refused": 0,
+            "http_429": 0,
+            "latencies": [],
+            "cdx_ok": 0,
+            "cdx_fail": 0,
+            "replay_ok": 0,
+            "replay_fail": 0,
+        }
+
+        def _bump_status(code: int | None) -> None:
+            key = str(code) if code is not None else "none"
+            metrics["http_status"][key] = metrics["http_status"].get(key, 0) + 1
+
+        with httpx.Client(
+            timeout=45.0,
+            follow_redirects=True,
+            http2=False,
+            headers={"User-Agent": "FFB-WebMiner/0.1-rescue-preflight"},
+            limits=httpx.Limits(max_keepalive_connections=0, max_connections=1),
+        ) as client:
+            for i in range(n_cdx):
+                url = cdx_urls[i % len(cdx_urls)]
+                t0 = time.time()
+                metrics["total_requests"] += 1
+                try:
+                    resp = client.get(
+                        "https://web.archive.org/cdx/search/cdx",
+                        params={"url": url, "output": "json", "limit": "2", "fl": "timestamp,original,statuscode"},
+                    )
+                    metrics["latencies"].append(time.time() - t0)
+                    _bump_status(resp.status_code)
+                    if resp.status_code == 200 and resp.content:
+                        metrics["successes"] += 1
+                        metrics["cdx_ok"] += 1
+                    else:
+                        metrics["failures"] += 1
+                        metrics["cdx_fail"] += 1
+                except Exception as exc:
+                    metrics["latencies"].append(time.time() - t0)
+                    metrics["failures"] += 1
+                    metrics["cdx_fail"] += 1
+                    cat = classify_transport_error(str(exc))
+                    if cat == "transport_tls_eof":
+                        metrics["tls_failures"] += 1
+                    if cat == "transport_connection_refused":
+                        metrics["connection_refused"] += 1
+                time.sleep(self.transport_policy.inter_request_delay_seconds)
+
+            for i in range(n_replay):
+                url = replay_urls[i % len(replay_urls)]
+                t0 = time.time()
+                metrics["total_requests"] += 1
+                try:
+                    resp = client.get(url)
+                    metrics["latencies"].append(time.time() - t0)
+                    _bump_status(resp.status_code)
+                    if resp.status_code == 429:
+                        metrics["http_429"] += 1
+                        metrics["failures"] += 1
+                        metrics["replay_fail"] += 1
+                    elif 200 <= resp.status_code < 400 and len(resp.content) > 100:
+                        metrics["successes"] += 1
+                        metrics["replay_ok"] += 1
+                    else:
+                        metrics["failures"] += 1
+                        metrics["replay_fail"] += 1
+                except Exception as exc:
+                    metrics["latencies"].append(time.time() - t0)
+                    metrics["failures"] += 1
+                    metrics["replay_fail"] += 1
+                    cat = classify_transport_error(str(exc))
+                    if cat == "transport_tls_eof":
+                        metrics["tls_failures"] += 1
+                    if cat == "transport_connection_refused":
+                        metrics["connection_refused"] += 1
+                time.sleep(self.transport_policy.inter_request_delay_seconds)
+
+        replay_total = max(1, metrics["replay_ok"] + metrics["replay_fail"])
+        replay_rate = metrics["replay_ok"] / replay_total
+        sustained = metrics["connection_refused"] + metrics["tls_failures"] + metrics["http_429"] >= 3
+        ok = (
+            metrics["cdx_ok"] >= 1
+            and replay_rate >= min_rate
+            and not (cfg.get("require_no_sustained_transport_cluster", True) and sustained)
+            and metrics["http_429"] < 2
+        )
+        metrics["replay_success_rate"] = replay_rate
+        metrics["ok"] = ok
+        metrics["status"] = "PREFLIGHT_OK" if ok else PREFLIGHT_FAILED_TRANSPORT
+        self.preflight_metrics = metrics
+        print(json.dumps({"stage": "preflight", **metrics}, indent=2))
+        return 0 if ok else EXIT_PREFLIGHT_FAILED
+
+    def resume_command_str(self) -> str:
+        firms = " ".join(self.firm_filter) if self.firm_filter else ""
+        firms_arg = f" --firms {firms}" if firms else ""
+        return (
+            "python scripts/run_full_sample_rescue.py "
+            "--config config/full_sample_rescue.yaml "
+            f"--stage full{firms_arg} --resume"
+        )
+
+    def _print_startup_banner(self) -> None:
+        state_db = self.layout["interim"] / "state" / "page_fetch_state.sqlite"
+        cache_dir = self.layout["interim"] / "html"
+        mode = "resumed" if self.resume else "fresh"
+        print(f"Rescue run mode: {mode}")
+        print(f"  cache directory: {cache_dir}")
+        print(f"  state database: {state_db}")
+        if state_db.exists():
+            store = PageFetchStateStore(state_db)
+            try:
+                firm = self.firm_filter[0] if self.firm_filter and len(self.firm_filter) == 1 else None
+                print(summarize_resume_state(store, firm_id=firm))
+            finally:
+                store.close()
+        else:
+            print("Rescue resume state:\n  (no prior page_fetch_state.sqlite)")
+
+    def _discovery_artifacts_reusable(self) -> bool:
+        snaps_path = self.layout["interim"] / "rescue_snapshots.csv"
+        log_path = self.layout["interim"] / "rescue_discovery_log.csv"
+        if not snaps_path.exists() or not log_path.exists():
+            return False
+        snaps = pd.read_csv(snaps_path, dtype=str)
+        if snaps.empty:
+            return False
+        scoped = snaps[snaps["firm_id"].astype(str).isin(self.targeted)].copy()
+        if scoped.empty:
+            return False
+        selected = scoped[scoped.get("snapshot_status", pd.Series(dtype=str)) == "selected"]
+        if selected.empty:
+            return False
+        # Require at least one selected capture per firm×timepoint in the alias map
+        needed = {(fid, tp) for fid, tp in self.alias_map.keys()}
+        have = {
+            (str(r.firm_id), str(r.relative_timepoint))
+            for _, r in selected.iterrows()
+            if str(r.get("archive_timestamp") or "").strip()
+        }
+        missing = needed - have
+        if missing:
+            print(f"discovery reuse skipped: missing selected captures for {sorted(missing)[:5]}...")
+            return False
+        print(
+            json.dumps(
+                {
+                    "discovery_reuse": True,
+                    "selected_captures": int(len(selected)),
+                    "targeted_firms": self.targeted,
+                    "note": "Valid discovery artifacts reused; CDX full discovery skipped (preflight probes still run separately)",
+                },
+                indent=2,
             )
-            return 3
+        )
+        return True
+
+    def _maybe_write_bbraun_smoke(
+        self,
+        *,
+        final_status: str,
+        pages_df: pd.DataFrame | None = None,
+        pause_info: dict[str, Any] | None = None,
+    ) -> None:
+        if not self.firm_filter or set(self.firm_filter) != {"10"}:
+            return
+        state_db = self.layout["interim"] / "state" / "page_fetch_state.sqlite"
+        counts = {
+            "completed_pages": 0,
+            "cached_valid_pages": 0,
+            "resumable_failures": 0,
+            "pending_pages": 0,
+        }
+        failures_by_cat: dict[str, int] = {}
+        if state_db.exists():
+            store = PageFetchStateStore(state_db)
+            try:
+                counts = store.counts(firm_id="10")
+                for rec in store.iter_records(firm_id="10"):
+                    if rec.transport_error_type:
+                        failures_by_cat[rec.transport_error_type] = (
+                            failures_by_cat.get(rec.transport_error_type, 0) + 1
+                        )
+            finally:
+                store.close()
+        snaps_path = self.layout["interim"] / "rescue_snapshots.csv"
+        discovered = 0
+        timepoints: list[str] = []
+        if snaps_path.exists():
+            snaps = pd.read_csv(snaps_path, dtype=str)
+            bb = snaps[snaps["firm_id"].astype(str) == "10"]
+            discovered = int((bb.get("snapshot_status") == "selected").sum()) if len(bb) else 0
+            timepoints = sorted(bb["relative_timepoint"].dropna().unique().tolist()) if len(bb) else []
+        pause_info = pause_info or self.last_pause
+        german = None
+        if pages_df is not None and len(pages_df):
+            de = pages_df[pages_df["firm_id"].astype(str) == "10"]
+            if "text_language" in de.columns:
+                german = {
+                    "pages_de": int((de["text_language"].astype(str).str.lower() == "de").sum()),
+                    "n_pages": int(len(de)),
+                }
+        payload = {
+            "firm_id": "10",
+            "company": "B. Braun",
+            "final_status": final_status,
+            "timepoints": timepoints or sorted({tp for fid, tp in self.alias_map if fid == "10"}),
+            "discovered_captures": discovered,
+            "pages_planned": counts.get("total", 0),
+            "pages_cached_before": pause_info.get("pages_cached_before"),
+            "pages_newly_fetched": pause_info.get("pages_newly_fetched"),
+            "cache_hits": pause_info.get("cache_hits"),
+            "pending_pages": counts.get("pending_pages"),
+            "resumable_failures": counts.get("resumable_failures"),
+            "transport_failures_by_category": failures_by_cat,
+            "retries": self.transport_policy.max_attempts_per_request,
+            "circuit_openings": pause_info.get("circuit_openings"),
+            "cooldown_durations": pause_info.get("cooldown_durations"),
+            "cdx_probe_results": (self.preflight_metrics or {}).get("cdx_ok"),
+            "replay_probe_results": {
+                "ok": (self.preflight_metrics or {}).get("replay_ok"),
+                "fail": (self.preflight_metrics or {}).get("replay_fail"),
+            },
+            "observations_extracted": pause_info.get("observations_extracted"),
+            "german_pages_tokens": german,
+            "rescue_decisions": pause_info.get("rescue_decisions"),
+            "longitudinal_ready": pause_info.get("longitudinal_ready"),
+            "parent_release_integrity": "unchanged" if self.parent_sha else "unchecked",
+            "resume_command": self.resume_command_str(),
+            "notes": pause_info.get("notes", ""),
+        }
+        path = write_bbraun_smoke_report(self.layout["reports"] / "bbraun_smoke_test.md", payload=payload)
+        print(f"Wrote B. Braun smoke report: {path}")
 
     def _runner(self) -> RescuePipelineRunner:
         layout = self.layout
         ensure_workspace_dirs(layout, create=True)
         pipe_yaml = _write_pipeline_yaml(self.rescue_doc, layout["interim"], self.transport)
         cfg = PipelineConfig.from_yaml(pipe_yaml).resolve_paths(ROOT)
-        return RescuePipelineRunner(cfg, seed_aliases=self.alias_map)
+        runner = RescuePipelineRunner(cfg, seed_aliases=self.alias_map)
+        runner.transport_policy = self.transport_policy
+        runner.resume_command = self.resume_command_str()
+        return runner
 
     def bootstrap_workspace(self, runner: RescuePipelineRunner) -> None:
         layout = self.layout
@@ -499,6 +760,13 @@ class RescueOrchestrator:
         self._network_guard("discover")
         if self.validate():
             return 2
+        self._print_startup_banner()
+        if self.resume and self._discovery_artifacts_reusable():
+            # Still ensure processed workspace has firms/snapshots scaffolding
+            runner = self._runner()
+            if not (runner.output_dir / "firms.csv").exists():
+                self.bootstrap_workspace(runner)
+            return 0
         runner = self._runner()
         self.bootstrap_workspace(runner)
         runner.prepare()
@@ -515,6 +783,17 @@ class RescueOrchestrator:
         self._network_guard("crawl")
         if not self.alias_map and self.validate():
             return 2
+        self._print_startup_banner()
+        state_db = self.layout["interim"] / "state" / "page_fetch_state.sqlite"
+        pages_cached_before = 0
+        if state_db.exists():
+            store = PageFetchStateStore(state_db)
+            try:
+                pages_cached_before = store.counts(firm_id=self.firm_filter[0] if self.firm_filter else None)[
+                    "cached_valid_pages"
+                ]
+            finally:
+                store.close()
         runner = self._runner()
         runner.prepare()
         snaps_path = self.layout["interim"] / "rescue_snapshots.csv"
@@ -534,11 +813,38 @@ class RescueOrchestrator:
         merged.to_csv(runner.output_dir / "snapshots.csv", index=False)
         non_t_pages = parent_pages[~parent_pages["firm_id"].astype(str).isin(self.targeted)]
         pipeline_io.write_csv(non_t_pages, runner.output_dir / "pages.csv", PAGE_COLUMNS)
-        pages = runner.crawl_and_extract(firm_ids=self.targeted)
+        try:
+            pages = runner.crawl_and_extract(firm_ids=self.targeted)
+        except TransportPausedError as exc:
+            self.last_pause = {
+                "pages_cached_before": pages_cached_before,
+                "cache_hits": getattr(runner, "_last_fetcher_stats", {}).get("cache_hits"),
+                "pages_newly_fetched": getattr(runner, "_last_fetcher_stats", {}).get("successes"),
+                "circuit_openings": getattr(getattr(runner, "_last_circuit", None), "openings", None),
+                "cooldown_durations": getattr(getattr(runner, "_last_circuit", None), "cooldown_seconds", None),
+                "notes": str(exc),
+            }
+            print(
+                f"\n{RESCUE_PAUSED_TRANSPORT_UNSTABLE}\n"
+                f"Cached pages preserved. Do not mark remaining pages unavailable.\n"
+                f"Resume with:\n{self.resume_command_str()}\n"
+            )
+            self._maybe_write_bbraun_smoke(
+                final_status="SMOKE_TEST_PAUSED_TRANSPORT_RESUMABLE",
+                pause_info=self.last_pause,
+            )
+            return EXIT_TRANSPORT_PAUSED
         pages[pages["firm_id"].astype(str).isin(self.targeted)].to_csv(
             self.layout["interim"] / "rescue_pages.csv", index=False
         )
         print(f"crawl complete: pages={len(pages)}")
+        self.last_pause = {
+            "pages_cached_before": pages_cached_before,
+            "cache_hits": getattr(runner, "_last_fetcher_stats", {}).get("cache_hits"),
+            "pages_newly_fetched": getattr(runner, "_last_fetcher_stats", {}).get("successes"),
+            "circuit_openings": getattr(getattr(runner, "_last_circuit", None), "openings", None),
+            "cooldown_durations": getattr(getattr(runner, "_last_circuit", None), "cooldown_seconds", None),
+        }
         return 0
 
     def extract(self) -> int:
@@ -702,6 +1008,19 @@ class RescueOrchestrator:
             rc = getattr(self, stage)()
             if rc:
                 return rc
+        if self.firm_filter and set(self.firm_filter) == {"10"}:
+            pages = None
+            pages_path = self.layout["interim"] / "rescue_pages.csv"
+            if pages_path.exists():
+                pages = pd.read_csv(pages_path, dtype=str)
+            self._maybe_write_bbraun_smoke(
+                final_status="SMOKE_TEST_PASSED",
+                pages_df=pages,
+                pause_info={
+                    **self.last_pause,
+                    "notes": "B. Braun smoke completed through acceptance",
+                },
+            )
         return 0
 
 
@@ -710,19 +1029,45 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--config", default="config/full_sample_rescue.yaml")
     parser.add_argument("--stage", choices=STAGES, default="validate")
     parser.add_argument("--resume-from", choices=RESUME_FROM, default=None)
+    parser.add_argument(
+        "--resume",
+        action="store_true",
+        help="Resume page-level crawl from SQLite/HTML cache; reuse valid discovery artifacts",
+    )
     parser.add_argument("--firms", nargs="*", default=None, help="Optional firm_id filter")
     parser.add_argument("--timepoints", nargs="*", default=None, help="Optional timepoint filter")
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--no-network", action="store_true")
     args = parser.parse_args(argv)
 
+    # --resume implies page-level resume; if --resume-from omitted and stage=full, start at discover
+    resume = bool(args.resume) or bool(args.resume_from)
     orch = RescueOrchestrator(
         config_path=(ROOT / args.config).resolve() if not Path(args.config).is_absolute() else Path(args.config),
         dry_run=args.dry_run,
         no_network=args.no_network,
         firms=args.firms,
         timepoints=args.timepoints,
+        resume=resume,
     )
+
+    if args.resume and not args.resume_from and args.stage == "full":
+        # validate + preflight, then stage resume from discover (discovery may reuse artifacts)
+        for stage in ("validate", "preflight", *RESUME_FROM):
+            rc = getattr(orch, stage)()
+            if rc:
+                return rc
+        if orch.firm_filter and set(orch.firm_filter) == {"10"}:
+            pages = None
+            pages_path = orch.layout["interim"] / "rescue_pages.csv"
+            if pages_path.exists():
+                pages = pd.read_csv(pages_path, dtype=str)
+            orch._maybe_write_bbraun_smoke(
+                final_status="SMOKE_TEST_PASSED",
+                pages_df=pages,
+                pause_info={**orch.last_pause, "notes": "B. Braun smoke completed (resume path)"},
+            )
+        return 0
 
     if args.resume_from:
         order = list(RESUME_FROM)

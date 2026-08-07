@@ -37,14 +37,34 @@ special_cases:
 # Operational transport controls only (not archival selection methodology).
 transport:
   concurrency: 1
-  throttle_seconds: 2.5
+  max_attempts_per_request: 3
+  inter_request_delay_seconds: 3.0
+  jitter_seconds: 2.0
   timeout_seconds: 45
-  retries: 5
   backoff_base_seconds: 2.0
-  jitter_seconds: 0.5
   respect_retry_after: true
-  circuit_breaker_threshold: 8
-  classify_transport_failures: true
+  post_failure_pause_seconds: 5.0
+  circuit_breaker:
+    enabled: true
+    rolling_window_requests: 6
+    failure_threshold: 3
+    initial_cooldown_seconds: 300
+    cooldown_multiplier: 2
+    max_cooldown_seconds: 1800
+    health_probe_successes_required: 2
+    max_circuit_cycles_before_exit: 3
+
+preflight:
+  cdx_requests: 2
+  replay_requests: 5
+  min_replay_success_rate: 0.8
+  require_no_sustained_transport_cluster: true
+  replay_urls:
+    - "https://web.archive.org/web/20190704175027id_/https://www.bbraun.com/"
+    - "https://web.archive.org/web/20210706194317id_/https://www.bbraun.de/de.html"
+  cdx_urls:
+    - "https://www.bbraun.de/"
+    - "https://www.bbraun.com/"
 
 # Pipeline block: copy of full_sample settings with isolated output paths.
 # Snapshot tolerances and analysis thresholds inherit validated full_sample values.
