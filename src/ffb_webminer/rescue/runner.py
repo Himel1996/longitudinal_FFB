@@ -18,8 +18,79 @@ from ffb_webminer.pipeline.runner import PipelineRunner
 from ffb_webminer.quality.duplicate_captures import apply_duplicate_capture_rules
 from ffb_webminer.quality.temporal_validity import enrich_snapshots_dataframe
 from ffb_webminer.rescue.candidates import NormalizedCandidate, expand_seed_variants
+from ffb_webminer.rescue.discovery_state import (
+    ATTEMPT_CDX_EMPTY,
+    ATTEMPT_SELECTED,
+    ATTEMPT_TRANSPORT,
+    DiscoveryStateStore,
+)
 from ffb_webminer.rescue.timestamps import normalize_archive_timestamp, sanitize_wayback_replay_url
 from ffb_webminer.rescue.transport import TRANSPORT_FAILURE_RESUMABLE, classify_fetch_error
+
+# Columns that must be homogeneous bools before parquet merge (parent CSV may be str).
+_PAGE_BOOL_COLUMNS = (
+    "observation_is_future",
+    "analysis_eligible",
+    "selected_under_reserved_slot",
+    "branding_corpus_eligible",
+    "german_corpus_eligible",
+    "governance_metadata_eligible",
+    "duplicate_content_flag",
+    "soft_404_flag",
+    "archive_toolbar_removed_flag",
+    "usable_for_analysis",
+)
+
+
+def _normalize_mixed_object_value(value: Any) -> str:
+    """Stringify scalar values so firm-filtered CSV/crawl merges stay parquet-safe."""
+    if value is None:
+        return ""
+    if isinstance(value, bool):
+        return "True" if value else "False"
+    if isinstance(value, float):
+        if pd.isna(value):
+            return ""
+        if value == int(value):
+            return str(int(value))
+        return str(value)
+    if isinstance(value, int):
+        return str(value)
+    if isinstance(value, str):
+        s = value.strip()
+        if not s or s.lower() in {"nan", "none", "<na>", "nat"}:
+            return ""
+        return s
+    if pd.isna(value):
+        return ""
+    return str(value)
+
+
+def _normalize_pages_df_for_output(df: pd.DataFrame) -> pd.DataFrame:
+    """Coerce mixed CSV/merge dtypes so parquet write survives firm-filtered rescue merges."""
+    from ffb_webminer.quality.checks import as_bool
+
+    if df.empty:
+        return df
+    out = df.copy()
+    if "firm_id" in out.columns:
+        out["firm_id"] = out["firm_id"].astype(str)
+    for col in _PAGE_BOOL_COLUMNS:
+        if col in out.columns:
+            out[col] = out[col].map(as_bool)
+    # Remaining object columns may mix str (from CSV) with int/float (from crawl).
+    for col in out.columns:
+        if col in _PAGE_BOOL_COLUMNS:
+            continue
+        if out[col].dtype != object:
+            continue
+        non_null = out[col].dropna()
+        if non_null.empty:
+            continue
+        if all(isinstance(v, str) for v in non_null.head(5000)):
+            continue
+        out[col] = out[col].map(_normalize_mixed_object_value)
+    return out
 
 
 class RescuePipelineRunner(PipelineRunner):
@@ -38,9 +109,125 @@ class RescuePipelineRunner(PipelineRunner):
         super().__init__(*args, **kwargs)
         self.seed_aliases = seed_aliases or {}
         self.rescue_discovery_log: list[dict[str, Any]] = []
+        self.discovery_store: DiscoveryStateStore | None = None
+        self.discovery_resume: bool = False
+        self.config_hash: str | None = None
+        self.candidate_file_hash: str | None = None
 
     def _aliases_for(self, firm_id: str, timepoint: str) -> list[NormalizedCandidate]:
         return list(self.seed_aliases.get((str(firm_id), str(timepoint)), []))
+
+    def _persisted_snapshot_row(self, firm_id: str, timepoint: str) -> dict[str, Any] | None:
+        if not self.discovery_store:
+            return None
+        rec = self.discovery_store.get(firm_id, timepoint)
+        if not rec or not rec.has_valid_selection or not rec.snapshot_row_json:
+            return None
+        import json
+
+        row = json.loads(rec.snapshot_row_json)
+        row["rescue_seed_url"] = rec.rescue_seed_url or rec.candidate_seed_url
+        row["rescue_source_row_id"] = rec.rescue_source_row_id or rec.source_row_id
+        row["rescue_candidate_type"] = rec.rescue_candidate_type or rec.candidate_type
+        row["rescue_domain"] = rec.rescue_domain or rec.candidate_domain
+        row["snapshot_status"] = "selected"
+        row["archive_timestamp"] = rec.selected_capture_timestamp
+        return row
+
+    def _transport_failure_snapshot_row(
+        self,
+        row: pd.Series,
+        *,
+        alias: NormalizedCandidate | None,
+        error: str,
+    ) -> dict[str, Any]:
+        note = f"rescue_discovery_transport_failure|{error}"
+        out = {
+            "run_id": self.run_id,
+            "firm_id": row["firm_id"],
+            "rank": row["rank"],
+            "company": row["company"],
+            "event_type": row["event_type"],
+            "event_year": row["event_year"],
+            "event_label": row["event_label"],
+            "event_date_inferred": row.get("event_date_inferred"),
+            "event_date_verified": row.get("event_date_verified"),
+            "event_date_final": row.get("event_date_final"),
+            "event_date_precision": row.get("event_date_precision"),
+            "event_date_source": row.get("event_date_source"),
+            "event_date_verification_status": row.get("event_date_verification_status"),
+            "relative_timepoint": row["relative_timepoint"],
+            "target_year": row.get("target_year"),
+            "target_date": row["target_date"],
+            "target_date_precision": row.get("target_date_precision"),
+            "observation_is_future": False,
+            "snapshot_status": "not_found",
+            "capture_source": "wayback",
+            "selection_reason": TRANSPORT_FAILURE_RESUMABLE,
+            "failure_reason": note,
+            "analysis_eligible": False,
+            "rescue_seed_url": alias.candidate_seed_url if alias else None,
+            "rescue_source_row_id": alias.source_row_id if alias else None,
+            "rescue_candidate_type": alias.candidate_type if alias else None,
+            "rescue_domain": alias.candidate_domain if alias else None,
+        }
+        return out
+
+    def discover_snapshots(self, firm_ids: list[str] | None = None) -> pd.DataFrame:
+        """Rescue discovery with incremental resume from persisted selections."""
+        from ffb_webminer.pipeline import io as pipeline_io
+        from ffb_webminer.pipeline.schemas import SNAPSHOT_COLUMNS
+
+        obs_path = self.state_dir / "observations.csv"
+        if not obs_path.exists():
+            self.prepare()
+        obs = pd.read_csv(obs_path)
+        if firm_ids:
+            obs = obs[obs["firm_id"].astype(str).isin([str(f) for f in firm_ids])]
+
+        branding_patterns = self._branding_patterns_flat()
+        client = CDXClient(
+            api_url=self.config.archive.cdx_api_url,
+            cache_dir=self.config.archive.cache_dir,
+            user_agent=self.config.crawl.user_agent,
+            throttle_seconds=self.config.crawl.throttle_seconds,
+            retry_max=self.config.archive.retry_max,
+            retry_backoff_base=self.config.archive.retry_backoff_base,
+        )
+        rows: list[dict[str, Any]] = []
+        for _, row in obs.iterrows():
+            firm_id = str(row["firm_id"])
+            tp = str(row["relative_timepoint"])
+            if row["observation_is_future"]:
+                rows.append(self._future_snapshot_row(row))
+                continue
+            if self.discovery_resume and self.discovery_store:
+                persisted = self._persisted_snapshot_row(firm_id, tp)
+                if persisted is not None:
+                    rows.append(persisted)
+                    continue
+            rows.append(self._discover_one_snapshot(row, client, branding_patterns))
+
+        snapshots = pd.DataFrame(rows)
+        firms = pd.read_csv(self.output_dir / "firms.csv")
+        snapshots = enrich_snapshots_dataframe(
+            snapshots,
+            firms,
+            adjacent_min_days=self.config.snapshot_selection.adjacent_period_min_days,
+            override_very_low_usable=self.config.snapshot_selection.override_very_low_usable,
+        )
+        snapshots = apply_duplicate_capture_rules(snapshots)
+        snapshots = assign_observation_scopes(snapshots)
+        out_path = self.output_dir / "snapshots.csv"
+        if firm_ids and out_path.exists():
+            existing = pd.read_csv(out_path)
+            keep = existing[~existing["firm_id"].astype(str).isin([str(f) for f in firm_ids])]
+            snapshots = pd.concat([keep, snapshots], ignore_index=True)
+
+        pipeline_io.write_csv(snapshots, out_path, SNAPSHOT_COLUMNS)
+        snapshots.to_csv(self.state_dir / "snapshots.csv", index=False)
+        self._write_temporal_validity_report(snapshots)
+        return snapshots
 
     def _discover_one_snapshot(
         self,
@@ -62,6 +249,8 @@ class RescuePipelineRunner(PipelineRunner):
         best_alias: NormalizedCandidate | None = None
         best_attempts: list[str] = []
         all_attempts: list[str] = []
+        transport_only = True
+        saw_cdx_response = False
 
         for alias in aliases:
             seed_plan = [alias.candidate_seed_url] + [
@@ -71,6 +260,7 @@ class RescuePipelineRunner(PipelineRunner):
             seen: set[str] = set()
             attempts: list[str] = []
             sel = None
+            alias_transport_only = True
             for seed in seed_plan:
                 attempts.append(seed)
                 all_attempts.append(seed)
@@ -78,6 +268,14 @@ class RescuePipelineRunner(PipelineRunner):
                     rows = client.search(seed, status_codes=status_codes, mimetypes=mimetypes)
                 except Exception as exc:
                     transport = classify_fetch_error(str(exc))
+                    if self.discovery_store:
+                        self.discovery_store.record_attempt(
+                            firm_id=firm_id,
+                            relative_timepoint=tp,
+                            candidate_seed_url=alias.candidate_seed_url,
+                            attempt_status=ATTEMPT_TRANSPORT if transport else "discovery_error",
+                            error=str(exc),
+                        )
                     self.rescue_discovery_log.append(
                         {
                             "firm_id": firm_id,
@@ -103,6 +301,18 @@ class RescuePipelineRunner(PipelineRunner):
                         }
                     )
                     continue
+                alias_transport_only = False
+                transport_only = False
+                saw_cdx_response = True
+                if not rows:
+                    if self.discovery_store:
+                        self.discovery_store.record_attempt(
+                            firm_id=firm_id,
+                            relative_timepoint=tp,
+                            candidate_seed_url=alias.candidate_seed_url,
+                            attempt_status=ATTEMPT_CDX_EMPTY,
+                        )
+                    continue
                 for crow in rows:
                     key = f"{crow.get('timestamp', '')}|{crow.get('original', '')}"
                     if key not in seen:
@@ -125,6 +335,8 @@ class RescuePipelineRunner(PipelineRunner):
                     break
 
             if sel is None:
+                if not alias_transport_only:
+                    transport_only = False
                 continue
             event_date = (
                 date.fromisoformat(str(row["event_date_final"])[:10])
@@ -183,12 +395,19 @@ class RescuePipelineRunner(PipelineRunner):
                     break
 
         if best_sel is None:
-            base = super()._discover_one_snapshot(row, client, branding_patterns)
-            base["fallback_attempts"] = str(all_attempts)
-            base["selection_reason"] = (
-                (base.get("selection_reason") or "") + "|rescue_alias_no_selected_capture"
-            )
-            return base
+            persisted = self._persisted_snapshot_row(firm_id, tp)
+            if persisted is not None:
+                return persisted
+            primary_alias = aliases[0] if aliases else None
+            if transport_only and not saw_cdx_response:
+                return self._transport_failure_snapshot_row(row, alias=primary_alias, error="all_alias_cdx_transport_failed")
+            if aliases:
+                return self._transport_failure_snapshot_row(
+                    row,
+                    alias=primary_alias,
+                    error="rescue_alias_no_selected_capture",
+                )
+            return super()._discover_one_snapshot(row, client, branding_patterns)
 
         homepage_available = bool(best_sel.homepage_available)
         relevant_subpages = (
@@ -234,6 +453,25 @@ class RescuePipelineRunner(PipelineRunner):
         out["rescue_source_row_id"] = best_alias.source_row_id if best_alias else None
         out["rescue_candidate_type"] = best_alias.candidate_type if best_alias else None
         out["rescue_domain"] = best_alias.candidate_domain if best_alias else None
+        if self.discovery_store and out.get("snapshot_status") == "selected":
+            alias_meta = {
+                "candidate_seed_url": best_alias.candidate_seed_url if best_alias else None,
+                "source_row_id": best_alias.source_row_id if best_alias else None,
+                "selected_domain": best_alias.candidate_domain if best_alias else None,
+                "archive_evidence": best_alias.archive_evidence if best_alias else None,
+                "historical_domain_flag": best_alias.historical_domain_flag if best_alias else False,
+                "locale_path_flag": best_alias.locale_path_flag if best_alias else False,
+                "migration_flag": best_alias.migration_warning if best_alias else False,
+                "entity_change_flag": best_alias.entity_change_warning if best_alias else False,
+                "candidate_type": best_alias.candidate_type if best_alias else None,
+                "candidate_priority": best_alias.priority if best_alias else None,
+            }
+            self.discovery_store.persist_selection(
+                out,
+                alias_meta=alias_meta,
+                config_hash=self.config_hash,
+                candidate_file_hash=self.candidate_file_hash,
+            )
         return out
 
     @staticmethod
@@ -450,11 +688,14 @@ class RescuePipelineRunner(PipelineRunner):
         all_pages = annotate_language_inclusion(all_pages, self.config.analysis)
 
         pages_df = pd.DataFrame(all_pages)
+        pages_df = _normalize_pages_df_for_output(pages_df)
         out_path = self.output_dir / "pages.csv"
         if firm_ids and out_path.exists():
-            existing = pd.read_csv(out_path)
+            existing = pd.read_csv(out_path, dtype=str)
+            existing = _normalize_pages_df_for_output(existing)
             keep = existing[~existing["firm_id"].astype(str).isin([str(f) for f in firm_ids])]
             pages_df = pd.concat([keep, pages_df], ignore_index=True)
+            pages_df = _normalize_pages_df_for_output(pages_df)
         else:
             self._assert_pages_match_snapshots(pages_df, pd.read_csv(snapshots_path, dtype=str))
         pipeline_io.write_csv(pages_df, out_path, PAGE_COLUMNS)

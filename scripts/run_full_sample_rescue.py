@@ -56,11 +56,23 @@ from ffb_webminer.rescue.candidates import (
     write_validation_report,
 )
 from ffb_webminer.rescue.compare import decide_rescue
+from ffb_webminer.rescue.discovery_state import (
+    DiscoveryStateStore,
+    atomic_write_rescue_snapshots,
+    count_selected_snapshots,
+    load_authoritative_rescue_snapshots,
+    merge_authoritative_snapshots,
+    summarize_discovery_state,
+)
 from ffb_webminer.rescue.manual_validation import build_manual_validation_sample
 from ffb_webminer.rescue.paths import assert_not_parent_release, ensure_workspace_dirs, rescue_layout
 from ffb_webminer.rescue.release import assemble_rescue_release
 from ffb_webminer.rescue.reports import write_candidate_validation_report, write_report_templates
-from ffb_webminer.rescue.runner import RescuePipelineRunner
+from ffb_webminer.rescue.runner import (
+    RescuePipelineRunner,
+    _normalize_pages_df_for_output,
+    refresh_snapshot_enrichment,
+)
 from ffb_webminer.rescue.special_cases import (
     entity_change_firm_ids,
     force_sensitivity_firm_ids,
@@ -270,7 +282,7 @@ def build_coverage(firms, obs, primary, sens_de, decisions, targeted) -> pd.Data
 def regenerate_corpora(runner: RescuePipelineRunner) -> dict[str, pd.DataFrame]:
     out = runner.output_dir
     snapshots = pd.read_csv(out / "snapshots.csv", dtype=str)
-    pages = pd.read_csv(out / "pages.csv", dtype=str)
+    pages = _normalize_pages_df_for_output(pd.read_csv(out / "pages.csv", low_memory=False))
     gov_pages = build_governance_metadata_pages(pages)
     gov_obs = build_governance_metadata_observations(snapshots, gov_pages)
     obs = build_observation_text_summary(snapshots, pages, gov_obs, runner.config.analysis)
@@ -621,7 +633,93 @@ class RescueOrchestrator:
         else:
             print("Rescue resume state:\n  (no prior page_fetch_state.sqlite)")
 
-    def _discovery_artifacts_reusable(self) -> bool:
+    def _discovery_state_db(self) -> Path:
+        return self.layout["interim"] / "state" / "rescue_discovery_state.sqlite"
+
+    def _open_discovery_store(self) -> DiscoveryStateStore:
+        return DiscoveryStateStore(self._discovery_state_db())
+
+    def _enrich_and_repersist_snapshots(
+        self, runner: RescuePipelineRunner, snaps: pd.DataFrame, store: DiscoveryStateStore
+    ) -> pd.DataFrame:
+        """Apply core temporal enrichment to persisted discovery rows and re-save.
+
+        Discovery state stores pre-enrichment CDX selection rows. Without this step,
+        analysis_eligible stays false and valid German observations are excluded as
+        observation_excluded_temporally.
+        """
+        if snaps.empty:
+            return snaps
+        enriched = refresh_snapshot_enrichment(runner, snaps)
+        for _, row in enriched.iterrows():
+            if str(row.get("snapshot_status") or "") != "selected":
+                continue
+            store.persist_selection(
+                row.to_dict(),
+                alias_meta={
+                    "candidate_seed_url": row.get("rescue_seed_url"),
+                    "source_row_id": row.get("rescue_source_row_id"),
+                    "selected_domain": row.get("rescue_domain"),
+                    "candidate_type": row.get("rescue_candidate_type"),
+                },
+                config_hash=self.cand_hash,
+                candidate_file_hash=self.cand_hash,
+            )
+        return enriched
+
+    def _sync_rescue_snapshots_csv(self, store: DiscoveryStateStore) -> pd.DataFrame:
+        """Export authoritative persisted selections to rescue_snapshots.csv."""
+        path = self.layout["interim"] / "rescue_snapshots.csv"
+        previous = pd.read_csv(path, dtype=str) if path.exists() else None
+        rows = store.snapshot_rows(firm_ids=self.targeted)
+        if rows:
+            df = pd.DataFrame(rows)
+        elif previous is not None and not previous.empty:
+            return previous
+        else:
+            df = pd.DataFrame()
+        if not df.empty:
+            atomic_write_rescue_snapshots(
+                path,
+                df,
+                previous=previous,
+                firm_ids=set(self.targeted),
+            )
+        return df
+
+    def _discovery_artifacts_reusable(self, store: DiscoveryStateStore | None = None) -> bool:
+        owned = store is None
+        if owned:
+            store = self._open_discovery_store()
+        try:
+            counts = store.counts(
+                firm_id=self.firm_filter[0] if self.firm_filter and len(self.firm_filter) == 1 else None
+            )
+            if counts["selected_rescue_snapshots"] > 0:
+                needed = {(fid, tp) for fid, tp in self.alias_map.keys()}
+                persisted = {
+                    (rec.firm_id, rec.relative_timepoint)
+                    for rec in store.iter_records()
+                    if rec.has_valid_selection
+                }
+                missing = needed - persisted
+                if not missing:
+                    print(
+                        json.dumps(
+                            {
+                                "discovery_reuse": True,
+                                "source": "rescue_discovery_state.sqlite",
+                                "selected_captures": counts["selected_rescue_snapshots"],
+                                "targeted_firms": self.targeted,
+                            },
+                            indent=2,
+                        )
+                    )
+                    return True
+        finally:
+            if owned:
+                store.close()
+
         snaps_path = self.layout["interim"] / "rescue_snapshots.csv"
         log_path = self.layout["interim"] / "rescue_discovery_log.csv"
         if not snaps_path.exists() or not log_path.exists():
@@ -744,6 +842,8 @@ class RescueOrchestrator:
         runner = RescuePipelineRunner(cfg, seed_aliases=self.alias_map)
         runner.transport_policy = self.transport_policy
         runner.resume_command = self.resume_command_str()
+        runner.config_hash = self.cand_hash
+        runner.candidate_file_hash = self.cand_hash
         return runner
 
     def bootstrap_workspace(self, runner: RescuePipelineRunner) -> None:
@@ -761,22 +861,60 @@ class RescueOrchestrator:
         if self.validate():
             return 2
         self._print_startup_banner()
-        if self.resume and self._discovery_artifacts_reusable():
-            # Still ensure processed workspace has firms/snapshots scaffolding
+        store = self._open_discovery_store()
+        try:
+            if self.firm_filter and len(self.firm_filter) == 1:
+                print(summarize_discovery_state(store, firm_id=self.firm_filter[0]))
+            else:
+                print(summarize_discovery_state(store))
+            from ffb_webminer.rescue.discovery_state import import_snapshots_csv_to_store
+
+            snaps_csv = self.layout["interim"] / "rescue_snapshots.csv"
+            if store.counts()["selected_rescue_snapshots"] == 0 and snaps_csv.exists():
+                n = import_snapshots_csv_to_store(
+                    store,
+                    snaps_csv,
+                    config_hash=self.cand_hash,
+                    candidate_file_hash=self.cand_hash,
+                )
+                if n:
+                    print(f"Imported {n} selected snapshot(s) from existing rescue_snapshots.csv")
+            if self.resume and self._discovery_artifacts_reusable(store):
+                runner = self._runner()
+                if not (runner.output_dir / "firms.csv").exists():
+                    self.bootstrap_workspace(runner)
+                self._sync_rescue_snapshots_csv(store)
+                return 0
             runner = self._runner()
-            if not (runner.output_dir / "firms.csv").exists():
-                self.bootstrap_workspace(runner)
-            return 0
-        runner = self._runner()
-        self.bootstrap_workspace(runner)
-        runner.prepare()
-        snaps = runner.discover_snapshots(firm_ids=self.targeted)
-        snaps = snaps[snaps["firm_id"].astype(str).isin(self.targeted)].copy()
-        log_df = pd.DataFrame(runner.rescue_discovery_log)
-        log_df.to_csv(self.layout["interim"] / "rescue_discovery_log.csv", index=False)
-        snaps = _annotate_rescue_domains(snaps, log_df)
-        snaps.to_csv(self.layout["interim"] / "rescue_snapshots.csv", index=False)
-        print(f"discover complete: selected={(snaps.get('snapshot_status') == 'selected').sum() if len(snaps) else 0}")
+            runner.discovery_store = store
+            runner.discovery_resume = self.resume
+            self.bootstrap_workspace(runner)
+            runner.prepare()
+            snaps = runner.discover_snapshots(firm_ids=self.targeted)
+            snaps = snaps[snaps["firm_id"].astype(str).isin(self.targeted)].copy()
+            snaps = merge_authoritative_snapshots(snaps, store, firm_ids=self.targeted)
+            log_df = pd.DataFrame(runner.rescue_discovery_log)
+            log_path = self.layout["interim"] / "rescue_discovery_log.csv"
+            if log_path.exists() and not log_df.empty:
+                prev_log = pd.read_csv(log_path, dtype=str)
+                log_df = pd.concat([prev_log, log_df], ignore_index=True)
+            log_df.to_csv(log_path, index=False)
+            snaps = _annotate_rescue_domains(snaps, log_df)
+            previous = (
+                pd.read_csv(self.layout["interim"] / "rescue_snapshots.csv", dtype=str)
+                if (self.layout["interim"] / "rescue_snapshots.csv").exists()
+                else None
+            )
+            atomic_write_rescue_snapshots(
+                self.layout["interim"] / "rescue_snapshots.csv",
+                snaps,
+                previous=previous,
+                firm_ids=set(self.targeted),
+            )
+            selected = (snaps.get("snapshot_status") == "selected").sum() if len(snaps) else 0
+            print(f"discover complete: selected={selected}")
+        finally:
+            store.close()
         return 0
 
     def crawl(self) -> int:
@@ -796,10 +934,27 @@ class RescueOrchestrator:
                 store.close()
         runner = self._runner()
         runner.prepare()
-        snaps_path = self.layout["interim"] / "rescue_snapshots.csv"
-        if not snaps_path.exists():
-            raise FileNotFoundError("missing rescue_snapshots.csv — run discover first")
-        rescue_snaps = pd.read_csv(snaps_path, dtype=str)
+        store = self._open_discovery_store()
+        try:
+            rescue_snaps = load_authoritative_rescue_snapshots(
+                self.layout["interim"], store, firm_ids=self.targeted
+            )
+            if not rescue_snaps.empty:
+                rescue_snaps = self._enrich_and_repersist_snapshots(runner, rescue_snaps, store)
+                self._sync_rescue_snapshots_csv(store)
+        finally:
+            store.close()
+        if rescue_snaps.empty:
+            snaps_path = self.layout["interim"] / "rescue_snapshots.csv"
+            if not snaps_path.exists():
+                raise FileNotFoundError("missing rescue_snapshots.csv — run discover first")
+            rescue_snaps = pd.read_csv(snaps_path, dtype=str)
+            store = self._open_discovery_store()
+            try:
+                rescue_snaps = self._enrich_and_repersist_snapshots(runner, rescue_snaps, store)
+                self._sync_rescue_snapshots_csv(store)
+            finally:
+                store.close()
         parent_snaps = pd.read_csv(self.layout["parent_data"] / "full_sample_snapshots.csv", dtype=str)
         parent_pages = pd.read_csv(self.layout["parent_data"] / "full_sample_pages.csv", dtype=str)
         non_t = parent_snaps[~parent_snaps["firm_id"].astype(str).isin(self.targeted)].copy()
@@ -849,21 +1004,80 @@ class RescueOrchestrator:
 
     def extract(self) -> int:
         # Extraction is performed inside crawl_and_extract; this stage rebuilds observation tables.
+        if self.validate():
+            return 2
         if self.dry_run or self.no_network:
             # offline: only verify inputs exist / plan
             print(json.dumps({"stage": "extract", "dry_run": True, "note": "no extraction performed"}, indent=2))
             return 0
         runner = self._runner()
-        t_snaps = pd.read_csv(runner.output_dir / "snapshots.csv", dtype=str)
-        t_snaps = t_snaps[t_snaps["firm_id"].astype(str).isin(self.targeted)].copy()
-        t_pages = pd.read_csv(runner.output_dir / "pages.csv", dtype=str)
+        store = self._open_discovery_store()
+        try:
+            auth_snaps = load_authoritative_rescue_snapshots(
+                self.layout["interim"], store, firm_ids=self.targeted
+            )
+            if auth_snaps.empty:
+                t_snaps = pd.read_csv(runner.output_dir / "snapshots.csv", dtype=str)
+                t_snaps = t_snaps[t_snaps["firm_id"].astype(str).isin(self.targeted)].copy()
+            else:
+                t_snaps = auth_snaps.copy()
+            t_snaps = self._enrich_and_repersist_snapshots(runner, t_snaps, store)
+            self._sync_rescue_snapshots_csv(store)
+        finally:
+            store.close()
+        t_pages = _normalize_pages_df_for_output(
+            pd.read_csv(runner.output_dir / "pages.csv", low_memory=False)
+        )
         t_pages = t_pages[t_pages["firm_id"].astype(str).isin(self.targeted)].copy()
+        # Prefer interim rescue pages, then state pages (authoritative German crawl cache).
+        for pages_candidate in (
+            self.layout["interim"] / "rescue_pages.csv",
+            self.layout["interim"] / "state" / "pages.csv",
+        ):
+            if not pages_candidate.exists():
+                continue
+            rp = _normalize_pages_df_for_output(pd.read_csv(pages_candidate, low_memory=False))
+            scoped = rp[rp["firm_id"].astype(str).isin(self.targeted)].copy() if not rp.empty else rp
+            if scoped.empty:
+                continue
+            # Prefer German rescue hosts when present.
+            if "canonical_host" in scoped.columns and scoped["canonical_host"].astype(str).str.contains(
+                r"\.de$|bbraun\.de", case=False, na=False
+            ).any():
+                t_pages = scoped
+                break
+            if t_pages.empty:
+                t_pages = scoped
         gov_p = build_governance_metadata_pages(t_pages)
         gov_o = build_governance_metadata_observations(t_snaps, gov_p)
         rescue_obs = build_observation_text_summary(t_snaps, t_pages, gov_o, runner.config.analysis)
         rescue_obs.to_csv(self.layout["interim"] / "rescue_observation_text_summary.csv", index=False)
-        t_snaps.to_csv(self.layout["interim"] / "rescue_snapshots.csv", index=False)
         t_pages.to_csv(self.layout["interim"] / "rescue_pages.csv", index=False)
+        # Keep processed pages.csv aligned with authoritative rescue pages for targeted firms.
+        out_pages_path = runner.output_dir / "pages.csv"
+        if out_pages_path.exists():
+            existing_pages = _normalize_pages_df_for_output(
+                pd.read_csv(out_pages_path, low_memory=False)
+            )
+            keep = existing_pages[~existing_pages["firm_id"].astype(str).isin(self.targeted)]
+            merged_pages = _normalize_pages_df_for_output(
+                pd.concat([keep, t_pages], ignore_index=True)
+            )
+        else:
+            merged_pages = t_pages
+        pipeline_io.write_csv(merged_pages, out_pages_path, PAGE_COLUMNS)
+        if not merged_pages.empty:
+            pipeline_io.write_parquet(merged_pages, runner.output_dir / "pages.parquet")
+        # Keep processed snapshots aligned with enriched authoritative rescue selections.
+        parent_snaps = pd.read_csv(self.layout["parent_data"] / "full_sample_snapshots.csv", dtype=str)
+        non_t = parent_snaps[~parent_snaps["firm_id"].astype(str).isin(self.targeted)].copy()
+        for col in SNAPSHOT_COLUMNS + RESCUE_EXTRA_COLS:
+            if col not in t_snaps.columns:
+                t_snaps[col] = None
+            if col not in non_t.columns:
+                non_t[col] = None
+        merged_snaps = pd.concat([non_t, t_snaps], ignore_index=True)
+        merged_snaps.to_csv(runner.output_dir / "snapshots.csv", index=False)
         print(f"extract complete: observations={len(rescue_obs)}")
         return 0
 
@@ -878,7 +1092,13 @@ class RescueOrchestrator:
         parent_snaps = pd.read_csv(layout["parent_data"] / "full_sample_snapshots.csv", dtype=str)
         parent_pages = pd.read_csv(layout["parent_data"] / "full_sample_pages.csv", dtype=str)
         parent_obs = pd.read_csv(layout["parent_data"] / "full_sample_observation_text_summary.csv", dtype=str)
-        t_snaps = pd.read_csv(layout["interim"] / "rescue_snapshots.csv", dtype=str)
+        store = self._open_discovery_store()
+        try:
+            t_snaps = load_authoritative_rescue_snapshots(layout["interim"], store, firm_ids=self.targeted)
+        finally:
+            store.close()
+        if t_snaps.empty and (layout["interim"] / "rescue_snapshots.csv").exists():
+            t_snaps = pd.read_csv(layout["interim"] / "rescue_snapshots.csv", dtype=str)
         t_pages = pd.read_csv(layout["interim"] / "rescue_pages.csv", dtype=str)
         rescue_obs = pd.read_csv(layout["interim"] / "rescue_observation_text_summary.csv", dtype=str)
         force_sens = force_sensitivity_firm_ids()

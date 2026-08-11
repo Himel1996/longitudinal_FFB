@@ -1,15 +1,8 @@
-# Phase B targeted German rescue — orchestration config only.
-# Does NOT alter config/full_sample.yaml or validated extraction rules.
-#
-# Parent release remains frozen at data/releases/full_sample_v1/.
-# All writes go under full_sample_rescue / full_sample_v1_1_rescue paths.
-
 rescue_mode: true
 parent_release: full_sample_v1
 run_type: targeted_rescue
 release_name: full_sample_v1_1_rescue
 rescue_candidate_file: data/input/full_sample_url_rescue_candidates.csv
-
 paths:
   raw_dir: data/raw/full_sample_rescue
   interim_dir: data/interim/full_sample_rescue
@@ -19,22 +12,97 @@ paths:
   reports_dir: reports/full_sample_rescue
   manual_validation_dir: data/interim/full_sample_rescue/manual_validation
   parent_release_dir: data/releases/full_sample_v1
-
-# Populated/refreshed by the orchestrator from the candidate CSV + coverage file.
-targeted_firms: []
-targeted_timepoints: []
-seed_aliases: []
-
+targeted_firms:
+- '10'
+targeted_timepoints:
+- event
+- post_event
+- post_post_event
+- pre_event
+- pre_pre_event
+seed_aliases:
+- firm_id: '10'
+  relative_timepoint: pre_pre_event
+  original_configured_seed: https://www.bbraun.com/
+  rescue_candidate_seed: https://www.bbraun.de/de.html
+  priority: 1
+  source_row_id: 5
+  reason_for_alias: Clear German locale seed with pre- and post-event coverage
+  historical_domain_flag: false
+  locale_path_flag: true
+  entity_change_warning: false
+  migration_warning: false
+  candidate_type: locale_path
+  rescue_strength: strong
+  archive_evidence: German corporate locale captured annually from 2016 through 2024
+- firm_id: '10'
+  relative_timepoint: pre_event
+  original_configured_seed: https://www.bbraun.com/
+  rescue_candidate_seed: https://www.bbraun.de/de.html
+  priority: 1
+  source_row_id: 5
+  reason_for_alias: Clear German locale seed with pre- and post-event coverage
+  historical_domain_flag: false
+  locale_path_flag: true
+  entity_change_warning: false
+  migration_warning: false
+  candidate_type: locale_path
+  rescue_strength: strong
+  archive_evidence: German corporate locale captured annually from 2016 through 2024
+- firm_id: '10'
+  relative_timepoint: event
+  original_configured_seed: https://www.bbraun.com/
+  rescue_candidate_seed: https://www.bbraun.de/de.html
+  priority: 1
+  source_row_id: 5
+  reason_for_alias: Clear German locale seed with pre- and post-event coverage
+  historical_domain_flag: false
+  locale_path_flag: true
+  entity_change_warning: false
+  migration_warning: false
+  candidate_type: locale_path
+  rescue_strength: strong
+  archive_evidence: German corporate locale captured annually from 2016 through 2024
+- firm_id: '10'
+  relative_timepoint: post_event
+  original_configured_seed: https://www.bbraun.com/
+  rescue_candidate_seed: https://www.bbraun.de/de.html
+  priority: 1
+  source_row_id: 5
+  reason_for_alias: Clear German locale seed with pre- and post-event coverage
+  historical_domain_flag: false
+  locale_path_flag: true
+  entity_change_warning: false
+  migration_warning: false
+  candidate_type: locale_path
+  rescue_strength: strong
+  archive_evidence: German corporate locale captured annually from 2016 through 2024
+- firm_id: '10'
+  relative_timepoint: post_post_event
+  original_configured_seed: https://www.bbraun.com/
+  rescue_candidate_seed: https://www.bbraun.de/de.html
+  priority: 1
+  source_row_id: 5
+  reason_for_alias: Clear German locale seed with pre- and post-event coverage
+  historical_domain_flag: false
+  locale_path_flag: true
+  entity_change_warning: false
+  migration_warning: false
+  candidate_type: locale_path
+  rescue_strength: strong
+  archive_evidence: German corporate locale captured annually from 2016 through 2024
 special_cases:
-  msf_firm_id: "5"
-  freudenberg_firm_id: "21"
-  stihl_firm_id: "22"
-  viessmann_firm_id: "24"
-  oetker_firm_id: "30"
-  force_sensitivity_firm_ids: ["21", "22"]
-  entity_change_firm_ids: ["24", "30"]
-
-# Operational transport controls only (not archival selection methodology).
+  msf_firm_id: '5'
+  freudenberg_firm_id: '21'
+  stihl_firm_id: '22'
+  viessmann_firm_id: '24'
+  oetker_firm_id: '30'
+  force_sensitivity_firm_ids:
+  - '21'
+  - '22'
+  entity_change_firm_ids:
+  - '24'
+  - '30'
 transport:
   concurrency: 1
   max_attempts_per_request: 3
@@ -53,21 +121,17 @@ transport:
     max_cooldown_seconds: 1800
     health_probe_successes_required: 2
     max_circuit_cycles_before_exit: 3
-
 preflight:
   cdx_requests: 2
   replay_requests: 5
   min_replay_success_rate: 0.8
   require_no_sustained_transport_cluster: true
   replay_urls:
-    - "https://web.archive.org/web/20190704175027id_/https://www.bbraun.com/"
-    - "https://web.archive.org/web/20210706194317id_/https://www.bbraun.de/de.html"
+  - https://web.archive.org/web/20190704175027id_/https://www.bbraun.com/
+  - https://web.archive.org/web/20210706194317id_/https://www.bbraun.de/de.html
   cdx_urls:
-    - "https://www.bbraun.de/"
-    - "https://www.bbraun.com/"
-
-# Pipeline block: copy of full_sample settings with isolated output paths.
-# Snapshot tolerances and analysis thresholds inherit validated full_sample values.
+  - https://www.bbraun.de/
+  - https://www.bbraun.com/
 pipeline:
   run:
     run_id: null
@@ -78,11 +142,11 @@ pipeline:
     reports_dir: reports/full_sample_rescue
   timepoints:
     relative:
-      - pre_pre_event
-      - pre_event
-      - event
-      - post_event
-      - post_post_event
+    - pre_pre_event
+    - pre_event
+    - event
+    - post_event
+    - post_post_event
     year_offsets:
       pre_pre_event: -4
       pre_event: -2
@@ -91,20 +155,20 @@ pipeline:
       post_post_event: 4
   snapshot_selection:
     target_date_strategy: mid_year
-    target_month_day: "07-01"
+    target_month_day: 07-01
     tolerance_days: 548
     prefer:
-      - closest
-      - earlier_on_tie
+    - closest
+    - earlier_on_tie
     allowed_status_codes:
-      - "200"
+    - '200'
     allowed_mimetypes:
-      - text/html
+    - text/html
     url_variants:
-      - "https://www.{domain}/"
-      - "http://www.{domain}/"
-      - "https://{domain}/"
-      - "http://{domain}/"
+    - https://www.{domain}/
+    - http://www.{domain}/
+    - https://{domain}/
+    - http://{domain}/
     event_dates_config: config/event_dates.yaml
     event_pre_window_days: 90
     adjacent_period_min_days: 180
@@ -118,10 +182,11 @@ pipeline:
     max_response_bytes: 10485760
     strip_query_strings: false
     exclude_query_patterns:
-      - "utm_"
-      - "fbclid"
-      - "gclid"
-    user_agent: "FFB-WebMiner/0.1 (research; family-firm-branding-full-sample-rescue; +https://github.com/)"
+    - utm_
+    - fbclid
+    - gclid
+    user_agent: FFB-WebMiner/0.1 (research; family-firm-branding-full-sample-rescue;
+      +https://github.com/)
     throttle_seconds: 2.5
     extract_pdf: false
     prefer_german_paths: true
@@ -137,28 +202,28 @@ pipeline:
       broad_context: 3
     branding_path_patterns:
       de:
-        - "ueber-uns"
-        - "über-uns"
-        - "unternehmen"
-        - "firma"
-        - "historie"
-        - "geschichte"
-        - "familie"
-        - "werte"
-        - "verantwortung"
-        - "management"
-        - "geschaeftsfuehrung"
-        - "geschäftsführung"
+      - ueber-uns
+      - über-uns
+      - unternehmen
+      - firma
+      - historie
+      - geschichte
+      - familie
+      - werte
+      - verantwortung
+      - management
+      - geschaeftsfuehrung
+      - geschäftsführung
       en:
-        - "about"
-        - "company"
-        - "history"
-        - "heritage"
-        - "family"
-        - "values"
-        - "responsibility"
-        - "management"
-        - "leadership"
+      - about
+      - company
+      - history
+      - heritage
+      - family
+      - values
+      - responsibility
+      - management
+      - leadership
   extract:
     methods:
       primary: trafilatura
@@ -180,11 +245,11 @@ pipeline:
     min_branding_tokens: 100
     preferred_branding_tokens: 300
     short_text_language_chars: 80
-    language_confidence_threshold: 0.80
+    language_confidence_threshold: 0.8
     low_quality_token_threshold: 100
     moderate_quality_token_threshold: 300
     primary_corpus_language: de
-    german_token_share_min: 0.70
+    german_token_share_min: 0.7
     allow_unknown_in_german_corpus: false
     near_duplicate_threshold: 0.98
   deduplication:

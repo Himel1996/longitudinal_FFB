@@ -1,0 +1,6 @@
+run_id,firm_id,company,relative_timepoint,archive_timestamp,n_high_priority_pages_discovered,n_high_priority_pages_fetched,n_high_priority_pages_missing,n_secondary_pages_fetched,n_broad_pages_fetched,n_foreign_pages_deprioritized,crawl_limit_reached,unused_reserved_slots,pages_fetched
+508f1903-71e7-4aab-aba6-000fed4d8b7d,10,B. BRAUN SE,event,20190704175027,14,14,0,11,0,0,True,0,25
+508f1903-71e7-4aab-aba6-000fed4d8b7d,10,B. BRAUN SE,post_event,20210706194317,50,20,30,5,0,0,True,0,25
+508f1903-71e7-4aab-aba6-000fed4d8b7d,10,B. BRAUN SE,post_post_event,20230701145021,51,20,31,5,0,0,True,0,25
+508f1903-71e7-4aab-aba6-000fed4d8b7d,10,B. BRAUN SE,pre_event,20170701101545,15,15,0,10,0,0,True,0,25
+508f1903-71e7-4aab-aba6-000fed4d8b7d,10,B. BRAUN SE,pre_pre_event,20160329173241,14,14,0,11,0,0,True,0,25

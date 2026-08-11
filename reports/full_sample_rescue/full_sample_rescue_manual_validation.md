@@ -1,6 +1,6 @@
 # Full-Sample Rescue Manual Validation
 
-**Generated:** 2026-07-31 14:51 UTC  
+**Generated:** 2026-08-11 13:55 UTC  
 **Status:** TEMPLATE — fill after sampling on the VM.
 
 Use `rescue_manual_validation_sample.csv` strata:

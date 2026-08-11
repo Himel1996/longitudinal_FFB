@@ -445,3 +445,54 @@ def test_cli_validate_dry_run_no_network():
     assert payload["safe_to_execute"] is True
     assert payload["no_network"] is True
     assert len(payload["targeted_firms"]) == 19
+
+
+def test_rescue_pages_firm_id_string_before_parquet(tmp_path: Path):
+    """Regression: mixed int/str firm_id after CSV merge must not break parquet write."""
+    from ffb_webminer.pipeline import io as pipeline_io
+    from ffb_webminer.rescue.runner import _normalize_pages_df_for_output
+
+    out_dir = tmp_path / "output"
+    out_dir.mkdir()
+    existing = pd.DataFrame([{"firm_id": 6, "page_id": "p1", "url": "https://example.com/", "analysis_eligible": "True"}])
+    existing.to_csv(out_dir / "pages.csv", index=False)
+    new_pages = pd.DataFrame(
+        [{"firm_id": "10", "page_id": "p2", "url": "https://bbraun.de/", "analysis_eligible": True}]
+    )
+    keep = existing[~existing["firm_id"].astype(str).isin(["10"])]
+    merged = pd.concat(
+        [_normalize_pages_df_for_output(keep), _normalize_pages_df_for_output(new_pages)],
+        ignore_index=True,
+    )
+    merged = _normalize_pages_df_for_output(merged)
+    pipeline_io.write_parquet(merged, out_dir / "pages.parquet")
+    reread = pd.read_parquet(out_dir / "pages.parquet")
+    assert reread["firm_id"].dtype == object
+    assert set(reread["firm_id"].astype(str)) == {"6", "10"}
+    assert reread["analysis_eligible"].dtype == bool
+
+
+def test_rescue_pages_http_status_mixed_float_str_before_parquet(tmp_path: Path):
+    """Regression: float http_status from crawl + str from CSV must not break parquet."""
+    from ffb_webminer.pipeline import io as pipeline_io
+    from ffb_webminer.rescue.runner import _normalize_pages_df_for_output
+
+    out_dir = tmp_path / "output"
+    out_dir.mkdir()
+    existing = pd.DataFrame(
+        [{"firm_id": "6", "page_id": "p1", "http_status": "200", "analysis_eligible": "True"}]
+    )
+    new_pages = pd.DataFrame(
+        [
+            {"firm_id": "10", "page_id": "p2", "http_status": 200.0, "analysis_eligible": True},
+            {"firm_id": "10", "page_id": "p3", "http_status": float("nan"), "analysis_eligible": False},
+        ]
+    )
+    merged = pd.concat(
+        [_normalize_pages_df_for_output(existing), _normalize_pages_df_for_output(new_pages)],
+        ignore_index=True,
+    )
+    merged = _normalize_pages_df_for_output(merged)
+    pipeline_io.write_parquet(merged, out_dir / "pages.parquet")
+    reread = pd.read_parquet(out_dir / "pages.parquet")
+    assert set(reread["http_status"].astype(str).tolist()) == {"200", ""}
