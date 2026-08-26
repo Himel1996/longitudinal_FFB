@@ -13,7 +13,9 @@ paths:
   manual_validation_dir: data/interim/full_sample_rescue/manual_validation
   parent_release_dir: data/releases/full_sample_v1
 targeted_firms:
-- '10'
+- '2'
+- '11'
+- '12'
 targeted_timepoints:
 - event
 - post_event
@@ -21,76 +23,199 @@ targeted_timepoints:
 - pre_event
 - pre_pre_event
 seed_aliases:
-- firm_id: '10'
+- firm_id: '2'
   relative_timepoint: pre_pre_event
-  original_configured_seed: https://www.bbraun.com/
-  rescue_candidate_seed: https://www.bbraun.de/de.html
+  original_configured_seed: https://www.peter-lacke.de/
+  rescue_candidate_seed: https://www.peter-lacke.com/
   priority: 1
-  source_row_id: 5
-  reason_for_alias: Clear German locale seed with pre- and post-event coverage
-  historical_domain_flag: false
-  locale_path_flag: true
+  source_row_id: 2
+  reason_for_alias: Domain migration from peter-lacke.de; same .com seed provides
+    usable pre- and post-event windows
+  historical_domain_flag: true
+  locale_path_flag: false
   entity_change_warning: false
-  migration_warning: false
-  candidate_type: locale_path
+  migration_warning: true
+  candidate_type: historical_domain
   rescue_strength: strong
-  archive_evidence: German corporate locale captured annually from 2016 through 2024
-- firm_id: '10'
+  archive_evidence: German corporate root captured in 2013-2015 and 2019-2020
+- firm_id: '2'
   relative_timepoint: pre_event
-  original_configured_seed: https://www.bbraun.com/
-  rescue_candidate_seed: https://www.bbraun.de/de.html
+  original_configured_seed: https://www.peter-lacke.de/
+  rescue_candidate_seed: https://www.peter-lacke.com/
   priority: 1
-  source_row_id: 5
-  reason_for_alias: Clear German locale seed with pre- and post-event coverage
-  historical_domain_flag: false
-  locale_path_flag: true
+  source_row_id: 2
+  reason_for_alias: Domain migration from peter-lacke.de; same .com seed provides
+    usable pre- and post-event windows
+  historical_domain_flag: true
+  locale_path_flag: false
   entity_change_warning: false
-  migration_warning: false
-  candidate_type: locale_path
+  migration_warning: true
+  candidate_type: historical_domain
   rescue_strength: strong
-  archive_evidence: German corporate locale captured annually from 2016 through 2024
-- firm_id: '10'
+  archive_evidence: German corporate root captured in 2013-2015 and 2019-2020
+- firm_id: '2'
   relative_timepoint: event
-  original_configured_seed: https://www.bbraun.com/
-  rescue_candidate_seed: https://www.bbraun.de/de.html
+  original_configured_seed: https://www.peter-lacke.de/
+  rescue_candidate_seed: https://www.peter-lacke.com/
   priority: 1
-  source_row_id: 5
-  reason_for_alias: Clear German locale seed with pre- and post-event coverage
-  historical_domain_flag: false
-  locale_path_flag: true
+  source_row_id: 2
+  reason_for_alias: Domain migration from peter-lacke.de; same .com seed provides
+    usable pre- and post-event windows
+  historical_domain_flag: true
+  locale_path_flag: false
   entity_change_warning: false
-  migration_warning: false
-  candidate_type: locale_path
+  migration_warning: true
+  candidate_type: historical_domain
   rescue_strength: strong
-  archive_evidence: German corporate locale captured annually from 2016 through 2024
-- firm_id: '10'
+  archive_evidence: German corporate root captured in 2013-2015 and 2019-2020
+- firm_id: '2'
   relative_timepoint: post_event
-  original_configured_seed: https://www.bbraun.com/
-  rescue_candidate_seed: https://www.bbraun.de/de.html
+  original_configured_seed: https://www.peter-lacke.de/
+  rescue_candidate_seed: https://www.peter-lacke.com/
   priority: 1
-  source_row_id: 5
-  reason_for_alias: Clear German locale seed with pre- and post-event coverage
-  historical_domain_flag: false
-  locale_path_flag: true
+  source_row_id: 2
+  reason_for_alias: Domain migration from peter-lacke.de; same .com seed provides
+    usable pre- and post-event windows
+  historical_domain_flag: true
+  locale_path_flag: false
   entity_change_warning: false
-  migration_warning: false
-  candidate_type: locale_path
+  migration_warning: true
+  candidate_type: historical_domain
   rescue_strength: strong
-  archive_evidence: German corporate locale captured annually from 2016 through 2024
-- firm_id: '10'
+  archive_evidence: German corporate root captured in 2013-2015 and 2019-2020
+- firm_id: '2'
   relative_timepoint: post_post_event
-  original_configured_seed: https://www.bbraun.com/
-  rescue_candidate_seed: https://www.bbraun.de/de.html
+  original_configured_seed: https://www.peter-lacke.de/
+  rescue_candidate_seed: https://www.peter-lacke.com/
   priority: 1
-  source_row_id: 5
-  reason_for_alias: Clear German locale seed with pre- and post-event coverage
+  source_row_id: 2
+  reason_for_alias: Domain migration from peter-lacke.de; same .com seed provides
+    usable pre- and post-event windows
+  historical_domain_flag: true
+  locale_path_flag: false
+  entity_change_warning: false
+  migration_warning: true
+  candidate_type: historical_domain
+  rescue_strength: strong
+  archive_evidence: German corporate root captured in 2013-2015 and 2019-2020
+- firm_id: '11'
+  relative_timepoint: pre_pre_event
+  original_configured_seed: https://www.harting.com/
+  rescue_candidate_seed: http://www.harting.de/
+  priority: 1
+  source_row_id: 6
+  reason_for_alias: Historical German site; direct company, family and history subpages
+    should receive reserved crawl capacity
+  historical_domain_flag: true
+  locale_path_flag: true
+  entity_change_warning: false
+  migration_warning: false
+  candidate_type: historical_domain
+  rescue_strength: strong
+  archive_evidence: German root and corporate subpages captured in 2011-2012
+- firm_id: '11'
+  relative_timepoint: pre_event
+  original_configured_seed: https://www.harting.com/
+  rescue_candidate_seed: http://www.harting.de/
+  priority: 1
+  source_row_id: 6
+  reason_for_alias: Historical German site; direct company, family and history subpages
+    should receive reserved crawl capacity
+  historical_domain_flag: true
+  locale_path_flag: true
+  entity_change_warning: false
+  migration_warning: false
+  candidate_type: historical_domain
+  rescue_strength: strong
+  archive_evidence: German root and corporate subpages captured in 2011-2012
+- firm_id: '11'
+  relative_timepoint: post_event
+  original_configured_seed: https://www.harting.com/
+  rescue_candidate_seed: https://www.harting.com/DE/de
+  priority: 1
+  source_row_id: 7
+  reason_for_alias: Use historical uppercase locale path; flag site migration in metadata
+  historical_domain_flag: true
+  locale_path_flag: true
+  entity_change_warning: false
+  migration_warning: true
+  candidate_type: locale_path
+  rescue_strength: strong
+  archive_evidence: German corporate locale and management pages captured from 2017-2018
+- firm_id: '11'
+  relative_timepoint: post_post_event
+  original_configured_seed: https://www.harting.com/
+  rescue_candidate_seed: https://www.harting.com/DE/de
+  priority: 1
+  source_row_id: 7
+  reason_for_alias: Use historical uppercase locale path; flag site migration in metadata
+  historical_domain_flag: true
+  locale_path_flag: true
+  entity_change_warning: false
+  migration_warning: true
+  candidate_type: locale_path
+  rescue_strength: strong
+  archive_evidence: German corporate locale and management pages captured from 2017-2018
+- firm_id: '12'
+  relative_timepoint: pre_pre_event
+  original_configured_seed: https://www.rossmann.de/
+  rescue_candidate_seed: https://www.rossmann.de/unternehmen/
+  priority: 1
+  source_row_id: 8
+  reason_for_alias: Direct pre-event corporate seed
   historical_domain_flag: false
   locale_path_flag: true
   entity_change_warning: false
   migration_warning: false
-  candidate_type: locale_path
+  candidate_type: company_section
   rescue_strength: strong
-  archive_evidence: German corporate locale captured annually from 2016 through 2024
+  archive_evidence: German corporate section captured annually from 2017 through 2021
+- firm_id: '12'
+  relative_timepoint: pre_event
+  original_configured_seed: https://www.rossmann.de/
+  rescue_candidate_seed: https://www.rossmann.de/unternehmen/
+  priority: 1
+  source_row_id: 8
+  reason_for_alias: Direct pre-event corporate seed
+  historical_domain_flag: false
+  locale_path_flag: true
+  entity_change_warning: false
+  migration_warning: false
+  candidate_type: company_section
+  rescue_strength: strong
+  archive_evidence: German corporate section captured annually from 2017 through 2021
+- firm_id: '12'
+  relative_timepoint: post_event
+  original_configured_seed: https://www.rossmann.de/
+  rescue_candidate_seed: https://unternehmen.rossmann.de/
+  priority: 1
+  source_row_id: 9
+  reason_for_alias: Corporate-content migration to subdomain; preserve alias in observation
+    metadata
+  historical_domain_flag: true
+  locale_path_flag: true
+  entity_change_warning: false
+  migration_warning: true
+  candidate_type: historical_domain
+  rescue_strength: strong
+  archive_evidence: German corporate subdomain captured annually from 2021 through
+    2025
+- firm_id: '12'
+  relative_timepoint: post_post_event
+  original_configured_seed: https://www.rossmann.de/
+  rescue_candidate_seed: https://unternehmen.rossmann.de/
+  priority: 1
+  source_row_id: 9
+  reason_for_alias: Corporate-content migration to subdomain; preserve alias in observation
+    metadata
+  historical_domain_flag: true
+  locale_path_flag: true
+  entity_change_warning: false
+  migration_warning: true
+  candidate_type: historical_domain
+  rescue_strength: strong
+  archive_evidence: German corporate subdomain captured annually from 2021 through
+    2025
 special_cases:
   msf_firm_id: '5'
   freudenberg_firm_id: '21'
