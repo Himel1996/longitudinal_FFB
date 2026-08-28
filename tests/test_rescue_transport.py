@@ -599,3 +599,27 @@ def test_process_restart_reuses_sqlite_state(tmp_path: Path):
         assert store2.counts()["cached_valid_pages"] == 1
     finally:
         store2.close()
+
+
+def test_page_fetch_store_reopens_after_close(tmp_path: Path):
+    """Extract may still read cache after an accidental close; reopen, do not crash."""
+    db = tmp_path / "page_fetch_state.sqlite"
+    store = PageFetchStateStore(db)
+    key = page_cache_key("https://example.de/", "20200101120000")
+    store.upsert(
+        PageFetchRecord(
+            page_cache_key=key,
+            firm_id="10",
+            original_url="https://example.de/",
+            replay_url="r",
+            archive_timestamp="20200101120000",
+            fetch_status=STATUS_FETCHED,
+            cache_valid=True,
+            content_hash="abc",
+        )
+    )
+    store.close()
+    rec = store.get(key)
+    assert rec is not None
+    assert rec.fetch_status == STATUS_FETCHED
+    store.close()

@@ -539,7 +539,6 @@ class RescuePipelineRunner(PipelineRunner):
         crawled_by_capture: dict[tuple[str, str], list] = {}
         crawl_summaries: list[dict[str, Any]] = []
         selected = snapshots[snapshots["snapshot_status"] == "selected"]
-        paused: TransportPausedError | None = None
         try:
             for (firm_id, archive_ts), group in selected.groupby(["firm_id", "archive_timestamp"], dropna=False):
                 ts_s = str(archive_ts).strip()
@@ -589,8 +588,125 @@ class RescuePipelineRunner(PipelineRunner):
                         "pages_fetched": len(crawl.pages),
                     }
                 )
-        except TransportPausedError as exc:
-            paused = exc
+        except TransportPausedError:
+            # Page cache/state already persisted; close after stats, then re-raise.
+            self._last_fetcher_stats = dict(getattr(fetcher, "stats", {}))
+            self._last_circuit = getattr(fetcher, "circuit", None)
+            try:
+                fetcher.close()
+            except Exception:
+                pass
+            raise
+
+        try:
+            all_pages: list[dict[str, Any]] = []
+            for _, snap in snapshots.iterrows():
+                snap_firm_id = str(snap["firm_id"])
+                raw_ts = snap.get("archive_timestamp")
+                if snap["snapshot_status"] != "selected" or raw_ts is None or str(raw_ts).strip().lower() in {
+                    "",
+                    "nan",
+                    "none",
+                    "nat",
+                    "<na>",
+                }:
+                    all_pages.extend(self._empty_pages_for_snapshot(snap))
+                    continue
+                try:
+                    archive_ts_norm = normalize_archive_timestamp(raw_ts)
+                except ValueError:
+                    all_pages.extend(self._empty_pages_for_snapshot(snap))
+                    continue
+                firm = firms[firms["firm_id"].astype(str) == snap_firm_id].iloc[0]
+                crawl_pages = crawled_by_capture.get((snap_firm_id, archive_ts_norm), [])
+                if not crawl_pages:
+                    all_pages.extend(self._empty_pages_for_snapshot(snap))
+                    continue
+                seed_url = snap.get("canonical_original_url") or firm["website"]
+                try:
+                    check_domain = parse_domain(str(seed_url)).registrable_domain
+                except Exception:
+                    check_domain = firm["primary_domain"]
+                if (
+                    snap.get("rescue_domain")
+                    and pd.notna(snap.get("rescue_domain"))
+                    and str(snap.get("rescue_domain")).strip()
+                ):
+                    check_domain = str(snap["rescue_domain"])
+                for cp in crawl_pages:
+                    page_row = self._page_row_from_crawl(snap, firm, cp, fetcher=fetcher)
+                    page_row = check_page(page_row, check_domain, self.config.quality)
+                    page_row = validate_page_for_analysis(
+                        page_row,
+                        check_domain,
+                        self.config.quality,
+                        max_temporal_distance=self.config.quality.max_temporal_distance_days,
+                    )
+                    classification = classify_page(
+                        page_row,
+                        governance_allowlist=self.config.analysis.governance_url_allowlist,
+                    )
+                    page_row.update(
+                        {
+                            "page_category": classification.page_category,
+                            "page_category_reason": classification.page_category_reason,
+                            "classification_rule_priority": classification.classification_rule_priority,
+                            "classification_rule_id": classification.classification_rule_id,
+                            "branding_corpus_eligible": classification.branding_corpus_eligible,
+                            "branding_corpus_exclusion_reason": classification.branding_corpus_exclusion_reason,
+                            "governance_metadata_eligible": classification.governance_metadata_eligible,
+                            "governance_inclusion_reason": classification.governance_inclusion_reason,
+                            "governance_rule_id": classification.governance_rule_id,
+                            "governance_evidence_type": classification.governance_evidence_type,
+                        }
+                    )
+                    all_pages.append(page_row)
+
+            preferred_hosts = {}
+            for _, firm in firms.iterrows():
+                host = parse_domain(str(firm.get("website") or "")).hostname or ""
+                preferred_hosts[str(firm["firm_id"])] = host.lstrip("www.")
+            for _, snap in snapshots.iterrows():
+                if pd.notna(snap.get("canonical_original_url")):
+                    host = urlparse(str(snap["canonical_original_url"])).hostname or ""
+                    if host:
+                        preferred_hosts[str(snap["firm_id"])] = host.lstrip("www.")
+
+            near_thresh = float(
+                getattr(self.config.deduplication, "near_duplicate_threshold", None)
+                or self.config.analysis.near_duplicate_threshold
+            )
+            all_pages = deduplicate_within_observations(
+                all_pages,
+                preferred_hosts=preferred_hosts,
+                near_duplicate_threshold=near_thresh,
+            )
+            all_pages = annotate_language_inclusion(all_pages, self.config.analysis)
+
+            pages_df = pd.DataFrame(all_pages)
+            pages_df = _normalize_pages_df_for_output(pages_df)
+            out_path = self.output_dir / "pages.csv"
+            if firm_ids and out_path.exists():
+                existing = pd.read_csv(out_path, dtype=str)
+                existing = _normalize_pages_df_for_output(existing)
+                keep = existing[~existing["firm_id"].astype(str).isin([str(f) for f in firm_ids])]
+                pages_df = pd.concat([keep, pages_df], ignore_index=True)
+                pages_df = _normalize_pages_df_for_output(pages_df)
+            else:
+                self._assert_pages_match_snapshots(pages_df, pd.read_csv(snapshots_path, dtype=str))
+            pipeline_io.write_csv(pages_df, out_path, PAGE_COLUMNS)
+            if not pages_df.empty:
+                pipeline_io.write_parquet(pages_df, self.output_dir / "pages.parquet")
+            pages_df.to_csv(self.state_dir / "pages.csv", index=False)
+
+            crawl_summary_df = build_crawl_priority_summary(snapshots, crawl_summaries)
+            crawl_out = self.output_dir / "crawl_priority_summary.csv"
+            if firm_ids and crawl_out.exists():
+                existing = pd.read_csv(crawl_out)
+                keep = existing[~existing["firm_id"].astype(str).isin([str(f) for f in firm_ids])]
+                crawl_summary_df = pd.concat([keep, crawl_summary_df], ignore_index=True)
+            pipeline_io.write_csv(crawl_summary_df, crawl_out, CRAWL_PRIORITY_SUMMARY_COLUMNS)
+            return pages_df
         finally:
             self._last_fetcher_stats = dict(getattr(fetcher, "stats", {}))
             self._last_circuit = getattr(fetcher, "circuit", None)
@@ -598,119 +714,6 @@ class RescuePipelineRunner(PipelineRunner):
                 fetcher.close()
             except Exception:
                 pass
-
-        if paused is not None:
-            # Page cache/state already persisted; re-raise so orchestrator exits resumable.
-            raise paused
-
-        all_pages: list[dict[str, Any]] = []
-        for _, snap in snapshots.iterrows():
-            snap_firm_id = str(snap["firm_id"])
-            raw_ts = snap.get("archive_timestamp")
-            if snap["snapshot_status"] != "selected" or raw_ts is None or str(raw_ts).strip().lower() in {
-                "",
-                "nan",
-                "none",
-                "nat",
-                "<na>",
-            }:
-                all_pages.extend(self._empty_pages_for_snapshot(snap))
-                continue
-            try:
-                archive_ts_norm = normalize_archive_timestamp(raw_ts)
-            except ValueError:
-                all_pages.extend(self._empty_pages_for_snapshot(snap))
-                continue
-            firm = firms[firms["firm_id"].astype(str) == snap_firm_id].iloc[0]
-            crawl_pages = crawled_by_capture.get((snap_firm_id, archive_ts_norm), [])
-            if not crawl_pages:
-                all_pages.extend(self._empty_pages_for_snapshot(snap))
-                continue
-            seed_url = snap.get("canonical_original_url") or firm["website"]
-            try:
-                check_domain = parse_domain(str(seed_url)).registrable_domain
-            except Exception:
-                check_domain = firm["primary_domain"]
-            if (
-                snap.get("rescue_domain")
-                and pd.notna(snap.get("rescue_domain"))
-                and str(snap.get("rescue_domain")).strip()
-            ):
-                check_domain = str(snap["rescue_domain"])
-            for cp in crawl_pages:
-                page_row = self._page_row_from_crawl(snap, firm, cp, fetcher=fetcher)
-                page_row = check_page(page_row, check_domain, self.config.quality)
-                page_row = validate_page_for_analysis(
-                    page_row,
-                    check_domain,
-                    self.config.quality,
-                    max_temporal_distance=self.config.quality.max_temporal_distance_days,
-                )
-                classification = classify_page(
-                    page_row,
-                    governance_allowlist=self.config.analysis.governance_url_allowlist,
-                )
-                page_row.update(
-                    {
-                        "page_category": classification.page_category,
-                        "page_category_reason": classification.page_category_reason,
-                        "classification_rule_priority": classification.classification_rule_priority,
-                        "classification_rule_id": classification.classification_rule_id,
-                        "branding_corpus_eligible": classification.branding_corpus_eligible,
-                        "branding_corpus_exclusion_reason": classification.branding_corpus_exclusion_reason,
-                        "governance_metadata_eligible": classification.governance_metadata_eligible,
-                        "governance_inclusion_reason": classification.governance_inclusion_reason,
-                        "governance_rule_id": classification.governance_rule_id,
-                        "governance_evidence_type": classification.governance_evidence_type,
-                    }
-                )
-                all_pages.append(page_row)
-
-        preferred_hosts = {}
-        for _, firm in firms.iterrows():
-            host = parse_domain(str(firm.get("website") or "")).hostname or ""
-            preferred_hosts[str(firm["firm_id"])] = host.lstrip("www.")
-        for _, snap in snapshots.iterrows():
-            if pd.notna(snap.get("canonical_original_url")):
-                host = urlparse(str(snap["canonical_original_url"])).hostname or ""
-                if host:
-                    preferred_hosts[str(snap["firm_id"])] = host.lstrip("www.")
-
-        near_thresh = float(
-            getattr(self.config.deduplication, "near_duplicate_threshold", None)
-            or self.config.analysis.near_duplicate_threshold
-        )
-        all_pages = deduplicate_within_observations(
-            all_pages,
-            preferred_hosts=preferred_hosts,
-            near_duplicate_threshold=near_thresh,
-        )
-        all_pages = annotate_language_inclusion(all_pages, self.config.analysis)
-
-        pages_df = pd.DataFrame(all_pages)
-        pages_df = _normalize_pages_df_for_output(pages_df)
-        out_path = self.output_dir / "pages.csv"
-        if firm_ids and out_path.exists():
-            existing = pd.read_csv(out_path, dtype=str)
-            existing = _normalize_pages_df_for_output(existing)
-            keep = existing[~existing["firm_id"].astype(str).isin([str(f) for f in firm_ids])]
-            pages_df = pd.concat([keep, pages_df], ignore_index=True)
-            pages_df = _normalize_pages_df_for_output(pages_df)
-        else:
-            self._assert_pages_match_snapshots(pages_df, pd.read_csv(snapshots_path, dtype=str))
-        pipeline_io.write_csv(pages_df, out_path, PAGE_COLUMNS)
-        if not pages_df.empty:
-            pipeline_io.write_parquet(pages_df, self.output_dir / "pages.parquet")
-        pages_df.to_csv(self.state_dir / "pages.csv", index=False)
-
-        crawl_summary_df = build_crawl_priority_summary(snapshots, crawl_summaries)
-        crawl_out = self.output_dir / "crawl_priority_summary.csv"
-        if firm_ids and crawl_out.exists():
-            existing = pd.read_csv(crawl_out)
-            keep = existing[~existing["firm_id"].astype(str).isin([str(f) for f in firm_ids])]
-            crawl_summary_df = pd.concat([keep, crawl_summary_df], ignore_index=True)
-        pipeline_io.write_csv(crawl_summary_df, crawl_out, CRAWL_PRIORITY_SUMMARY_COLUMNS)
-        return pages_df
 
 
 def refresh_snapshot_enrichment(runner: PipelineRunner, snapshots: pd.DataFrame) -> pd.DataFrame:

@@ -1,6 +1,6 @@
 # Full-Sample Rescue Impact — Phase B
 
-**Generated:** 2026-08-11 13:55 UTC  
+**Generated:** 2026-08-28 05:41 UTC  
 **Status:** TEMPLATE — populate only after a completed rescue run.
 
 ## Sections to fill from run artifacts

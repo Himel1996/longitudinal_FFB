@@ -5,7 +5,9 @@
   "rescue_candidate_file": "data/input/full_sample_url_rescue_candidates.csv",
   "rescue_candidate_file_hash": "d28b44180c44eabaefca54ecc1322493b144fe63a39cd4e56e51dc2140530120",
   "firms_targeted": [
-    "10"
+    "2",
+    "11",
+    "12"
   ],
   "timepoints_targeted": [
     "event",
@@ -14,7 +16,7 @@
     "pre_event",
     "pre_pre_event"
   ],
-  "git_commit": "dd708dd0b726deaa56c6200975daab48893a873d",
+  "git_commit": "83f14f0c81d0ddc82dcb299be283b6a970775e34",
   "pipeline_version": "ffb_webminer",
   "extraction_logic_version": "full_sample_v1_frozen",
   "source_code_changed_for_core_rules": false,
@@ -23,14 +25,14 @@
   "original_release_preserved": true,
   "parent_primary_sha256": "c54fc35698b2b2e962b40ed0a75170ba66d6dd03352b6f34eee55304022d6c27",
   "config_hash_full_sample": "2e3c987c0cb13b2c248d75275d4cacf16370741d791085b43f65079a9622c58b",
-  "config_hash_rescue": "7cd2f10decc989e033ed1b0e20255bc1b02f38803df292343bdd2bba61ecd8fe",
+  "config_hash_rescue": "d87896c0da5b78bf3ca72436ab18dfa4c2c1fde22510bb2471bc50b027c45d86",
   "execution_environment": "vm_or_local",
-  "creation_timestamp": "2026-08-11T13:55:12.955236+00:00",
+  "creation_timestamp": "2026-08-28T05:41:25.904616+00:00",
   "counts": {
     "primary": 56,
-    "sensitivity_all": 87,
-    "sensitivity_de": 66,
-    "ready_primary": 11,
-    "ready_extended": 11
+    "sensitivity_all": 92,
+    "sensitivity_de": 69,
+    "ready_primary": 12,
+    "ready_extended": 13
   }
 }

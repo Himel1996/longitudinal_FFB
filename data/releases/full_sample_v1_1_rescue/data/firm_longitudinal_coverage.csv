@@ -1,6 +1,6 @@
 firm_id,company,event_date,event_year,event_type,n_pre_event_observations_total,n_post_event_observations_total,n_pre_event_german_eligible,n_post_event_german_eligible,n_pre_event_german_primary,n_post_event_german_primary,n_pre_event_german_sensitivity,n_post_event_german_sensitivity,german_longitudinal_ready_primary,german_longitudinal_ready_extended,rescue_attempted,rescue_improved_coverage,historical_domain_used,site_migration_flag,entity_change_flag,remaining_coverage_gap,coverage_notes
 1,BLUE MOON COMMUNICATION CONSULTANTS GMBH,2024-07-01,2024,family_internal_succession,2,2,2,1,2,1,2,1,TRUE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,none,ready_primary
-2,PETER-LACKE HOLDING GMBH,2015-07-01,2015,family_internal_succession,2,2,2,0,2,0,2,0,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,missing_post,missing_post
+2,PETER-LACKE HOLDING GMBH,2015-07-01,2015,family_internal_succession,2,2,2,1,2,1,2,1,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,none,rescue_attempted
 3,ANLAGENTECHNIK LEICHTLE GMBH,2023-07-01,2023,unclear_family_transition,2,2,2,1,2,1,2,1,TRUE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,none,ready_primary
 4,MYRENNE GMBH,2012-04-15,2012,family_internal_succession,2,2,1,2,1,2,1,2,TRUE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,none,ready_primary
 5,MSF-VATHAUER ANTRIEBSTECHNIK GMBH & CO. KG,2006-01-01,2006,family_internal_succession_or_management_entry,2,2,0,2,0,2,0,2,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,missing_pre;msf_text_volume_threshold,missing_pre;msf_text_volume_threshold
@@ -8,9 +8,9 @@ firm_id,company,event_date,event_year,event_type,n_pre_event_observations_total,
 7,SIXT SE,2021-07-01,2021,family_internal_succession,2,2,2,2,2,2,2,2,TRUE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,none,ready_primary
 8,DM-DROGERIE MARKT GMBH + CO. KG,2019-07-01,2019,family_internal_succession,2,2,2,0,2,0,2,0,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,missing_post,missing_post
 9,TRIGEMA W. GRUPP KG,2024-07-01,2024,family_internal_succession,2,2,2,1,2,1,2,1,TRUE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,none,ready_primary
-10,B. BRAUN SE,2019-07-01,2019,family_internal_succession,2,2,2,2,2,2,2,2,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,none,rescue_attempted
-11,HARTING TECHNOLOGY GROUP,2015-07-01,2015,family_internal_succession,2,2,0,0,0,0,0,0,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,missing_pre;missing_post,missing_pre;missing_post
-12,DIRK ROSSMANN GMBH,2021-07-01,2021,family_internal_succession,2,2,1,0,1,0,1,0,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,missing_post,missing_post
+10,B. BRAUN SE,2019-07-01,2019,family_internal_succession,2,2,0,0,0,0,0,0,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,missing_pre;missing_post,missing_pre;missing_post
+11,HARTING TECHNOLOGY GROUP,2015-07-01,2015,family_internal_succession,2,2,2,2,1,2,2,2,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,none,rescue_attempted
+12,DIRK ROSSMANN GMBH,2021-07-01,2021,family_internal_succession,2,2,2,2,0,2,2,2,FALSE,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,none,rescue_attempted
 13,HIPP HOLDING / HIPP GMBH & CO. VERTRIEB KG,2021-07-01,2021,family_internal_succession,2,2,2,2,2,2,2,2,TRUE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,none,ready_primary
 14,CLAAS KGAA MBH,2019-07-01,2019,external_ceo_professionalization,2,2,0,0,0,0,0,0,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,missing_pre;missing_post,missing_pre;missing_post
 15,FABER-CASTELL AG,2017-07-01,2017,external_ceo_professionalization,2,2,2,0,2,0,2,0,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,missing_post,missing_post

@@ -74,17 +74,34 @@ class PageFetchStateStore:
     def __init__(self, db_path: Path) -> None:
         self.db_path = Path(db_path)
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
+        self._conn: sqlite3.Connection | None = None
+        self._ensure_conn()
+        self._ensure_schema()
+
+    def _ensure_conn(self) -> sqlite3.Connection:
+        if self._conn is not None:
+            try:
+                self._conn.execute("SELECT 1")
+                return self._conn
+            except sqlite3.ProgrammingError:
+                self._conn = None
         self._conn = sqlite3.connect(str(self.db_path), timeout=60)
         self._conn.row_factory = sqlite3.Row
         self._conn.execute("PRAGMA journal_mode=WAL;")
         self._conn.execute("PRAGMA synchronous=FULL;")
-        self._ensure_schema()
+        return self._conn
 
     def close(self) -> None:
-        self._conn.close()
+        if self._conn is None:
+            return
+        try:
+            self._conn.close()
+        except sqlite3.Error:
+            pass
+        self._conn = None
 
     def _ensure_schema(self) -> None:
-        self._conn.execute(
+        self._ensure_conn().execute(
             """
             CREATE TABLE IF NOT EXISTS page_fetch_state (
                 page_cache_key TEXT PRIMARY KEY,
@@ -111,10 +128,10 @@ class PageFetchStateStore:
             )
             """
         )
-        self._conn.commit()
+        self._ensure_conn().commit()
 
     def get(self, key: str) -> PageFetchRecord | None:
-        row = self._conn.execute(
+        row = self._ensure_conn().execute(
             "SELECT * FROM page_fetch_state WHERE page_cache_key = ?", (key,)
         ).fetchone()
         if row is None:
@@ -143,7 +160,7 @@ class PageFetchStateStore:
         )
 
     def upsert(self, record: PageFetchRecord) -> None:
-        self._conn.execute(
+        self._ensure_conn().execute(
             """
             INSERT INTO page_fetch_state (
                 page_cache_key, firm_id, relative_timepoint, original_url, replay_url,
@@ -198,7 +215,7 @@ class PageFetchStateStore:
                 _utc_now(),
             ),
         )
-        self._conn.commit()
+        self._ensure_conn().commit()
 
     def counts(self, *, firm_id: str | None = None) -> dict[str, int]:
         sql = "SELECT fetch_status, COUNT(*) AS n FROM page_fetch_state"
@@ -207,7 +224,7 @@ class PageFetchStateStore:
             sql += " WHERE firm_id = ?"
             params = (str(firm_id),)
         sql += " GROUP BY fetch_status"
-        rows = self._conn.execute(sql, params).fetchall()
+        rows = self._ensure_conn().execute(sql, params).fetchall()
         out = {
             "completed_pages": 0,
             "cached_valid_pages": 0,
@@ -243,7 +260,7 @@ class PageFetchStateStore:
         if firm_id is not None:
             sql += " WHERE firm_id = ?"
             params = (str(firm_id),)
-        for row in self._conn.execute(sql, params):
+        for row in self._ensure_conn().execute(sql, params):
             rec = self.get(row["page_cache_key"])
             if rec is not None:
                 yield rec
