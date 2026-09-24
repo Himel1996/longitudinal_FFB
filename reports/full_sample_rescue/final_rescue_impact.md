@@ -13,7 +13,7 @@
 | German extended-ready | 10 (same parent flag) | 27 |
 | Newly primary-ready firms | — | 12 |
 | Newly extended-ready firms | — | 17 |
-| Firms still not extended-ready | — | 3: 8, 24, 30 |
+| Firms still not extended-ready | — | 3: 8 DM-DROGERIE MARKT, 24 Viessmann, 30 Oetker |
 
 Parent readiness used the single column `german_longitudinal_ready` (10 firms). Final release splits primary vs extended.
 
@@ -24,7 +24,9 @@ Parent readiness used the single column `german_longitudinal_ready` (10 firms). 
 2, 5, 10, 11, 12, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 25, 27
 
 ### Still not longitudinally ready (extended FALSE)
-8, 24, 30
+- **8 — DM-DROGERIE MARKT GMBH + CO. KG** (not a Phase B rescue target)
+- **24 — Viessmann** (entity-change)
+- **30 — Oetker** (entity-change / manual review)
 
 ## Decision totals (19 rescue firms)
 

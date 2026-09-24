@@ -1,0 +1,184 @@
+{
+  "release_name": "full_sample_v1_1_rescue_final",
+  "release_version": "full_sample_v1_1_rescue_final",
+  "release_status": "FROZEN",
+  "acceptance_verdict": "READY_TO_FREEZE_WITH_DOCUMENTED_LIMITATIONS",
+  "freeze_timestamp_utc": "2026-09-24T08:01:03.043548+00:00",
+  "source_branch": "rescue_pass",
+  "source_git_commit": "2bfcb0018489230fdefa5b8e5c9b0939035ac62c",
+  "parent_release": "full_sample_v1",
+  "parent_primary_sha256": "c54fc35698b2b2e962b40ed0a75170ba66d6dd03352b6f34eee55304022d6c27",
+  "network_used_during_assembly": false,
+  "network_used_during_freeze": false,
+  "headline_counts": {
+    "firms": 30,
+    "observations": 150,
+    "pages": 3024,
+    "german_primary_observations": 87,
+    "german_sensitivity_observations": 118,
+    "all_language_sensitivity_observations": 125,
+    "primary_ready_before": 10,
+    "primary_ready_after": 22,
+    "extended_ready_before": 10,
+    "extended_ready_after": 27,
+    "replace_with_rescue": 62,
+    "add_as_sensitivity_alternative": 7,
+    "fetch_failed_resumable": 68,
+    "archive_unavailable_from_transport": 0,
+    "tests_passed_at_freeze": 62
+  },
+  "firms_still_not_extended_ready": [
+    {
+      "firm_id": "8",
+      "company": "DM-DROGERIE MARKT GMBH + CO. KG",
+      "note": "not a Phase B rescue target"
+    },
+    {
+      "firm_id": "24",
+      "company": "VIESSMANN CLIMATE SOLUTIONS / VIESSMANN GROUP",
+      "note": "entity_change"
+    },
+    {
+      "firm_id": "30",
+      "company": "DR. AUGUST OETKER KG / OETKER-GRUPPE",
+      "note": "entity_change + manual_review"
+    }
+  ],
+  "known_limitations": [
+    "Remaining FETCH_FAILED_RESUMABLE pages retained as transport failures only (not archive_unavailable).",
+    "Viessmann and Oetker not longitudinally ready due to entity-change / comparability constraints.",
+    "Some rescued firms are extended-ready only (sensitivity/temporal rules): Rossmann, Schaeffler, Freudenberg, STIHL, MSF.",
+    "Observation vs DE page token residual \u0394=124 (parent residual was \u0394=235).",
+    "B02\u2013B05 page corpora reconstructed offline from local HTML cache during cumulative assembly; B. Braun/B01/B06 used accepted persisted extracts.",
+    "Intermediate full_sample_v1_1_rescue outputs were batch-targeted and are not the authoritative cumulative Phase B release."
+  ],
+  "corpus_definitions": {
+    "full_sample_branding_corpus_observations_primary.csv": "German PRIMARY only",
+    "full_sample_branding_corpus_observations_sensitivity_all_languages.csv": "ALL languages sensitivity",
+    "full_sample_branding_corpus_observations_sensitivity.csv": "Legacy alias of all-language sensitivity",
+    "full_sample_branding_corpus_observations_sensitivity_de.csv": "German-only sensitivity",
+    "full_sample_branding_corpus_pages_all_languages.csv": "ALL language branding pages",
+    "full_sample_branding_corpus_pages_de.csv": "German-only branding pages"
+  },
+  "release_total_bytes": 138993400,
+  "file_inventory_excludes": [
+    "freeze_manifest.json"
+  ],
+  "file_inventory": [
+    {
+      "path": "README.md",
+      "bytes": 5073,
+      "sha256": "0288c82306c281a014166358c16f3baea366fd3c8d323eed5bbc586017109564"
+    },
+    {
+      "path": "config/full_sample.yaml",
+      "bytes": 3620,
+      "sha256": "2e3c987c0cb13b2c248d75275d4cacf16370741d791085b43f65079a9622c58b"
+    },
+    {
+      "path": "config/full_sample_rescue.yaml",
+      "bytes": 15389,
+      "sha256": "d22113b0f9eaad6c04857bbb51accc09b919031c39fc9e4109ce1caa947146b0"
+    },
+    {
+      "path": "data/firm_longitudinal_coverage.csv",
+      "bytes": 5792,
+      "sha256": "83dc67381fbbb300f2db8c073d1148383af86db4b9e509103682d66d3312146e"
+    },
+    {
+      "path": "data/firms.csv",
+      "bytes": 12702,
+      "sha256": "a7f4065ced4b2e009eca2c7647a6ee25b44cb6273f77695135c173a77599c076"
+    },
+    {
+      "path": "data/full_sample_branding_corpus_observations_primary.csv",
+      "bytes": 4884093,
+      "sha256": "49e7eef23d240c55581e6e52f29ae69edf7241f43cf56953a7de41df7b5ee508"
+    },
+    {
+      "path": "data/full_sample_branding_corpus_observations_sensitivity.csv",
+      "bytes": 7236440,
+      "sha256": "a14f8125d91a74aad3b099dabea9a0d6fee9744fc72c5ff96c6719ff5708982d"
+    },
+    {
+      "path": "data/full_sample_branding_corpus_observations_sensitivity_all_languages.csv",
+      "bytes": 7236440,
+      "sha256": "a14f8125d91a74aad3b099dabea9a0d6fee9744fc72c5ff96c6719ff5708982d"
+    },
+    {
+      "path": "data/full_sample_branding_corpus_observations_sensitivity_de.csv",
+      "bytes": 6255892,
+      "sha256": "9c5f42c1bd53d9dd95e7440b6ddd9dd9fb77a93cf35569bd60ee3b55c504170f"
+    },
+    {
+      "path": "data/full_sample_branding_corpus_pages_all_languages.csv",
+      "bytes": 36416047,
+      "sha256": "8ceeda81bfeefc957cc2be55fc1b911c3c9a636a0df5a03226710ebd69851468"
+    },
+    {
+      "path": "data/full_sample_branding_corpus_pages_de.csv",
+      "bytes": 31833585,
+      "sha256": "9afefd6ed27d106d8fdf884416682def16495b6cf611321bcfededdfc54905a5"
+    },
+    {
+      "path": "data/full_sample_governance_metadata_observations.csv",
+      "bytes": 142114,
+      "sha256": "4a0e6e95a5608ea8f053f3ed47ce23795577aa5e5879751fc11ea5e5ac68a0b6"
+    },
+    {
+      "path": "data/full_sample_governance_metadata_pages.csv",
+      "bytes": 142281,
+      "sha256": "abf063f6c7966f5ef1ae57957f734ef446a8f7e563f009e8da2261ce97fbe7a3"
+    },
+    {
+      "path": "data/full_sample_observation_text_summary.csv",
+      "bytes": 38842,
+      "sha256": "dbd7e0a74a64e4a1c188b60a70ee1eabbf65578722efd98bb443ec75c7b70911"
+    },
+    {
+      "path": "data/full_sample_pages.csv",
+      "bytes": 44548155,
+      "sha256": "eb9ca31eb44f1f5fcdc5f6199e89fa44062e9bfedc6ff3a811c2a22496c07228"
+    },
+    {
+      "path": "data/full_sample_snapshots.csv",
+      "bytes": 124263,
+      "sha256": "14c203b6d41e193a24ca575eef44acd33eb47dbe3af7a3865f7ab6dde5f1d77c"
+    },
+    {
+      "path": "data/full_sample_url_rescue_candidates.csv",
+      "bytes": 8273,
+      "sha256": "d28b44180c44eabaefca54ecc1322493b144fe63a39cd4e56e51dc2140530120"
+    },
+    {
+      "path": "data/rescue_comparison_decisions.csv",
+      "bytes": 36707,
+      "sha256": "734d5ceb92e2943262a078465144fd07b16ac571d9b4bdfd6de4bff7444c4dc3"
+    },
+    {
+      "path": "data/rescue_comparison_decisions_FINAL.csv",
+      "bytes": 36707,
+      "sha256": "734d5ceb92e2943262a078465144fd07b16ac571d9b4bdfd6de4bff7444c4dc3"
+    },
+    {
+      "path": "data/rescue_impact_by_firm.csv",
+      "bytes": 1666,
+      "sha256": "7dcf430cecc3e10fbb8f955f55d348bd55d8315c8606a5e14270088aa875367a"
+    },
+    {
+      "path": "data/run_manifest.json",
+      "bytes": 1341,
+      "sha256": "28e2e71989d1ce4d48badffd907ec11b6546c051935290c2d91c96b5800c7d9e"
+    },
+    {
+      "path": "reports/final_release_acceptance.md",
+      "bytes": 4862,
+      "sha256": "5e1a63de8438da6f33ec3b9b5efa41a0a366b0f4f4f5bf74bf02c98f752d3782"
+    },
+    {
+      "path": "reports/final_rescue_impact.md",
+      "bytes": 3116,
+      "sha256": "413f8fd262088a5a3e363aabbc389bac2189e35c5cd8547ebefcca0a42abfc04"
+    }
+  ]
+}

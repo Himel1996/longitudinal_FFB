@@ -47,5 +47,13 @@
     "primary": "German only",
     "sensitivity_all": "all languages",
     "sensitivity_de": "German only"
-  }
+  },
+  "release_status": "FROZEN",
+  "release_version": "full_sample_v1_1_rescue_final",
+  "acceptance_verdict": "READY_TO_FREEZE_WITH_DOCUMENTED_LIMITATIONS",
+  "freeze_timestamp_utc": "2026-09-24T07:55:57.669051+00:00",
+  "source_branch": "rescue_pass",
+  "source_git_commit": "2bfcb0018489230fdefa5b8e5c9b0939035ac62c",
+  "network_used_during_assembly": false,
+  "network_used_during_freeze": false
 }

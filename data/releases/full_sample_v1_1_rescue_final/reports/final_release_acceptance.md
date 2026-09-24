@@ -5,6 +5,7 @@
 **Parent:** `data/releases/full_sample_v1/`  
 **Parent primary SHA:** `c54fc35698b2b2e962b40ed0a75170ba66d6dd03352b6f34eee55304022d6c27`  
 **Network during assembly:** none  
+**Release status:** `FROZEN`  
 **Verdict:** `READY_TO_FREEZE_WITH_DOCUMENTED_LIMITATIONS`
 
 ---
@@ -57,8 +58,10 @@
 
 \*Parent exposed a single readiness flag.
 
-**Still not extended-ready:** firms **8**, **24 (Viessmann)**, **30 (Oetker)**.  
-Firm 8 was never a Phase B rescue target.
+**Still not extended-ready:**
+- **8 — DM-DROGERIE MARKT GMBH + CO. KG** (never a Phase B rescue target)
+- **24 — Viessmann** (entity-change)
+- **30 — Oetker** (entity-change / manual review)
 
 ---
 
