@@ -1,0 +1,51 @@
+{
+  "parent_release": "full_sample_v1",
+  "release_name": "full_sample_v1_1_rescue_final",
+  "run_type": "cumulative_rescue_final_assembly",
+  "firms_targeted": [
+    "10",
+    "2",
+    "11",
+    "12",
+    "14",
+    "15",
+    "16",
+    "17",
+    "18",
+    "19",
+    "20",
+    "23",
+    "25",
+    "21",
+    "22",
+    "24",
+    "5",
+    "27",
+    "30"
+  ],
+  "parent_primary_sha256": "c54fc35698b2b2e962b40ed0a75170ba66d6dd03352b6f34eee55304022d6c27",
+  "creation_timestamp": "2026-09-24T07:33:38.630800+00:00",
+  "network_used": false,
+  "source_batches": [
+    "B_BRAUN_SMOKE",
+    "B01",
+    "B02",
+    "B03",
+    "B04",
+    "B05",
+    "B06"
+  ],
+  "counts": {
+    "observations": 150,
+    "primary": 87,
+    "sensitivity_all": 125,
+    "sensitivity_de": 118,
+    "pages": 3024,
+    "decisions": 87
+  },
+  "corpus_definitions": {
+    "primary": "German only",
+    "sensitivity_all": "all languages",
+    "sensitivity_de": "German only"
+  }
+}

@@ -239,7 +239,61 @@ class RescuePipelineRunner(PipelineRunner):
         tp = str(row["relative_timepoint"])
         aliases = self._aliases_for(firm_id, tp)
         if not aliases:
-            return super()._discover_one_snapshot(row, client, branding_patterns)
+            # No rescue candidate for this firm/timepoint — do not fall back to the
+            # parent/configured seed (that creates CSV-only orphans not in SQLite).
+            from ffb_webminer.archive.snapshot_selector import SnapshotSelection
+
+            empty = SnapshotSelection(
+                snapshot_status="not_found",
+                requested_url=None,
+                canonical_original_url=None,
+                cdx_original_url=None,
+                archive_timestamp=None,
+                selected_capture_date=None,
+                temporal_distance_days=None,
+                wayback_replay_url=None,
+                http_status=None,
+                mime_type=None,
+                digest=None,
+                redirect_chain=None,
+                selection_reason="no_rescue_alias",
+                fallback_attempts="0",
+                failure_reason="no_rescue_alias",
+            )
+            out = self._snapshot_row_from_selection(row, empty, [], False, False, False, None)
+            out["rescue_seed_url"] = None
+            out["rescue_source_row_id"] = None
+            out["rescue_candidate_type"] = None
+            out["rescue_domain"] = None
+            self.rescue_discovery_log.append(
+                {
+                    "firm_id": firm_id,
+                    "relative_timepoint": tp,
+                    "target_date": str(row.get("target_date")),
+                    "source_row_id": None,
+                    "original_configured_seed": row.get("website"),
+                    "candidate_seed_url": None,
+                    "normalized_seed": None,
+                    "selected_domain": None,
+                    "historical_domain_flag": False,
+                    "locale_path_flag": False,
+                    "migration_flag": False,
+                    "entity_change_flag": False,
+                    "candidate_priority": None,
+                    "candidate_type": None,
+                    "archive_evidence": None,
+                    "n_captures": 0,
+                    "snapshot_status": "not_found",
+                    "capture_timestamp": None,
+                    "capture_url": None,
+                    "capture_distance": None,
+                    "selection_reason": "no_rescue_alias",
+                    "failure_reason": "no_rescue_alias",
+                    "discovery_decision": "rejected",
+                    "rejection_reason": "no_rescue_alias",
+                }
+            )
+            return out
 
         target = date.fromisoformat(row["target_date"])
         status_codes = self.config.snapshot_selection.allowed_status_codes
@@ -407,7 +461,31 @@ class RescuePipelineRunner(PipelineRunner):
                     alias=primary_alias,
                     error="rescue_alias_no_selected_capture",
                 )
-            return super()._discover_one_snapshot(row, client, branding_patterns)
+            from ffb_webminer.archive.snapshot_selector import SnapshotSelection
+
+            empty = SnapshotSelection(
+                snapshot_status="not_found",
+                requested_url=None,
+                canonical_original_url=None,
+                cdx_original_url=None,
+                archive_timestamp=None,
+                selected_capture_date=None,
+                temporal_distance_days=None,
+                wayback_replay_url=None,
+                http_status=None,
+                mime_type=None,
+                digest=None,
+                redirect_chain=None,
+                selection_reason="no_rescue_alias",
+                fallback_attempts="0",
+                failure_reason="no_rescue_alias",
+            )
+            out = self._snapshot_row_from_selection(row, empty, [], False, False, False, None)
+            out["rescue_seed_url"] = None
+            out["rescue_source_row_id"] = None
+            out["rescue_candidate_type"] = None
+            out["rescue_domain"] = None
+            return out
 
         homepage_available = bool(best_sel.homepage_available)
         relevant_subpages = (

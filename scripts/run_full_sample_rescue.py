@@ -679,10 +679,27 @@ class RescueOrchestrator:
         else:
             df = pd.DataFrame()
         if not df.empty:
+            # Regression guard protects store-backed coverage only. Drop CSV orphans
+            # (e.g. parent-seed fallbacks never persisted to SQLite) from the baseline.
+            guard_previous = previous
+            if previous is not None and not previous.empty:
+                keys = {
+                    (str(r.get("firm_id")), str(r.get("relative_timepoint")))
+                    for r in rows
+                }
+                targeted = set(str(f) for f in self.targeted)
+
+                def _store_backed(row: pd.Series) -> bool:
+                    fid = str(row.get("firm_id"))
+                    if fid not in targeted:
+                        return True
+                    return (fid, str(row.get("relative_timepoint"))) in keys
+
+                guard_previous = previous[previous.apply(_store_backed, axis=1)]
             atomic_write_rescue_snapshots(
                 path,
                 df,
-                previous=previous,
+                previous=guard_previous,
                 firm_ids=set(self.targeted),
             )
         return df
@@ -900,18 +917,9 @@ class RescueOrchestrator:
                 log_df = pd.concat([prev_log, log_df], ignore_index=True)
             log_df.to_csv(log_path, index=False)
             snaps = _annotate_rescue_domains(snaps, log_df)
-            previous = (
-                pd.read_csv(self.layout["interim"] / "rescue_snapshots.csv", dtype=str)
-                if (self.layout["interim"] / "rescue_snapshots.csv").exists()
-                else None
-            )
-            atomic_write_rescue_snapshots(
-                self.layout["interim"] / "rescue_snapshots.csv",
-                snaps,
-                previous=previous,
-                firm_ids=set(self.targeted),
-            )
-            selected = (snaps.get("snapshot_status") == "selected").sum() if len(snaps) else 0
+            # CSV must match SQLite-selected captures only (no parent-fallback orphans).
+            self._sync_rescue_snapshots_csv(store)
+            selected = len(store.snapshot_rows(firm_ids=self.targeted))
             print(f"discover complete: selected={selected}")
         finally:
             store.close()

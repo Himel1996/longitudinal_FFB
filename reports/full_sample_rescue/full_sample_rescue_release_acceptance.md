@@ -1,6 +1,6 @@
 # Full-Sample Rescue Release Acceptance
 
-**Generated:** 2026-08-28 05:41 UTC  
+**Generated:** 2026-09-23 18:15 UTC  
 **Status:** TEMPLATE — complete after release assembly and audits.
 
 ## Checklist
