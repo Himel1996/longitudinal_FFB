@@ -1,12 +1,12 @@
 # Temporal Validity Report
 
 **Run ID:** `508f1903-71e7-4aab-aba6-000fed4d8b7d`  
-**Pipeline run date:** 2026-09-23  
+**Pipeline run date:** 2026-10-03  
 **Observations:** 150
 
 ## Temporal fit distribution (selected snapshots)
 
-- **high:** 84
+- **high:** 73
   - BLUE MOON COMMUNICATION CONSULTANTS GMBH / pre_event (target 2022-07-01, capture 2022-07-07, Δ=6.0d)
   - PETER-LACKE HOLDING GMBH / pre_pre_event (target 2011-07-01, capture 2011-07-09, Δ=8.0d)
   - PETER-LACKE HOLDING GMBH / pre_event (target 2013-07-01, capture 2013-07-03, Δ=2.0d)
@@ -19,6 +19,7 @@
   - MYRENNE GMBH / pre_event (target 2010-07-01, capture 2010-04-27, Δ=65.0d)
   - MYRENNE GMBH / post_event (target 2014-07-01, capture 2014-05-17, Δ=45.0d)
   - MYRENNE GMBH / post_post_event (target 2016-07-01, capture 2016-08-01, Δ=31.0d)
+  - MSF-VATHAUER ANTRIEBSTECHNIK GMBH & CO. KG / post_post_event (target 2010-07-01, capture 2010-06-18, Δ=13.0d)
   - FIELMANN GROUP AG / pre_pre_event (target 2015-07-01, capture 2015-07-01, Δ=0.0d)
   - FIELMANN GROUP AG / pre_event (target 2017-07-01, capture 2017-06-24, Δ=7.0d)
   - FIELMANN GROUP AG / event (target 2019-07-01, capture 2019-06-24, Δ=7.0d)
@@ -29,11 +30,6 @@
   - SIXT SE / event (target 2021-07-01, capture 2021-07-01, Δ=0.0d)
   - SIXT SE / post_event (target 2023-07-01, capture 2023-07-01, Δ=0.0d)
   - SIXT SE / post_post_event (target 2025-07-01, capture 2025-07-02, Δ=1.0d)
-  - DM-DROGERIE MARKT GMBH + CO. KG / pre_pre_event (target 2015-07-01, capture 2015-08-10, Δ=40.0d)
-  - DM-DROGERIE MARKT GMBH + CO. KG / pre_event (target 2017-07-01, capture 2017-07-01, Δ=0.0d)
-  - DM-DROGERIE MARKT GMBH + CO. KG / event (target 2019-07-01, capture 2019-07-02, Δ=1.0d)
-  - DM-DROGERIE MARKT GMBH + CO. KG / post_event (target 2021-07-01, capture 2021-07-13, Δ=12.0d)
-  - DM-DROGERIE MARKT GMBH + CO. KG / post_post_event (target 2023-07-01, capture 2023-07-01, Δ=0.0d)
   - TRIGEMA W. GRUPP KG / pre_pre_event (target 2020-07-01, capture 2020-06-29, Δ=2.0d)
   - TRIGEMA W. GRUPP KG / pre_event (target 2022-07-01, capture 2022-07-01, Δ=0.0d)
   - TRIGEMA W. GRUPP KG / event (target 2024-07-01, capture 2024-07-03, Δ=2.0d)
@@ -73,6 +69,7 @@
   - RIMOWA GMBH / event (target 2016-07-01, capture 2016-06-30, Δ=1.0d)
   - RIMOWA GMBH / post_event (target 2018-07-01, capture 2018-07-01, Δ=0.0d)
   - RIMOWA GMBH / post_post_event (target 2020-07-01, capture 2020-06-26, Δ=5.0d)
+  - DOUGLAS HOLDING / DOUGLAS GROUP / pre_pre_event (target 2008-07-01, capture 2008-07-01, Δ=0.0d)
   - CONDITOREI COPPENRATH & WIESE KG / pre_pre_event (target 2011-07-01, capture 2011-07-03, Δ=2.0d)
   - CONDITOREI COPPENRATH & WIESE KG / pre_event (target 2013-07-01, capture 2013-07-08, Δ=7.0d)
   - CONDITOREI COPPENRATH & WIESE KG / event (target 2015-07-01, capture 2015-06-28, Δ=3.0d)
@@ -83,35 +80,32 @@
   - CANYON BICYCLES GMBH / event (target 2020-07-01, capture 2020-06-27, Δ=4.0d)
   - CANYON BICYCLES GMBH / post_event (target 2022-07-01, capture 2022-07-01, Δ=0.0d)
   - CANYON BICYCLES GMBH / post_post_event (target 2024-07-01, capture 2024-07-01, Δ=0.0d)
-  - MSF-VATHAUER ANTRIEBSTECHNIK GMBH & CO. KG / pre_event (target 2004-07-01, capture 2004-06-11, Δ=20.0d)
-  - MSF-VATHAUER ANTRIEBSTECHNIK GMBH & CO. KG / post_event (target 2008-07-01, capture 2008-09-13, Δ=74.0d)
-  - DOUGLAS HOLDING / DOUGLAS GROUP / pre_pre_event (target 2008-07-01, capture 2008-09-13, Δ=74.0d)
-  - DOUGLAS HOLDING / DOUGLAS GROUP / pre_event (target 2010-07-01, capture 2010-07-04, Δ=3.0d)
-  - DOUGLAS HOLDING / DOUGLAS GROUP / event (target 2012-07-01, capture 2012-06-16, Δ=15.0d)
-  - DR. AUGUST OETKER KG / OETKER-GRUPPE / pre_event (target 2019-07-01, capture 2019-07-24, Δ=23.0d)
-  - DR. AUGUST OETKER KG / OETKER-GRUPPE / post_event (target 2023-07-01, capture 2023-05-10, Δ=52.0d)
-  - DR. AUGUST OETKER KG / OETKER-GRUPPE / post_post_event (target 2025-07-01, capture 2025-07-08, Δ=7.0d)
 - **moderate:** 5
   - BLUE MOON COMMUNICATION CONSULTANTS GMBH / pre_pre_event (target 2020-07-01, capture 2020-11-01, Δ=123.0d)
   - BLUE MOON COMMUNICATION CONSULTANTS GMBH / post_event (target 2026-07-01, capture 2026-03-04, Δ=119.0d)
+  - MSF-VATHAUER ANTRIEBSTECHNIK GMBH & CO. KG / event (target 2006-01-01, capture 2005-09-09, Δ=114.0d)
+  - MSF-VATHAUER ANTRIEBSTECHNIK GMBH & CO. KG / post_event (target 2008-07-01, capture 2008-03-27, Δ=96.0d)
   - FABER-CASTELL AG / pre_pre_event (target 2013-07-01, capture 2013-01-29, Δ=153.0d)
-  - MSF-VATHAUER ANTRIEBSTECHNIK GMBH & CO. KG / pre_pre_event (target 2002-07-01, capture 2002-11-27, Δ=149.0d)
-  - DOUGLAS HOLDING / DOUGLAS GROUP / post_event (target 2014-07-01, capture 2014-03-13, Δ=110.0d)
-- **low:** 7
+- **low:** 8
   - BLUE MOON COMMUNICATION CONSULTANTS GMBH / event (target 2024-07-01, capture 2025-03-14, Δ=256.0d)
+  - MSF-VATHAUER ANTRIEBSTECHNIK GMBH & CO. KG / pre_pre_event (target 2002-07-01, capture 2001-07-23, Δ=343.0d)
   - HERAEUS GROUP / pre_pre_event (target 2009-07-01, capture 2008-10-12, Δ=262.0d)
   - BAHLSEN GMBH & CO. KG / pre_event (target 2020-07-01, capture 2021-04-15, Δ=288.0d)
   - BAHLSEN GMBH & CO. KG / event (target 2022-07-01, capture 2021-07-08, Δ=358.0d)
   - ANDREAS STIHL AG & CO. KG / pre_event (target 2020-07-01, capture 2019-08-17, Δ=319.0d)
   - VIESSMANN CLIMATE SOLUTIONS / VIESSMANN GROUP / pre_event (target 2021-07-01, capture 2020-09-16, Δ=288.0d)
-  - MSF-VATHAUER ANTRIEBSTECHNIK GMBH & CO. KG / post_post_event (target 2010-07-01, capture 2009-11-18, Δ=225.0d)
-- **very_low:** 6
+  - DR. AUGUST OETKER KG / OETKER-GRUPPE / post_post_event (target 2025-07-01, capture 2024-11-10, Δ=233.0d)
+- **very_low:** 10
+  - MSF-VATHAUER ANTRIEBSTECHNIK GMBH & CO. KG / pre_event (target 2004-07-01, capture 2005-09-09, Δ=435.0d)
   - B. BRAUN SE / pre_event (target 2017-07-01, capture 2016-04-09, Δ=448.0d)
   - BAHLSEN GMBH & CO. KG / pre_pre_event (target 2018-07-01, capture 2017-02-15, Δ=501.0d)
   - FREUDENBERG GROUP / event (target 2012-07-01, capture 2011-03-20, Δ=469.0d)
   - FREUDENBERG GROUP / post_post_event (target 2016-07-01, capture 2017-07-03, Δ=367.0d)
   - VIESSMANN CLIMATE SOLUTIONS / VIESSMANN GROUP / pre_pre_event (target 2019-07-01, capture 2020-09-16, Δ=443.0d)
-  - DOUGLAS HOLDING / DOUGLAS GROUP / post_post_event (target 2016-07-01, capture 2015-05-12, Δ=416.0d)
+  - DOUGLAS HOLDING / DOUGLAS GROUP / pre_event (target 2010-07-01, capture 2009-02-15, Δ=501.0d)
+  - DOUGLAS HOLDING / DOUGLAS GROUP / post_post_event (target 2016-07-01, capture 2017-07-27, Δ=391.0d)
+  - DR. AUGUST OETKER KG / OETKER-GRUPPE / post_event (target 2023-07-01, capture 2024-07-20, Δ=385.0d)
+  - DM-DROGERIE MARKT GMBH + CO. KG / post_event (target 2021-07-01, capture 2020-04-16, Δ=441.0d)
 
 ## Event snapshots vs known event dates
 
@@ -119,9 +113,9 @@
 - **PETER-LACKE HOLDING GMBH:** status=selected, event_date=2015-07-01, capture=2015-05-22, position=before_event, days_from_event=-40.0
 - **ANLAGENTECHNIK LEICHTLE GMBH:** status=selected, event_date=2023-07-01, capture=2023-05-29, position=before_event, days_from_event=-33.0
 - **MYRENNE GMBH:** status=event_unavailable, event_date=2012-04-15, capture=2011-08-10, position=before_event, days_from_event=-249.0
+- **MSF-VATHAUER ANTRIEBSTECHNIK GMBH & CO. KG:** status=selected, event_date=2006-01-01, capture=2005-09-09, position=before_event, days_from_event=-114.0
 - **FIELMANN GROUP AG:** status=selected, event_date=2019-07-01, capture=2019-06-24, position=before_event, days_from_event=-7.0
 - **SIXT SE:** status=selected, event_date=2021-07-01, capture=2021-07-01, position=on_event_day, days_from_event=0.0
-- **DM-DROGERIE MARKT GMBH + CO. KG:** status=selected, event_date=2019-07-01, capture=2019-07-02, position=after_event, days_from_event=1.0
 - **TRIGEMA W. GRUPP KG:** status=selected, event_date=2024-07-01, capture=2024-07-03, position=after_event, days_from_event=2.0
 - **B. BRAUN SE:** status=beyond_tolerance, event_date=2019-07-01, capture=nan, position=unknown, days_from_event=nan
 - **HARTING TECHNOLOGY GROUP:** status=beyond_tolerance, event_date=2015-07-01, capture=nan, position=unknown, days_from_event=nan
@@ -140,18 +134,22 @@
 - **VIESSMANN CLIMATE SOLUTIONS / VIESSMANN GROUP:** status=selected, event_date=2023-07-01, capture=2023-06-10, position=before_event, days_from_event=-21.0
 - **BIRKENSTOCK GROUP:** status=selected, event_date=2021-07-01, capture=2021-04-03, position=before_event, days_from_event=-89.0
 - **RIMOWA GMBH:** status=selected, event_date=2016-07-01, capture=2016-06-30, position=before_event, days_from_event=-1.0
+- **DOUGLAS HOLDING / DOUGLAS GROUP:** status=beyond_tolerance, event_date=2012-07-01, capture=nan, position=unknown, days_from_event=nan
 - **CONDITOREI COPPENRATH & WIESE KG:** status=selected, event_date=2015-07-01, capture=2015-06-28, position=before_event, days_from_event=-3.0
+- **DR. AUGUST OETKER KG / OETKER-GRUPPE:** status=beyond_tolerance, event_date=2021-07-01, capture=nan, position=unknown, days_from_event=nan
 - **CANYON BICYCLES GMBH:** status=selected, event_date=2020-07-01, capture=2020-06-27, position=before_event, days_from_event=-4.0
-- **MSF-VATHAUER ANTRIEBSTECHNIK GMBH & CO. KG:** status=not_found, event_date=2006-01-01, capture=None, position=unknown, days_from_event=nan
-- **DOUGLAS HOLDING / DOUGLAS GROUP:** status=selected, event_date=2012-07-01, capture=2012-06-16, position=before_event, days_from_event=-15.0
-- **DR. AUGUST OETKER KG / OETKER-GRUPPE:** status=not_found, event_date=2021-07-01, capture=None, position=unknown, days_from_event=nan
+- **DM-DROGERIE MARKT GMBH + CO. KG:** status=not_found, event_date=2019-07-01, capture=None, position=unknown, days_from_event=nan
 
 ## Adjacent-period overlap
 
+- MSF-VATHAUER ANTRIEBSTECHNIK GMBH & CO. KG / pre_event: gap=1509.0 days to previous selected capture
+- MSF-VATHAUER ANTRIEBSTECHNIK GMBH & CO. KG / event: gap=0.0 days to previous selected capture
 - BAHLSEN GMBH & CO. KG / pre_event: gap=1520.0 days to previous selected capture
 - BAHLSEN GMBH & CO. KG / event: gap=84.0 days to previous selected capture
 - VIESSMANN CLIMATE SOLUTIONS / VIESSMANN GROUP / pre_pre_event: gap=nan days to previous selected capture
 - VIESSMANN CLIMATE SOLUTIONS / VIESSMANN GROUP / pre_event: gap=0.0 days to previous selected capture
+- DR. AUGUST OETKER KG / OETKER-GRUPPE / post_event: gap=nan days to previous selected capture
+- DR. AUGUST OETKER KG / OETKER-GRUPPE / post_post_event: gap=113.0 days to previous selected capture
 
 ## Homepage missing but archived subpages available
 
@@ -185,15 +183,14 @@
 - ANDREAS STIHL AG & CO. KG / event
 - ANDREAS STIHL AG & CO. KG / post_event
 - ANDREAS STIHL AG & CO. KG / post_post_event
-- MSF-VATHAUER ANTRIEBSTECHNIK GMBH & CO. KG / pre_pre_event
-- MSF-VATHAUER ANTRIEBSTECHNIK GMBH & CO. KG / pre_event
+- DR. AUGUST OETKER KG / OETKER-GRUPPE / pre_pre_event
 - DR. AUGUST OETKER KG / OETKER-GRUPPE / pre_event
-- DR. AUGUST OETKER KG / OETKER-GRUPPE / post_event
-- DR. AUGUST OETKER KG / OETKER-GRUPPE / post_post_event
+- DR. AUGUST OETKER KG / OETKER-GRUPPE / event
+- DM-DROGERIE MARKT GMBH + CO. KG / post_event
 
 ## Observation recommendations
 
-### include (78)
+### include (72)
 - BLUE MOON COMMUNICATION CONSULTANTS GMBH / pre_pre_event [selected, fit=moderate]
 - BLUE MOON COMMUNICATION CONSULTANTS GMBH / pre_event [selected, fit=high]
 - BLUE MOON COMMUNICATION CONSULTANTS GMBH / event [selected, fit=low]
@@ -207,6 +204,9 @@
 - MYRENNE GMBH / pre_event [selected, fit=high]
 - MYRENNE GMBH / post_event [selected, fit=high]
 - MYRENNE GMBH / post_post_event [selected, fit=high]
+- MSF-VATHAUER ANTRIEBSTECHNIK GMBH & CO. KG / pre_pre_event [selected, fit=low]
+- MSF-VATHAUER ANTRIEBSTECHNIK GMBH & CO. KG / post_event [selected, fit=moderate]
+- MSF-VATHAUER ANTRIEBSTECHNIK GMBH & CO. KG / post_post_event [selected, fit=high]
 - FIELMANN GROUP AG / pre_pre_event [selected, fit=high]
 - FIELMANN GROUP AG / pre_event [selected, fit=high]
 - FIELMANN GROUP AG / post_event [selected, fit=high]
@@ -216,11 +216,6 @@
 - SIXT SE / event [selected, fit=high]
 - SIXT SE / post_event [selected, fit=high]
 - SIXT SE / post_post_event [selected, fit=high]
-- DM-DROGERIE MARKT GMBH + CO. KG / pre_pre_event [selected, fit=high]
-- DM-DROGERIE MARKT GMBH + CO. KG / pre_event [selected, fit=high]
-- DM-DROGERIE MARKT GMBH + CO. KG / event [selected, fit=high]
-- DM-DROGERIE MARKT GMBH + CO. KG / post_event [selected, fit=high]
-- DM-DROGERIE MARKT GMBH + CO. KG / post_post_event [selected, fit=high]
 - TRIGEMA W. GRUPP KG / pre_pre_event [selected, fit=high]
 - TRIGEMA W. GRUPP KG / pre_event [selected, fit=high]
 - TRIGEMA W. GRUPP KG / event [selected, fit=high]
@@ -259,6 +254,7 @@
 - RIMOWA GMBH / pre_event [selected, fit=high]
 - RIMOWA GMBH / post_event [selected, fit=high]
 - RIMOWA GMBH / post_post_event [selected, fit=high]
+- DOUGLAS HOLDING / DOUGLAS GROUP / pre_pre_event [selected, fit=high]
 - CONDITOREI COPPENRATH & WIESE KG / pre_pre_event [selected, fit=high]
 - CONDITOREI COPPENRATH & WIESE KG / pre_event [selected, fit=high]
 - CONDITOREI COPPENRATH & WIESE KG / post_event [selected, fit=high]
@@ -267,15 +263,11 @@
 - CANYON BICYCLES GMBH / pre_event [selected, fit=high]
 - CANYON BICYCLES GMBH / post_event [selected, fit=high]
 - CANYON BICYCLES GMBH / post_post_event [selected, fit=high]
-- MSF-VATHAUER ANTRIEBSTECHNIK GMBH & CO. KG / post_event [selected, fit=high]
-- MSF-VATHAUER ANTRIEBSTECHNIK GMBH & CO. KG / post_post_event [selected, fit=low]
-- DOUGLAS HOLDING / DOUGLAS GROUP / pre_pre_event [selected, fit=high]
-- DOUGLAS HOLDING / DOUGLAS GROUP / pre_event [selected, fit=high]
-- DOUGLAS HOLDING / DOUGLAS GROUP / post_event [selected, fit=moderate]
 
-### sensitivity_analysis (23)
+### sensitivity_analysis (22)
 - PETER-LACKE HOLDING GMBH / event [selected, fit=high]
 - ANLAGENTECHNIK LEICHTLE GMBH / event [selected, fit=high]
+- MSF-VATHAUER ANTRIEBSTECHNIK GMBH & CO. KG / event [selected, fit=moderate]
 - FIELMANN GROUP AG / event [selected, fit=high]
 - B. BRAUN SE / pre_event [selected, fit=very_low]
 - BAHLSEN GMBH & CO. KG / pre_pre_event [selected, fit=very_low]
@@ -288,17 +280,15 @@
 - VIESSMANN CLIMATE SOLUTIONS / VIESSMANN GROUP / event [selected, fit=high]
 - BIRKENSTOCK GROUP / event [selected, fit=high]
 - RIMOWA GMBH / event [selected, fit=high]
-- CONDITOREI COPPENRATH & WIESE KG / event [selected, fit=high]
-- CANYON BICYCLES GMBH / event [selected, fit=high]
-- MSF-VATHAUER ANTRIEBSTECHNIK GMBH & CO. KG / pre_pre_event [selected, fit=moderate]
-- MSF-VATHAUER ANTRIEBSTECHNIK GMBH & CO. KG / pre_event [selected, fit=high]
-- DOUGLAS HOLDING / DOUGLAS GROUP / event [selected, fit=high]
+- DOUGLAS HOLDING / DOUGLAS GROUP / pre_event [selected, fit=very_low]
 - DOUGLAS HOLDING / DOUGLAS GROUP / post_post_event [selected, fit=very_low]
-- DR. AUGUST OETKER KG / OETKER-GRUPPE / pre_event [selected, fit=high]
-- DR. AUGUST OETKER KG / OETKER-GRUPPE / post_event [selected, fit=high]
-- DR. AUGUST OETKER KG / OETKER-GRUPPE / post_post_event [selected, fit=high]
+- CONDITOREI COPPENRATH & WIESE KG / event [selected, fit=high]
+- DR. AUGUST OETKER KG / OETKER-GRUPPE / post_event [selected, fit=very_low]
+- DR. AUGUST OETKER KG / OETKER-GRUPPE / post_post_event [selected, fit=low]
+- CANYON BICYCLES GMBH / event [selected, fit=high]
+- DM-DROGERIE MARKT GMBH + CO. KG / post_event [selected, fit=very_low]
 
-### exclude (48)
+### exclude (54)
 - BLUE MOON COMMUNICATION CONSULTANTS GMBH / post_post_event [future_unavailable, fit=nan]
 - PETER-LACKE HOLDING GMBH / post_event [beyond_tolerance, fit=nan]
 - PETER-LACKE HOLDING GMBH / post_post_event [beyond_tolerance, fit=nan]
@@ -344,10 +334,17 @@
 - VIESSMANN CLIMATE SOLUTIONS / VIESSMANN GROUP / post_post_event [future_unavailable, fit=nan]
 - BIRKENSTOCK GROUP / post_event [beyond_tolerance, fit=nan]
 - BIRKENSTOCK GROUP / post_post_event [beyond_tolerance, fit=nan]
-- MSF-VATHAUER ANTRIEBSTECHNIK GMBH & CO. KG / event [not_found, fit=None]
-- DR. AUGUST OETKER KG / OETKER-GRUPPE / pre_pre_event [not_found, fit=None]
-- DR. AUGUST OETKER KG / OETKER-GRUPPE / event [not_found, fit=None]
+- DOUGLAS HOLDING / DOUGLAS GROUP / event [beyond_tolerance, fit=nan]
+- DOUGLAS HOLDING / DOUGLAS GROUP / post_event [beyond_tolerance, fit=nan]
+- DR. AUGUST OETKER KG / OETKER-GRUPPE / pre_pre_event [beyond_tolerance, fit=nan]
+- DR. AUGUST OETKER KG / OETKER-GRUPPE / pre_event [beyond_tolerance, fit=nan]
+- DR. AUGUST OETKER KG / OETKER-GRUPPE / event [beyond_tolerance, fit=nan]
+- DM-DROGERIE MARKT GMBH + CO. KG / pre_pre_event [not_found, fit=None]
+- DM-DROGERIE MARKT GMBH + CO. KG / pre_event [not_found, fit=None]
+- DM-DROGERIE MARKT GMBH + CO. KG / event [not_found, fit=None]
+- DM-DROGERIE MARKT GMBH + CO. KG / post_post_event [not_found, fit=None]
 
-### exclude_duplicate_capture (1)
+### exclude_duplicate_capture (2)
+- MSF-VATHAUER ANTRIEBSTECHNIK GMBH & CO. KG / pre_event [selected, fit=very_low]
 - VIESSMANN CLIMATE SOLUTIONS / VIESSMANN GROUP / pre_pre_event [selected, fit=very_low]
 

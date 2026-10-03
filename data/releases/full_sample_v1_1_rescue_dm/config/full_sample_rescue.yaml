@@ -1,0 +1,265 @@
+rescue_mode: true
+parent_release: full_sample_v1
+run_type: dm_final_targeted_rescue
+isolated_run: true
+release_name: full_sample_v1_1_rescue_dm
+rescue_candidate_file: data/input/dm_final_targeted_rescue_candidates.csv
+paths:
+  raw_dir: data/raw/full_sample_rescue_dm
+  interim_dir: data/interim/full_sample_rescue_dm
+  processed_dir: data/processed/full_sample_rescue_dm
+  processed_output_dir: data/processed/full_sample_rescue_dm/output
+  release_dir: data/releases/full_sample_v1_1_rescue_dm
+  reports_dir: reports/full_sample_rescue
+  manual_validation_dir: data/interim/full_sample_rescue_dm/manual_validation
+  parent_release_dir: data/releases/full_sample_v1
+targeted_firms:
+- '8'
+targeted_timepoints:
+- post_event
+- post_post_event
+seed_aliases:
+- firm_id: '8'
+  relative_timepoint: post_event
+  original_configured_seed: https://www.dm.de/
+  rescue_candidate_seed: https://dm.de/unternehmen/ueber-uns
+  priority: 1
+  source_row_id: 2
+  reason_for_alias: About subpage preferred after company-section root https://dm.de/unternehmen
+    selected closer captures (20210714 / 20230618) but extracted as navigation_only
+    with 0 branding tokens; Phase B allows preferring materially better German content
+    within existing temporal rules
+  historical_domain_flag: false
+  locale_path_flag: true
+  entity_change_warning: false
+  migration_warning: false
+  candidate_type: about_page
+  rescue_strength: strong
+  archive_evidence: 'CDX discovery (isolated dm pass): 19 HTML captures; post_event
+    nearest in-tolerance capture 20200416175348 (Δ=441d from 2021-07-01). post_post_event
+    nearest exceeds tolerance_days=548. Parent full_sample_v1 also has German branding
+    at this path in pre_event/event.'
+- firm_id: '8'
+  relative_timepoint: post_post_event
+  original_configured_seed: https://www.dm.de/
+  rescue_candidate_seed: https://dm.de/unternehmen/ueber-uns
+  priority: 1
+  source_row_id: 2
+  reason_for_alias: About subpage preferred after company-section root https://dm.de/unternehmen
+    selected closer captures (20210714 / 20230618) but extracted as navigation_only
+    with 0 branding tokens; Phase B allows preferring materially better German content
+    within existing temporal rules
+  historical_domain_flag: false
+  locale_path_flag: true
+  entity_change_warning: false
+  migration_warning: false
+  candidate_type: about_page
+  rescue_strength: strong
+  archive_evidence: 'CDX discovery (isolated dm pass): 19 HTML captures; post_event
+    nearest in-tolerance capture 20200416175348 (Δ=441d from 2021-07-01). post_post_event
+    nearest exceeds tolerance_days=548. Parent full_sample_v1 also has German branding
+    at this path in pre_event/event.'
+- firm_id: '8'
+  relative_timepoint: post_event
+  original_configured_seed: https://www.dm.de/
+  rescue_candidate_seed: https://dm.de/unternehmen/ueber-uns/historie
+  priority: 2
+  source_row_id: 3
+  reason_for_alias: History subpage retained as secondary seed; expected reject if
+    still outside 548d
+  historical_domain_flag: false
+  locale_path_flag: true
+  entity_change_warning: false
+  migration_warning: false
+  candidate_type: history_page
+  rescue_strength: strong
+  archive_evidence: 'CDX discovery (isolated dm pass): 11 HTML captures; nearest for
+    post_event and post_post_event exceeds tolerance_days=548 (rejected under existing
+    rules). Parent full_sample_v1 has German branding at this path in pre_pre_event/pre_event/event.'
+- firm_id: '8'
+  relative_timepoint: post_post_event
+  original_configured_seed: https://www.dm.de/
+  rescue_candidate_seed: https://dm.de/unternehmen/ueber-uns/historie
+  priority: 2
+  source_row_id: 3
+  reason_for_alias: History subpage retained as secondary seed; expected reject if
+    still outside 548d
+  historical_domain_flag: false
+  locale_path_flag: true
+  entity_change_warning: false
+  migration_warning: false
+  candidate_type: history_page
+  rescue_strength: strong
+  archive_evidence: 'CDX discovery (isolated dm pass): 11 HTML captures; nearest for
+    post_event and post_post_event exceeds tolerance_days=548 (rejected under existing
+    rules). Parent full_sample_v1 has German branding at this path in pre_pre_event/pre_event/event.'
+special_cases:
+  msf_firm_id: '5'
+  freudenberg_firm_id: '21'
+  stihl_firm_id: '22'
+  viessmann_firm_id: '24'
+  oetker_firm_id: '30'
+  force_sensitivity_firm_ids:
+  - '21'
+  - '22'
+  entity_change_firm_ids:
+  - '24'
+  - '30'
+transport:
+  concurrency: 1
+  max_attempts_per_request: 3
+  inter_request_delay_seconds: 3.0
+  jitter_seconds: 2.0
+  timeout_seconds: 45
+  backoff_base_seconds: 2.0
+  respect_retry_after: true
+  post_failure_pause_seconds: 5.0
+  circuit_breaker:
+    enabled: true
+    rolling_window_requests: 6
+    failure_threshold: 3
+    initial_cooldown_seconds: 300
+    cooldown_multiplier: 2
+    max_cooldown_seconds: 1800
+    health_probe_successes_required: 2
+    max_circuit_cycles_before_exit: 3
+preflight:
+  cdx_requests: 2
+  replay_requests: 5
+  min_replay_success_rate: 0.8
+  require_no_sustained_transport_cluster: true
+  replay_urls:
+  - https://web.archive.org/web/20210713152535id_/https://dm.de/
+  - https://web.archive.org/web/20230701010633id_/https://dm.de/
+  cdx_urls:
+  - https://dm.de/unternehmen
+  - https://dm.de/
+pipeline:
+  run:
+    run_id: null
+    top_n: 30
+    input_csv: data/input/family_firm_event_longlist_30_trimmed.csv
+    output_dir: data/processed/full_sample_rescue_dm/output
+    interim_dir: data/interim/full_sample_rescue_dm
+    reports_dir: reports/full_sample_rescue
+  timepoints:
+    relative:
+    - pre_pre_event
+    - pre_event
+    - event
+    - post_event
+    - post_post_event
+    year_offsets:
+      pre_pre_event: -4
+      pre_event: -2
+      event: 0
+      post_event: 2
+      post_post_event: 4
+  snapshot_selection:
+    target_date_strategy: mid_year
+    target_month_day: 07-01
+    tolerance_days: 548
+    prefer:
+    - closest
+    - earlier_on_tie
+    allowed_status_codes:
+    - '200'
+    allowed_mimetypes:
+    - text/html
+    url_variants:
+    - https://www.{domain}/
+    - http://www.{domain}/
+    - https://{domain}/
+    - http://{domain}/
+    event_dates_config: config/event_dates.yaml
+    event_pre_window_days: 90
+    adjacent_period_min_days: 180
+    override_very_low_usable: false
+  crawl:
+    mode: focused_site_crawl
+    max_pages_per_snapshot: 25
+    max_depth: 2
+    timeout_seconds: 45
+    retries: 5
+    max_response_bytes: 10485760
+    strip_query_strings: false
+    exclude_query_patterns:
+    - utm_
+    - fbclid
+    - gclid
+    user_agent: FFB-WebMiner/0.1 (research; family-firm-branding-full-sample-rescue;
+      +https://github.com/)
+    throttle_seconds: 2.5
+    extract_pdf: false
+    prefer_german_paths: true
+    reserved_slots:
+      homepage: 1
+      company_about: 4
+      history_heritage: 3
+      family_owners: 3
+      values_responsibility: 3
+      management_leadership: 3
+    flexible_slots:
+      secondary_pages: 5
+      broad_context: 3
+    branding_path_patterns:
+      de:
+      - ueber-uns
+      - über-uns
+      - unternehmen
+      - firma
+      - historie
+      - geschichte
+      - familie
+      - werte
+      - verantwortung
+      - management
+      - geschaeftsfuehrung
+      - geschäftsführung
+      en:
+      - about
+      - company
+      - history
+      - heritage
+      - family
+      - values
+      - responsibility
+      - management
+      - leadership
+  extract:
+    methods:
+      primary: trafilatura
+      fallback: readability
+    store_raw_html: true
+    raw_html_dir: data/interim/full_sample_rescue_dm/html
+    min_text_chars: 50
+  archive:
+    cdx_api_url: https://web.archive.org/cdx/search/cdx
+    cache_dir: data/interim/cdx
+    retry_max: 5
+    retry_backoff_base: 2.0
+  quality:
+    max_temporal_distance_days: 548
+    min_text_chars: 50
+    manual_validation_sample_size: 15
+  analysis:
+    min_branding_pages: 1
+    min_branding_tokens: 100
+    preferred_branding_tokens: 300
+    short_text_language_chars: 80
+    language_confidence_threshold: 0.8
+    low_quality_token_threshold: 100
+    moderate_quality_token_threshold: 300
+    primary_corpus_language: de
+    german_token_share_min: 0.7
+    allow_unknown_in_german_corpus: false
+    near_duplicate_threshold: 0.98
+  deduplication:
+    within_observation: true
+    near_duplicate_threshold: 0.98
+    near_duplicate_enabled: true
+  visual:
+    enabled: false
+    viewport_width: 1280
+    viewport_height: 800
+    screenshot_dir: data/interim/full_sample_rescue_dm/screenshots

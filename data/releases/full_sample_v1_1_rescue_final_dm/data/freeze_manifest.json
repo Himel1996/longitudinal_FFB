@@ -1,0 +1,191 @@
+{
+  "release_name": "full_sample_v1_1_rescue_final_dm",
+  "release_version": "full_sample_v1_1_rescue_final_dm",
+  "release_status": "FROZEN",
+  "acceptance_verdict": "READY_TO_FREEZE_WITH_DOCUMENTED_LIMITATIONS",
+  "freeze_timestamp_utc": "2026-10-03T21:25:31.349267+00:00",
+  "source_branch": "rescue_pass",
+  "source_git_commit": "14efea1301978ab575162608fca2e7a97dab71bc",
+  "parent_release": "full_sample_v1",
+  "parent_primary_sha256": "c54fc35698b2b2e962b40ed0a75170ba66d6dd03352b6f34eee55304022d6c27",
+  "base_rescue_final": "full_sample_v1_1_rescue_final",
+  "dm_addendum_batch": "DM_FINAL",
+  "network_used_during_assembly": false,
+  "network_used_during_freeze": false,
+  "headline_counts": {
+    "firms": 30,
+    "observations": 150,
+    "pages": 3048,
+    "german_primary_observations": 87,
+    "german_sensitivity_observations": 119,
+    "all_language_sensitivity_observations": 126,
+    "primary_ready_before": 22,
+    "primary_ready_after": 22,
+    "extended_ready_before": 27,
+    "extended_ready_after": 28,
+    "replace_with_rescue": 63,
+    "add_as_sensitivity_alternative": 7,
+    "decisions": 89,
+    "tests_passed_at_freeze": 33
+  },
+  "firms_still_not_extended_ready": [
+    {
+      "firm_id": "24",
+      "company": "VIESSMANN CLIMATE SOLUTIONS / VIESSMANN GROUP",
+      "note": "entity_change"
+    },
+    {
+      "firm_id": "30",
+      "company": "DR. AUGUST OETKER KG / OETKER-GRUPPE",
+      "note": "entity_change + manual_review"
+    }
+  ],
+  "known_limitations": [
+    "dm post_event recovered as sensitivity-only (temporal_fit=very_low, \u0394=441d); primary longitudinal ready remains FALSE for firm 8.",
+    "dm post_post_event unrecovered: About/history CDX captures exceed tolerance_days=548.",
+    "Viessmann and Oetker not longitudinally ready due to entity-change / comparability constraints.",
+    "Phase B initially targeted 19 candidate-CSV firms; dm was a post-acceptance same-methodology addendum.",
+    "Observation vs DE page token residual \u0394=124.",
+    "Remaining FETCH_FAILED_RESUMABLE pages retained as transport failures only (not archive_unavailable)."
+  ],
+  "corpus_definitions": {
+    "full_sample_branding_corpus_observations_primary.csv": "German PRIMARY only",
+    "full_sample_branding_corpus_observations_sensitivity_all_languages.csv": "ALL languages sensitivity",
+    "full_sample_branding_corpus_observations_sensitivity.csv": "Legacy alias of all-language sensitivity",
+    "full_sample_branding_corpus_observations_sensitivity_de.csv": "German-only sensitivity",
+    "full_sample_branding_corpus_pages_all_languages.csv": "ALL language branding pages",
+    "full_sample_branding_corpus_pages_de.csv": "German-only branding pages"
+  },
+  "release_total_bytes": 140166973,
+  "file_inventory_excludes": [
+    "freeze_manifest.json",
+    "data/freeze_manifest.json"
+  ],
+  "file_inventory": [
+    {
+      "path": "README.md",
+      "bytes": 1819,
+      "sha256": "8f874d61300c7e8ff9cfe47130d13d3fc96c47c5761406c8346c7b2d09a7ed5f"
+    },
+    {
+      "path": "config/full_sample.yaml",
+      "bytes": 3620,
+      "sha256": "2e3c987c0cb13b2c248d75275d4cacf16370741d791085b43f65079a9622c58b"
+    },
+    {
+      "path": "config/full_sample_rescue.yaml",
+      "bytes": 15389,
+      "sha256": "d22113b0f9eaad6c04857bbb51accc09b919031c39fc9e4109ce1caa947146b0"
+    },
+    {
+      "path": "config/full_sample_rescue_dm.yaml",
+      "bytes": 8456,
+      "sha256": "7239fda9bbee359224e3d0e284291351e5deddc8b83a0bb9691aae9caf55c9ba"
+    },
+    {
+      "path": "data/dm_final_targeted_rescue_candidates.csv",
+      "bytes": 1224,
+      "sha256": "d0057b07c83897046773ff09488614d8ce3e2dd22750ab10b070f00ae1ec3690"
+    },
+    {
+      "path": "data/firm_longitudinal_coverage.csv",
+      "bytes": 5789,
+      "sha256": "78ba03b140a95d071a3869c36f6e4f02466a2b17d6867b08d279c2a3681f7a3d"
+    },
+    {
+      "path": "data/firms.csv",
+      "bytes": 12702,
+      "sha256": "a7f4065ced4b2e009eca2c7647a6ee25b44cb6273f77695135c173a77599c076"
+    },
+    {
+      "path": "data/full_sample_branding_corpus_observations_primary.csv",
+      "bytes": 4884093,
+      "sha256": "49e7eef23d240c55581e6e52f29ae69edf7241f43cf56953a7de41df7b5ee508"
+    },
+    {
+      "path": "data/full_sample_branding_corpus_observations_sensitivity.csv",
+      "bytes": 7274817,
+      "sha256": "2d9929048d4b030ecb54fbc56e187e5ad891469babf2f30b2992befb674fc58b"
+    },
+    {
+      "path": "data/full_sample_branding_corpus_observations_sensitivity_all_languages.csv",
+      "bytes": 7274817,
+      "sha256": "2d9929048d4b030ecb54fbc56e187e5ad891469babf2f30b2992befb674fc58b"
+    },
+    {
+      "path": "data/full_sample_branding_corpus_observations_sensitivity_de.csv",
+      "bytes": 6294268,
+      "sha256": "57405dc93049577bfb1a26499713c06eade30e4076583a59f5e20bec2eedc809"
+    },
+    {
+      "path": "data/full_sample_branding_corpus_pages_all_languages.csv",
+      "bytes": 36745608,
+      "sha256": "f3aee073970fd9121de77735d5706f6acf4b33297a23a26366b48d00efd36dff"
+    },
+    {
+      "path": "data/full_sample_branding_corpus_pages_de.csv",
+      "bytes": 32163146,
+      "sha256": "a94de6e1d0d6bde53e1148e364551289eb4f91b98365a12872f8e701ebdfaefa"
+    },
+    {
+      "path": "data/full_sample_governance_metadata_observations.csv",
+      "bytes": 142114,
+      "sha256": "c56e9617968ac85d83fbc184b5b100b9cbfdf485aac94beb3c8cce0dbee0fd8f"
+    },
+    {
+      "path": "data/full_sample_governance_metadata_pages.csv",
+      "bytes": 142281,
+      "sha256": "abf063f6c7966f5ef1ae57957f734ef446a8f7e563f009e8da2261ce97fbe7a3"
+    },
+    {
+      "path": "data/full_sample_observation_text_summary.csv",
+      "bytes": 38844,
+      "sha256": "02cfecf29b61219fe34874129975c626dad365b4c40224c243020a2a3f37b6c5"
+    },
+    {
+      "path": "data/full_sample_pages.csv",
+      "bytes": 44934285,
+      "sha256": "3c90e502766f54fc6fdf5967085fad4da7ee23996969857be2e53bb2d517fb7e"
+    },
+    {
+      "path": "data/full_sample_snapshots.csv",
+      "bytes": 124384,
+      "sha256": "fffb04523fcbda427343d00375a6c2a74b64aa00dae0e06fc39b524dfacf5e42"
+    },
+    {
+      "path": "data/full_sample_url_rescue_candidates.csv",
+      "bytes": 8273,
+      "sha256": "d28b44180c44eabaefca54ecc1322493b144fe63a39cd4e56e51dc2140530120"
+    },
+    {
+      "path": "data/rescue_comparison_decisions.csv",
+      "bytes": 37572,
+      "sha256": "dfeb25c51a9baa1d5bfb74614f627cc1e95b5e25639bc8d7b7cc271153ad0b09"
+    },
+    {
+      "path": "data/rescue_comparison_decisions_FINAL.csv",
+      "bytes": 37572,
+      "sha256": "dfeb25c51a9baa1d5bfb74614f627cc1e95b5e25639bc8d7b7cc271153ad0b09"
+    },
+    {
+      "path": "data/run_manifest.json",
+      "bytes": 2045,
+      "sha256": "f6eb3831e72c05587356691264c52103782b715b998f4ae0d76de413e696f6b8"
+    },
+    {
+      "path": "reports/dm_final_targeted_rescue.md",
+      "bytes": 9767,
+      "sha256": "86cae4fef659cc5246f7e0f6424dc2e4267cd93060ba5c88aed804c92ccad454"
+    },
+    {
+      "path": "reports/final_release_acceptance_dm.md",
+      "bytes": 2269,
+      "sha256": "a7434aeb110d45f5e821a7307e459b1435cc7c4d936ef548fe2c2951873975ed"
+    },
+    {
+      "path": "reports/final_rescue_impact_dm.md",
+      "bytes": 1819,
+      "sha256": "a340228794a825d738341b6ffdc34ae3a6063863486614043687616536565a1d"
+    }
+  ]
+}

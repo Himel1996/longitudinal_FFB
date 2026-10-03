@@ -65,7 +65,12 @@ from ffb_webminer.rescue.discovery_state import (
     summarize_discovery_state,
 )
 from ffb_webminer.rescue.manual_validation import build_manual_validation_sample
-from ffb_webminer.rescue.paths import assert_not_parent_release, ensure_workspace_dirs, rescue_layout
+from ffb_webminer.rescue.paths import (
+    assert_not_final_rescue_release,
+    assert_not_parent_release,
+    ensure_workspace_dirs,
+    rescue_layout,
+)
 from ffb_webminer.rescue.release import assemble_rescue_release
 from ffb_webminer.rescue.reports import write_candidate_validation_report, write_report_templates
 from ffb_webminer.rescue.runner import (
@@ -129,30 +134,45 @@ def _scalar_bool(val: Any) -> bool:
     return as_bool(val)
 
 
-def _write_pipeline_yaml(rescue_doc: dict[str, Any], interim: Path, transport: dict[str, Any]) -> Path:
+def _relpath_str(path: Path) -> str:
+    try:
+        return str(path.resolve().relative_to(ROOT.resolve()))
+    except ValueError:
+        return str(path)
+
+
+def _write_pipeline_yaml(
+    rescue_doc: dict[str, Any],
+    layout: dict[str, Path],
+    transport: dict[str, Any],
+) -> Path:
     """Build an isolated pipeline YAML from full_sample.yaml + path/transport overrides."""
     base = yaml.safe_load((ROOT / "config" / "full_sample.yaml").read_text(encoding="utf-8"))
     # Prefer explicit pipeline block if present, else inherit full_sample entirely.
     pipeline = dict(rescue_doc.get("pipeline") or base)
-    # Force isolation paths regardless of embedded pipeline block.
+    interim = layout["interim"]
+    # Force isolation paths from the active rescue layout.
     pipeline.setdefault("run", {})
-    pipeline["run"]["output_dir"] = "data/processed/full_sample_rescue/output"
-    pipeline["run"]["interim_dir"] = "data/interim/full_sample_rescue"
-    pipeline["run"]["reports_dir"] = "reports/full_sample_rescue"
+    pipeline["run"]["output_dir"] = _relpath_str(layout["processed_output"])
+    pipeline["run"]["interim_dir"] = _relpath_str(interim)
+    pipeline["run"]["reports_dir"] = _relpath_str(layout["reports"])
     pipeline["run"]["run_id"] = None
     pipeline.setdefault("extract", {})
-    pipeline["extract"]["raw_html_dir"] = "data/interim/full_sample_rescue/html"
+    pipeline["extract"]["raw_html_dir"] = _relpath_str(interim / "html")
     pipeline.setdefault("archive", {})
+    # Shared CDX cache is OK (read-through); do not invent captures.
     pipeline["archive"]["cache_dir"] = "data/interim/cdx"
     pipeline.setdefault("visual", {})
     pipeline["visual"]["enabled"] = False
-    pipeline["visual"]["screenshot_dir"] = "data/interim/full_sample_rescue/screenshots"
+    pipeline["visual"]["screenshot_dir"] = _relpath_str(interim / "screenshots")
     crawl = dict(pipeline.get("crawl") or {})
     crawl["retries"] = int(transport.get("max_attempts_per_request", transport.get("retries", crawl.get("retries", 3))))
     crawl["throttle_seconds"] = float(
         transport.get("inter_request_delay_seconds", transport.get("throttle_seconds", crawl.get("throttle_seconds", 3.0)))
     )
     crawl["timeout_seconds"] = int(transport.get("timeout_seconds", crawl.get("timeout_seconds", 45)))
+    # Preserve Phase B transport semantics: single-flight crawl.
+    crawl["concurrency"] = int(transport.get("concurrency", 1))
     pipeline["crawl"] = crawl
     path = interim / "pipeline_config.yaml"
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -351,8 +371,12 @@ class RescueOrchestrator:
         self.firm_filter = [str(f) for f in firms] if firms else None
         self.timepoint_filter = [str(t) for t in timepoints] if timepoints else None
         self.resume = resume
-        self.layout = rescue_layout(ROOT)
-        self.rescue_doc = yaml.safe_load(config_path.read_text(encoding="utf-8"))
+        self.rescue_doc = yaml.safe_load(config_path.read_text(encoding="utf-8")) or {}
+        self.layout = rescue_layout(ROOT, self.rescue_doc)
+        self.layout["rescue_config"] = config_path.resolve()
+        self.isolated_run = bool(self.rescue_doc.get("isolated_run")) or (
+            str(self.rescue_doc.get("run_type") or "") == "dm_final_targeted_rescue"
+        )
         self.transport_policy = TransportPolicy.from_mapping(self.rescue_doc.get("transport") or {})
         self.transport = {
             **{
@@ -384,7 +408,12 @@ class RescueOrchestrator:
         ensure_workspace_dirs(layout, create=not self.dry_run)
         assert_not_parent_release(layout["processed_output"], project_root=ROOT)
         assert_not_parent_release(layout["release"], project_root=ROOT)
+        assert_not_final_rescue_release(layout["processed_output"], project_root=ROOT)
+        assert_not_final_rescue_release(layout["release"], project_root=ROOT)
+        assert_not_final_rescue_release(layout["interim"], project_root=ROOT)
         guard_release_destination(layout["release"], ROOT)
+        if "rescue_final" in layout["release"].resolve().name:
+            raise RuntimeError(f"refusing release destination that looks final: {layout['release']}")
 
         parent = assert_parent_unchanged(layout["parent_data"])
         self.parent_sha = parent["parent_primary_sha256"]
@@ -435,9 +464,11 @@ class RescueOrchestrator:
         self.execution_plan = {
             "dry_run": self.dry_run,
             "no_network": self.no_network,
+            "isolated_run": self.isolated_run,
             "parent_release": str(layout["parent_release"]),
             "parent_primary_sha256": self.parent_sha,
             "candidate_sha256": self.cand_hash,
+            "candidate_file": str(layout["candidate_csv"]),
             "targeted_firms": self.targeted,
             "targeted_timepoints": timepoints,
             "n_aliases": len(alias_rows),
@@ -446,20 +477,27 @@ class RescueOrchestrator:
             "transport": self.transport,
             "write_protection": {
                 "parent_release_blocked": True,
+                "final_rescue_release_blocked": True,
                 "release_destination": str(layout["release"]),
             },
         }
 
         if not self.dry_run:
-            write_candidate_validation_report(
-                ROOT / "reports" / "rescue_candidate_input_validation.md",
-                vreport,
-                candidate_hash=self.cand_hash,
+            validation_name = (
+                "dm_candidate_input_validation.md"
+                if self.isolated_run
+                else "rescue_candidate_input_validation.md"
             )
-            # also keep package helper report writer for compatibility
+            # Isolated runs must not overwrite the accepted 19-firm validation report.
+            if not self.isolated_run:
+                write_candidate_validation_report(
+                    ROOT / "reports" / "rescue_candidate_input_validation.md",
+                    vreport,
+                    candidate_hash=self.cand_hash,
+                )
             write_validation_report(
                 vreport,
-                layout["reports"] / "rescue_candidate_input_validation.md",
+                layout["reports"] / validation_name,
                 candidate_hash=self.cand_hash,
             )
             candidates_to_dataframe(candidates).to_csv(
@@ -610,10 +648,16 @@ class RescueOrchestrator:
     def resume_command_str(self) -> str:
         firms = " ".join(self.firm_filter) if self.firm_filter else ""
         firms_arg = f" --firms {firms}" if firms else ""
+        tps = " ".join(self.timepoint_filter) if self.timepoint_filter else ""
+        tps_arg = f" --timepoints {tps}" if tps else ""
+        try:
+            cfg = str(self.config_path.resolve().relative_to(ROOT.resolve()))
+        except ValueError:
+            cfg = str(self.config_path)
         return (
             "python scripts/run_full_sample_rescue.py "
-            "--config config/full_sample_rescue.yaml "
-            f"--stage full{firms_arg} --resume"
+            f"--config {cfg} "
+            f"--stage full{firms_arg}{tps_arg} --resume"
         )
 
     def _print_startup_banner(self) -> None:
@@ -854,7 +898,7 @@ class RescueOrchestrator:
     def _runner(self) -> RescuePipelineRunner:
         layout = self.layout
         ensure_workspace_dirs(layout, create=True)
-        pipe_yaml = _write_pipeline_yaml(self.rescue_doc, layout["interim"], self.transport)
+        pipe_yaml = _write_pipeline_yaml(self.rescue_doc, layout, self.transport)
         cfg = PipelineConfig.from_yaml(pipe_yaml).resolve_paths(ROOT)
         runner = RescuePipelineRunner(cfg, seed_aliases=self.alias_map)
         runner.transport_policy = self.transport_policy
@@ -1176,6 +1220,20 @@ class RescueOrchestrator:
     def report(self) -> int:
         if self.validate():
             return 2
+        if self.isolated_run:
+            # Do not overwrite shared Phase B report templates.
+            print(
+                json.dumps(
+                    {
+                        "stage": "report",
+                        "templates_written": False,
+                        "isolated_run": True,
+                        "note": "Shared report templates skipped; write dm-specific report separately",
+                    },
+                    indent=2,
+                )
+            )
+            return 0
         write_report_templates(self.layout["reports"])
         write_report_templates(ROOT / "reports")
         print(json.dumps({"stage": "report", "templates_written": True, "dry_run": self.dry_run}, indent=2))

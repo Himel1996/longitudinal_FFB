@@ -1,0 +1,92 @@
+{
+  "parent_release": "full_sample_v1",
+  "base_rescue_final": "full_sample_v1_1_rescue_final",
+  "release_name": "full_sample_v1_1_rescue_final_dm",
+  "run_type": "cumulative_rescue_final_dm_assembly",
+  "firms_targeted_phase_b": [
+    "2",
+    "5",
+    "10",
+    "11",
+    "12",
+    "14",
+    "15",
+    "16",
+    "17",
+    "18",
+    "19",
+    "20",
+    "21",
+    "22",
+    "23",
+    "24",
+    "25",
+    "27",
+    "30"
+  ],
+  "firms_targeted_including_dm": [
+    "2",
+    "5",
+    "8",
+    "10",
+    "11",
+    "12",
+    "14",
+    "15",
+    "16",
+    "17",
+    "18",
+    "19",
+    "20",
+    "21",
+    "22",
+    "23",
+    "24",
+    "25",
+    "27",
+    "30"
+  ],
+  "dm_addendum_batch": "DM_FINAL",
+  "parent_primary_sha256": "c54fc35698b2b2e962b40ed0a75170ba66d6dd03352b6f34eee55304022d6c27",
+  "creation_timestamp": "2026-10-03T21:25:26.034774+00:00",
+  "network_used": false,
+  "source_batches": [
+    "B_BRAUN_SMOKE",
+    "B01",
+    "B02",
+    "B03",
+    "B04",
+    "B05",
+    "B06",
+    "DM_FINAL"
+  ],
+  "counts": {
+    "observations": 150,
+    "primary": 87,
+    "sensitivity_all": 126,
+    "sensitivity_de": 119,
+    "pages": 3048,
+    "decisions": 89,
+    "primary_ready": 22,
+    "extended_ready": 28
+  },
+  "corpus_definitions": {
+    "primary": "German only",
+    "sensitivity_all": "all languages",
+    "sensitivity_de": "German only"
+  },
+  "firms_still_not_extended_ready": [
+    {
+      "firm_id": "24",
+      "company": "VIESSMANN CLIMATE SOLUTIONS / VIESSMANN GROUP",
+      "remaining_coverage_gap": "missing_pre;missing_post;rescue_attempted;viessmann_entity_change;comparability_not_assumed",
+      "coverage_notes": "missing_pre;missing_post;rescue_attempted;viessmann_entity_change;comparability_not_assumed"
+    },
+    {
+      "firm_id": "30",
+      "company": "DR. AUGUST OETKER KG / OETKER-GRUPPE",
+      "remaining_coverage_gap": "missing_pre;rescue_attempted;oetker_entity_change;comparability_not_assumed",
+      "coverage_notes": "missing_pre;rescue_attempted;oetker_entity_change;comparability_not_assumed"
+    }
+  ]
+}

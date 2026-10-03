@@ -1,0 +1,33 @@
+{
+  "parent_release": "full_sample_v1",
+  "release_name": "full_sample_v1_1_rescue",
+  "run_type": "targeted_rescue",
+  "rescue_candidate_file": "data/input/full_sample_url_rescue_candidates.csv",
+  "rescue_candidate_file_hash": "d0057b07c83897046773ff09488614d8ce3e2dd22750ab10b070f00ae1ec3690",
+  "firms_targeted": [
+    "8"
+  ],
+  "timepoints_targeted": [
+    "post_event",
+    "post_post_event"
+  ],
+  "git_commit": "14efea1301978ab575162608fca2e7a97dab71bc",
+  "pipeline_version": "ffb_webminer",
+  "extraction_logic_version": "full_sample_v1_frozen",
+  "source_code_changed_for_core_rules": false,
+  "validated_core_rules_changed": false,
+  "core_logic_changed": false,
+  "original_release_preserved": true,
+  "parent_primary_sha256": "c54fc35698b2b2e962b40ed0a75170ba66d6dd03352b6f34eee55304022d6c27",
+  "config_hash_full_sample": "2e3c987c0cb13b2c248d75275d4cacf16370741d791085b43f65079a9622c58b",
+  "config_hash_rescue": "7239fda9bbee359224e3d0e284291351e5deddc8b83a0bb9691aae9caf55c9ba",
+  "execution_environment": "vm_or_local",
+  "creation_timestamp": "2026-10-03T21:18:17.202309+00:00",
+  "counts": {
+    "primary": 51,
+    "sensitivity_all": 85,
+    "sensitivity_de": 62,
+    "ready_primary": 10,
+    "ready_extended": 11
+  }
+}
